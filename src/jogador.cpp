@@ -1,4 +1,5 @@
-#include "../Entidades/Personagens/jogador.hpp"
+#include "../Persistencia/entidades.h"
+#include "../Entidades/Personagens/jogador.h"
 #include <iostream>
 #include <SFML/Graphics.hpp>
 
@@ -11,7 +12,7 @@ namespace Entidades
         Gerenciadores::Gerenciador_Estados *Jogador::PGEstados(Gerenciadores::Gerenciador_Estados::get_instancia());
 
         Jogador::Jogador(sf::Vector2f pos, sf::Vector2f vel, bool jog2) : Personagem(pos, vel),
-         tempo(0.0), poder(1), jogador2(jog2), leu_fase(false)
+         jogador2(jog2), leu_fase(false), poder(1), tempo(0.0)
         {
             this->set_vida(20);
             if (!jog2)
@@ -25,7 +26,7 @@ namespace Entidades
                 this->setSkin("Design/imagens/luigiDireita.png");
             }
            tempo = 0.0;
-           nome = "augusto";
+           nome = jog2 ? "Jogador 2" : "Jogador 1";
         }
         Jogador::~Jogador()
         {
@@ -80,19 +81,6 @@ namespace Entidades
             
         }
 
-        void Jogador::criar_jogadores(string arquivo, bool jogador2)
-        {
-            //relogio.restart();
-            if(jogador2)
-            {
-
-            }
-            
-            else
-            {
-
-            }
-        }
 
         void Jogador::mover()
         {
@@ -116,13 +104,6 @@ namespace Entidades
                 velocidade.y += -6.0f;
             if (sf::Keyboard::isKeyPressed(sf::Keyboard::S))
                 velocidade.y += 0.1f;
-            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape))
-            {
-                //a tela de pause ta seguindo o jogador?
-                pausado = !pausado;
-                pGG->limpar();
-                PGEstados->set_estado_atual(5);
-            }
 
             nochao = false;
 
@@ -151,30 +132,10 @@ namespace Entidades
 
             nochao = false;
         }
-        void Jogador::salvar_tempo(string caminho)
+
+        void Jogador::salvar(std::ostringstream* entrada)
         {
-            fstream arquivoOutput(caminho, ios::app);
-            std::string linha =  "";
-            std::string bolinhas = ".....";
-            if(!arquivoOutput)
-            {
-                std::cout  << " erro!";
-            }
-            else
-            {  
-
-                linha += this->get_nome() + bolinhas;
-                arquivoOutput << linha;
-                arquivoOutput << this->get_tempo();
-                arquivoOutput << "s" << endl;
-               
-
-            }
-        }
-
-        void Jogador::salvar(std::ostringstream *entrada)
-        {
-            (*entrada) << "{ \"posicao\": [" << corpo.getPosition().x << "," << corpo.getPosition().y << "], \"velocidade\": [" << velocidade.x << "," << velocidade.y << "] }" << std::endl;
+            *entrada << Persistencia::Serializador::salvar(*this).dump();
         }
     }
 }

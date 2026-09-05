@@ -1,86 +1,60 @@
-//codigo reaproveitado do Peteco
+#include "../Gerenciadores/gerenciador_estados.h"
+#include "../Estados/estado.h"
+#include "../Estados/Fases/fase.h"
+#include <stdexcept>
 
-#include "../Gerenciadores/gerenciador_estados.hpp"
-#include "../Estados/estado.hpp"
-
-namespace Gerenciadores
-{
-    Gerenciador_Estados* Gerenciador_Estados::instancia = nullptr;
-
-    Gerenciador_Estados::Gerenciador_Estados() : estadoAtual(0)
-    {
-        //colocar o numero de estados que voce possui
-        /*try
-        {
-            estados.resize(11);
-            estadoAtual = 10;
-        }
-        catch(const std::exception& e)
-        {
-            estados.resize(10);
-            estadoAtual = 0;
-        }*/
-        
-        estados.resize(11);
+namespace Gerenciadores {
+Gerenciador_Estados* Gerenciador_Estados::instancia = nullptr;
+Gerenciador_Estados::Gerenciador_Estados() : estadoAtual(0), fase(-1), estados(11, nullptr) {}
+Gerenciador_Estados::~Gerenciador_Estados() { for (auto* estado : estados) delete estado; }
+Gerenciador_Estados* Gerenciador_Estados::get_instancia() {
+    if (!instancia) instancia = new Gerenciador_Estados;
+    return instancia;
+}
+Estados::Estado* Gerenciador_Estados::get_estado(int id) {
+    return id >= 0 && id < static_cast<int>(estados.size()) ? estados[id] : nullptr;
+}
+void Gerenciador_Estados::set_estado_atual(int id) {
+    auto* destino = get_estado(id);
+    if (!destino) throw std::runtime_error("Estado de destino nao foi criado.");
+    if (id == estadoAtual) return;
+    // Mesmo sem permissao de escrita, a simulacao deve parar na pausa.
+    if (estadoAtual >= 6 && estadoAtual <= 9 && id == 5) salvar_partida();
+    estadoAtual = id;
+    if (id >= 6 && id <= 9) fase = id;
+    destino->ao_entrar();
+}
+bool Gerenciador_Estados::salvar_partida() {
+    auto* partida = dynamic_cast<Estados::Fases::Fase*>(get_estado(fase));
+    if (!partida) return true;
+    try {
+        partida->salvar();
+        mensagem = "Partida salva.";
+        return true;
+    } catch (const std::exception& erro) {
+        mensagem = std::string("Nao foi possivel salvar: ") + erro.what();
+        return false;
     }
-
-    Gerenciador_Estados::~Gerenciador_Estados()
-    {
-        int i;
-        for(i = 0; i < estados.size(); i++)
-            delete estados[i];
-    }
-
-    Gerenciador_Estados* Gerenciador_Estados::get_instancia()
-    {
-        if(!instancia)
-            instancia = new Gerenciador_Estados;
-
-        return instancia;
-    }
-
-    void Gerenciador_Estados::set_estado_atual(int eA)
-    {
-        estadoAtual = eA;
-    }
-
-    void Gerenciador_Estados::deleta_estados(int i)
-    {
-        delete estados[i];
-    }
-
-    void Gerenciador_Estados::set_fase(int f)
-    {
-        fase = f;
-    }
-    
-    int Gerenciador_Estados::get_estado_atual()
-    {
-        return estadoAtual;
-    }
-
-    int Gerenciador_Estados::get_fase()
-    {
-        return fase;
-    }
-
-    void Gerenciador_Estados::adicionar_estado(Estados::Estado* pE)
-    {
-        if(pE)
-        {
-            if(!estados.at(pE->getID()))
-                estados.at(pE->getID()) = pE;
-            else
-            {
-                delete estados.at(pE->getID());
-                estados.at(pE->getID()) = pE;
-            }
-        }
-    }
-
-    void Gerenciador_Estados::executar()
-    {
-        estados[estadoAtual]->executar();
-    }
-
+}
+void Gerenciador_Estados::deleta_estados(int id) {
+    if (id == estadoAtual) throw std::runtime_error("Nao e possivel excluir o estado em execucao.");
+    delete estados.at(id);
+    estados.at(id) = nullptr;
+}
+void Gerenciador_Estados::set_fase(int id) { fase = id; }
+int Gerenciador_Estados::get_estado_atual() { return estadoAtual; }
+int Gerenciador_Estados::get_fase() { return fase; }
+void Gerenciador_Estados::adicionar_estado(Estados::Estado* estado) {
+    if (!estado) return;
+    auto& anterior = estados.at(estado->getID());
+    if (anterior == estado) return;
+    if (anterior && estado->getID() == estadoAtual)
+        throw std::runtime_error("Nao e possivel substituir o estado em execucao.");
+    delete anterior;
+    anterior = estado;
+}
+void Gerenciador_Estados::executar() {
+    auto* estado = get_estado(estadoAtual);
+    if (estado) estado->executar();
+}
 }

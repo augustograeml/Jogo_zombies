@@ -1,5 +1,5 @@
-#include "../Observers/observer_menu_principal.hpp"
-#include "../Estados/Menus/menu_principal.hpp"
+#include "../Observers/observer_menu_principal.h"
+#include "../Estados/Menus/menu_principal.h"
 
 namespace Observers
 {

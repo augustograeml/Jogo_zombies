@@ -1,4 +1,6 @@
-#include "../Entidades/Personagens/arqueiro.hpp"
+#include "../Persistencia/entidades.h"
+#include <algorithm>
+#include "../Entidades/Personagens/arqueiro.h"
 
 namespace Entidades
 {
@@ -38,13 +40,6 @@ namespace Entidades
             }
             atualizar();
             nochao = false;
-            for(int i = 0; i < vetor_projeteis.size(); i++)
-                vetor_projeteis[i].executar();
-            if(vetor_projeteis.size() > 50)
-            {
-                for(int i = 0; i < vetor_projeteis.size()/2; i++)
-                    vetor_projeteis.erase(vetor_projeteis.begin() + i);
-            }
         }
 
         void Arqueiro::executar()
@@ -54,6 +49,9 @@ namespace Entidades
                 mover();
                 atirar();
             }
+            for (auto& flecha : vetor_projeteis) flecha.executar();
+            vetor_projeteis.erase(std::remove_if(vetor_projeteis.begin(), vetor_projeteis.end(),
+                [](Projetil& flecha) { return !flecha.get_vivo(); }), vetor_projeteis.end());
         }
 
         void Arqueiro::atacar(Entidade *jg)
@@ -79,56 +77,14 @@ namespace Entidades
                 atacar(pE);
         }
 
-        void Arqueiro::criar_arqueiros(string arquivo)
-        {
-            ifstream caminho(arquivo);
-
-            if (!caminho)
-            {
-                cout << "Nao foi possivel acessar o arquivo de criacao dos arqueiros";
-                exit(1);
-            }
-
-            string linha;
-            Entidade *aux = nullptr;
-            int j, i;
-
-            for (i = 0; getline(caminho, linha); i++)
-            {
-                j = 0;
-                for (char tipo : linha)
-                {
-                    switch (tipo)
-                    {
-                    case '4':
-                        aux = static_cast<Entidade *>(new Arqueiro(sf::Vector2f(0.f, 0.f), sf::Vector2f(0.f, 0.f)));
-                        if (aux)
-                        {
-                            aux->setWindow(pGG->get_Janela());
-                            aux->setPosicao(sf::Vector2f(j * TAM, i * TAM));
-                            // incluir inmigos na lista
-                        }
-                        break;
-
-                    default:
-                        break;
-                        ;
-                    }
-                }
-            }
-        }
 
         void Arqueiro::atirar()
         {
-            sf::Vector2f z = this->getTamanho() / 2.f;
-
             if (recarregar == 0)
             {
                 Projetil novo_projetil({10, 5}, direcao);
                 novo_projetil.setPosicao(sf::Vector2f(this->getPosicao().x + 20.f, this->getPosicao().y + 15.f));
                 atirando = false;
-                if (!direcao)
-                    novo_projetil.setVelocidade(-novo_projetil.getVelocidade());
                 vetor_projeteis.push_back(novo_projetil);
                 atirando = false;
                 recarregar = TEMPO_RECARGA;
@@ -139,23 +95,9 @@ namespace Entidades
             }
         }
 
-        void Arqueiro::salvar(std::ostringstream *entrada)
+        void Arqueiro::salvar(std::ostringstream* entrada)
         {
-            (*entrada) << "{ \"identidade\": [" << 4 << "] , \"posicao\": [" << corpo.getPosition().x << "," << corpo.getPosition().y << "], \"velocidade\": [" << velocidade.x << "," << velocidade.y << "], \"projeteis\": ["  << endl;
-
-            std::vector<Projetil>::iterator it;
-            for(it = vetor_projeteis.begin(); it != vetor_projeteis.end(); it++)
-            {
-                (*it).salvar(entrada);
-                if(it != vetor_projeteis.end() - 1 && (*it).get_vivo() == true)
-                {
-                    (*entrada << ", ");
-                }
-            }
-            (*entrada) << "]}";
-
-            numero_salvo_arqueiros++;
-            //fim do salvamento
+            *entrada << Persistencia::Serializador::salvar(*this).dump();
         }
     }
 }

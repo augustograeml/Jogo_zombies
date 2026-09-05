@@ -1,7 +1,7 @@
 //codigo reaproveitado do Peteco
 
-#include "../Observers/observer_menu_fase.hpp"
-#include "../Estados/Menus/menu_fase.hpp"
+#include "../Observers/observer_menu_fase.h"
+#include "../Estados/Menus/menu_fase.h"
 
 namespace Observers
 {

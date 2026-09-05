@@ -1,0 +1,65 @@
+#pragma once
+#include "../../Entidades/Personagens/jogador.h"
+#include "../../Entidades/Personagens/zumbi.h"
+#include "../../Entidades/Personagens/arqueiro.h"
+#include "../../Entidades/Personagens/gigante.h"
+#include "../../Entidades/Obstaculos/neve.h"
+#include "../../Entidades/Obstaculos/musgo.h"
+#include "../../Entidades/Obstaculos/espinho.h"
+#include "../../Entidades/Obstaculos/caixa.h"
+#include "../../Entidades/Obstaculos/coracao.h"
+#include "../../Listas/listaEntidades.h"
+#include "../../Gerenciadores/gerenciador_colisoes.h"
+#include "../estado.h"
+#include "../../Persistencia/arquivo.h"
+#include <cstdint>
+#include <random>
+
+namespace Estados::Fases {
+class Fase : public Ente, public Estado {
+protected:
+    bool ja_criado;
+    bool jogador2;
+    sf::Texture Textura;
+    sf::RectangleShape shape;
+    Listas::ListaEntidade jogadores, obstaculos, inimigos;
+    Gerenciadores::Gerenciador_Colisoes gC;
+    int num_jogadores;
+    sf::Clock relogio;
+    std::uint64_t passos = 0;
+    double acumulador = 0;
+    bool finalizada = false;
+    bool vitoria = false;
+    bool ranking_registrado = false;
+    std::string partida_id;
+    std::mt19937 motor_fase;
+    void executar_comum();
+    void concluir(bool venceu);
+public:
+    explicit Fase(int id, bool carregar = false);
+    ~Fase() override = default;
+    void criar_jogadores();
+    void criar_inimigos(std::string cenario);
+    void criar_cenario(std::string caminho);
+    void gerenciar_colisoes() { gC.gerenciar_colisoes(); }
+    bool get_jaCriado() const { return ja_criado; }
+    bool get_jogador2() const { return jogador2; }
+    bool get_finalizada() const { return finalizada; }
+    bool get_vitoria() const { return vitoria; }
+    bool get_ranking_registrado() const { return ranking_registrado; }
+    int get_num_jogadores() const { return num_jogadores; }
+    int get_numero_fase() const { return Estado::id < 8 ? 1 : 2; }
+    double get_tempo() const { return static_cast<double>(passos) / 60.0; }
+    void set_tempo_jogadores();
+    void salvar(const std::filesystem::path& caminho = "partida.json");
+    Persistencia::Json capturar();
+    // Constroi listas temporarias e valida tudo antes de trocar o mundo atual.
+    void restaurar(const Persistencia::Json& dados);
+    bool registrar_resultado(const std::vector<std::string>& nomes);
+    void ao_entrar() override;
+    void tratar_evento(const sf::Event& evento) override;
+    virtual void atualizar();
+    virtual void fim_de_jogo();
+    void simular_passo();
+};
+}

@@ -1,0 +1,15 @@
+/build/
+/prog
+/partida.json
+/partida.json.tmp
+/ranking.json
+/ranking.json.tmp
+/entrega/
+
+# Biblioteca SFML local e seus binarios.
+[Ss][Ff][Mm][Ll]*/
+libsfml*
+sfml-*.dll
+
+# Documentacao local da analise.
+/ANALISE_E_MELHORIAS.md

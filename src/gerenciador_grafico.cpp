@@ -1,7 +1,7 @@
 //codigo reaproveitado do Peteco
 
-#include "../Gerenciadores/gerenciador_grafico.hpp"
-#include "../ente.hpp"
+#include "../Gerenciadores/gerenciador_grafico.h"
+#include "../ente.h"
 #include <iostream>
 
 namespace Gerenciadores
@@ -13,6 +13,7 @@ namespace Gerenciadores
     camera(sf::Vector2f((LARGURA_TELA / 2.f)/*+ 50.f*/, (ALTURA_TELA / 2.f)), sf::Vector2f(LARGURA_TELA /*- 50.f*/, ALTURA_TELA)) // posição e tamanho
     {
         janela->setFramerateLimit(60);
+        janela->setKeyRepeatEnabled(false);
         janela->setView(camera);
     }
     Gerenciador_Grafico::~Gerenciador_Grafico()
@@ -47,7 +48,7 @@ namespace Gerenciadores
             janela->draw(*pT);
         }
     }
-    const bool Gerenciador_Grafico::get_JanelaAberta() const
+    bool Gerenciador_Grafico::get_JanelaAberta() const
     {
         return janela->isOpen();
     }

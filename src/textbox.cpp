@@ -1,4 +1,4 @@
-#include "../Estados/Menus/textbox.hpp"
+#include "../Estados/Menus/textbox.h"
 #define DELETE_TECLA 8
 #define ENTER_TECLA 13
 #define ESC_TECLA 27

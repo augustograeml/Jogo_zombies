@@ -1,15 +1,15 @@
 // codigo reaproveitado do Peteco
 
-#include "../Gerenciadores/gerenciador_colisoes.hpp"
-#include "../Entidades/Personagens/jogador.hpp"
-#include "../Entidades/Personagens/inimigo.hpp"
-#include "../Entidades/Personagens/arqueiro.hpp"
-#include "../Entidades/Obstaculos/obstaculo.hpp"
-#include "../Entidades/Obstaculos/espinho.hpp"
-#include "../Entidades/Obstaculos/coracao.hpp"
-#include "../Entidades/Obstaculos/caixa.hpp"
-#include "../Entidades/Obstaculos/neve.hpp"
-#include "../Entidades/Obstaculos/musgo.hpp"
+#include "../Gerenciadores/gerenciador_colisoes.h"
+#include "../Entidades/Personagens/jogador.h"
+#include "../Entidades/Personagens/inimigo.h"
+#include "../Entidades/Personagens/arqueiro.h"
+#include "../Entidades/Obstaculos/obstaculo.h"
+#include "../Entidades/Obstaculos/espinho.h"
+#include "../Entidades/Obstaculos/coracao.h"
+#include "../Entidades/Obstaculos/caixa.h"
+#include "../Entidades/Obstaculos/neve.h"
+#include "../Entidades/Obstaculos/musgo.h"
 #include <math.h>
 #include <iostream>
 
@@ -19,9 +19,10 @@ using namespace std;
 
 namespace Gerenciadores
 {
-    Gerenciador_Colisoes::Gerenciador_Colisoes() : jogadores(nullptr),
-                                                   obstaculos(nullptr),
+    Gerenciador_Colisoes::Gerenciador_Colisoes() : obstaculos(nullptr),
+                                                   jogadores(nullptr),
                                                    inimigos(nullptr),
+                                                   zumbis(nullptr), atiradores(nullptr), gigantes(nullptr),
                                                    projeteis(nullptr),
                                                    sem_inimigos(false),
                                                    sem_jogadores(false)
@@ -70,7 +71,7 @@ namespace Gerenciadores
             while (obst != nullptr)
             {
                 if ((*obst)->get_vivo())
-                    int id_colisao = colidiu(*inim, *obst);
+                    colidiu(*inim, *obst);
 
                 obst++;
             }
@@ -101,79 +102,40 @@ namespace Gerenciadores
     }
     void Gerenciador_Colisoes::colisao_jogadores_projeteis()
     {
-        Listas::Lista<Entidades::Entidade>::Iterador inim = inimigos->get_primeiro();
-        Listas::Lista<Entidades::Entidade>::Iterador jog = jogadores->get_primeiro();
-        while (inim != nullptr)
-        {
-            Entidades::Personagens::Inimigo *arqueiro_atira = static_cast<Entidades::Personagens::Inimigo *>(*inim);
-            std::vector<Entidades::Projetil> *pVetor = arqueiro_atira->get_projeteis();
-
-            if (pVetor != nullptr)
-            {
-                jog = jogadores->get_primeiro();
-                while (jog != nullptr)
-                {
-                    if (pVetor->size() > 0)
-                    {
-                        for (int i = 0; i < pVetor->size(); i++)
-                        {
-                            Entidades::Entidade *proj = static_cast<Entidades::Entidade *>(&pVetor->at(i));
-                            if (proj->get_vivo())
-                            {
-                                int j = colidiu(*jog, proj);
-                                if (j)
-                                {
-                                    proj->colidir(*jog, j);
-                                    proj->set_vivo(false);
-                                }
-                            }
-                        }
+        for (auto inim = inimigos->get_primeiro(); inim != nullptr; ++inim) {
+            auto* flechas = static_cast<Entidades::Personagens::Inimigo*>(*inim)->get_projeteis();
+            if (!flechas) continue;
+            for (auto& flecha : *flechas) {
+                if (!flecha.get_vivo()) continue;
+                for (auto jog = jogadores->get_primeiro(); jog != nullptr; ++jog) {
+                    if ((*jog)->get_vivo() && (*jog)->get_corpo()->getGlobalBounds().intersects(
+                            flecha.get_corpo()->getGlobalBounds())) {
+                        flecha.colidir(*jog, 1);
+                        break;
                     }
-                    jog++;
                 }
             }
-            inim++;
         }
     }
     void Gerenciador_Colisoes::colisao_obstaculos_projeteis()
     {
-        Listas::Lista<Entidades::Entidade>::Iterador obst = obstaculos->get_primeiro();
-        Listas::Lista<Entidades::Entidade>::Iterador inim = inimigos->get_primeiro();
-        while (inim != nullptr)
-        {
-            Entidades::Personagens::Inimigo *arqueiro_atira = static_cast<Entidades::Personagens::Inimigo *>(*inim);
-            std::vector<Entidades::Projetil> *pVetor = arqueiro_atira->get_projeteis();
-
-            if (pVetor != nullptr)
-            {
-                obst = obstaculos->get_primeiro();
-                while (obst != nullptr)
-                {
-                    if (pVetor->size() > 0)
-                    {
-                        for (int i = 0; i < pVetor->size(); i++)
-                        {
-                            Entidades::Entidade *proj = static_cast<Entidades::Entidade *>(&pVetor->at(i));
-                            if (proj->get_vivo())
-                            {
-                                int j = colidiu(*obst, proj);
-                                if (j)
-                                {
-                                    proj->colidir(*obst, j);
-                                    proj->set_vivo(false);
-                                }
-                            }
-                        }
+        for (auto inim = inimigos->get_primeiro(); inim != nullptr; ++inim) {
+            auto* flechas = static_cast<Entidades::Personagens::Inimigo*>(*inim)->get_projeteis();
+            if (!flechas) continue;
+            for (auto& flecha : *flechas) {
+                if (!flecha.get_vivo()) continue;
+                for (auto obst = obstaculos->get_primeiro(); obst != nullptr; ++obst) {
+                    if ((*obst)->get_vivo() && (*obst)->get_corpo()->getGlobalBounds().intersects(
+                            flecha.get_corpo()->getGlobalBounds())) {
+                        flecha.morrer();
+                        break;
                     }
-                    obst++;
                 }
             }
-
-            inim++;
         }
     }
 
-    const bool Gerenciador_Colisoes::get_inimigos_vivos()
+    bool Gerenciador_Colisoes::get_inimigos_vivos()
     {
         int ini_vivos = 0;
         Listas::Lista<Entidades::Entidade>::Iterador inimg = inimigos->get_primeiro();
@@ -183,13 +145,12 @@ namespace Gerenciadores
                 ini_vivos++;
             inimg++;
         }
-        if (ini_vivos == 0)
-            sem_inimigos = true;
+        sem_inimigos = ini_vivos == 0;
 
         return sem_inimigos;
     }
 
-    const bool Gerenciador_Colisoes::get_jogadores_vivos()
+    bool Gerenciador_Colisoes::get_jogadores_vivos()
     {
         int jog_vivos = 0;
         Listas::Lista<Entidades::Entidade>::Iterador joga = jogadores->get_primeiro();
@@ -199,8 +160,7 @@ namespace Gerenciadores
                 jog_vivos++;
             joga++;
         }
-        if (jog_vivos == 0)
-            sem_jogadores = true;
+        sem_jogadores = jog_vivos == 0;
 
         return sem_jogadores;
     }
@@ -218,6 +178,7 @@ namespace Gerenciadores
 
     int Gerenciador_Colisoes::colidiu(Entidades::Entidade *e1, Entidades::Entidade *e2)
     {
+        if (!e1 || !e2 || !e1->get_vivo() || !e2->get_vivo()) return 0;
 
         sf::Vector2f pos1 = e1->getPosicao(), pos2 = e2->getPosicao(), tam1 = e1->getTamanho(), tam2 = e2->getTamanho(),
                      d(fabs(pos1.x - pos2.x) - ((tam1.x + tam2.x) / 2.f),

@@ -1,13 +1,15 @@
-#include "../Entidades/Personagens/gigante.hpp"
+#include "../Persistencia/entidades.h"
+#include "../Persistencia/aleatorio.h"
+#include "../Entidades/Personagens/gigante.h"
 
 namespace Entidades
 {
     namespace Personagens
     {
         Gigante::Gigante(sf::Vector2f pos, sf::Vector2f vel) : Inimigo(pos, vel),
-        numero_salvo_gigantes(0), ja_inc(false)
+        ja_inc(false), tempo_pulo(0), numero_salvo_gigantes(0)
         {
-            int i = rand() % 10;
+            int i = Persistencia::sortear(10);
             if (i == 2)
                 maldade = true;
 
@@ -31,7 +33,7 @@ namespace Entidades
 
         void Gigante::mover()
         {
-            // velocidade += Vector2f(rand() % 10 - 5, (float) (nochao ? - (rand() % 5) : 0));
+            // velocidade += Vector2f(Persistencia::sortear(10) - 5, (float) (nochao ? - (Persistencia::sortear(5)) : 0));
             if (maldade && !(ja_inc))
             {
                 velocidade.x += 0.2;
@@ -78,54 +80,15 @@ namespace Entidades
             }
         }
 
-        void Gigante::criar_gigante(string arquivo)
-        {
-            ifstream caminho(arquivo);
-
-            if (!caminho)
-            {
-                cout << "Nao foi possivel acessar o arquivo de criacao dos arqueiros";
-                exit(1);
-            }
-
-            string linha;
-            Entidade *aux = nullptr;
-            int j, i;
-
-            for (i = 0; getline(caminho, linha); i++)
-            {
-                j = 0;
-                for (char tipo : linha)
-                {
-                    switch (tipo)
-                    {
-                    case '9':
-                        aux = static_cast<Entidade *>(new Gigante(sf::Vector2f(0.f, 0.f), sf::Vector2f(0.f, 0.f)));
-                        if (aux)
-                        {
-                            aux->setWindow(pGG->get_Janela());
-                            aux->setPosicao(sf::Vector2f(j * TAM, i * TAM));
-                            // incluir inmigos na lista
-                        }
-                        break;
-
-                    default:
-                        break;
-                    }
-                }
-            }
-        }
 
         void Gigante::atacar(Entidade *jg)
         {
             jg->set_vida(jg->get_vida() - forca);
         }
 
-        void Gigante::salvar(std::ostringstream *entrada)
+        void Gigante::salvar(std::ostringstream* entrada)
         {
-            (*entrada) << "{ \"identidade\": [" << 9 << "], \"posicao\": [" << corpo.getPosition().x << "," << corpo.getPosition().y << "], \"velocidade\": [" << velocidade.x << "," << velocidade.y << "] }" << std::endl;
-
-            numero_salvo_gigantes++;
+            *entrada << Persistencia::Serializador::salvar(*this).dump();
         }
     }
 }

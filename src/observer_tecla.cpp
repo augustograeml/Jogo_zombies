@@ -1,6 +1,6 @@
 //codigo reaproveitado do Peteco
 
-#include "../Observers/observer_tecla.hpp"
+#include "../Observers/observer_tecla.h"
 
 namespace Observers
 {

@@ -1,7 +1,7 @@
 //codigo reaproveitado do Peteco
 
-#include "../Observers/observer_menu_jogadores.hpp"
-#include "../Estados/Menus/menu_jogadores.hpp"
+#include "../Observers/observer_menu_jogadores.h"
+#include "../Estados/Menus/menu_jogadores.h"
 
 namespace Observers
 {

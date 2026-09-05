@@ -1,50 +1,47 @@
+#include "../jogo.h"
+#include <memory>
 
-#include "../jogo.hpp"
-#include <iostream>
-
-using namespace std;
-
-Jogo::Jogo() : pG(Gerenciadores::Gerenciador_Grafico::get_instancia()), pE(Gerenciadores::Gerenciador_Estados::get_instancia()),
-               pEv(Gerenciadores::Gerenciador_Eventos::get_instancia()), obs1(1), obs2(2)
-{
-    menu_principal = new Estados::Menus::Menu_Principal(0);
-    menu_jogadores = new Estados::Menus::Menu_Jogadores(1);
-    menu_fase = new Estados::Menus::Menu_Fase(2, false);
-    menu_fase = new Estados::Menus::Menu_Fase(3, true);
-    ranking = new Estados::Menus::Ranking(4);
-    pause = new Estados::Menus::Pause(5);
-
-    Estados::Fases::Fase1 *fase1 = new Estados::Fases::Fase1(6, false);
-    Estados::Fases::Fase1 *fase12 = new Estados::Fases::Fase1(7, false);
-
-    Estados::Fases::Fase2 *fase2 = new Estados::Fases::Fase2(8, false);
-    Estados::Fases::Fase2 *fase22 = new Estados::Fases::Fase2(9, false);
-
+Jogo::Jogo() : pG(Gerenciadores::Gerenciador_Grafico::get_instancia()),
+    pE(Gerenciadores::Gerenciador_Estados::get_instancia()),
+    pEv(Gerenciadores::Gerenciador_Eventos::get_instancia()) {
+    pE->adicionar_estado(new Estados::Menus::Menu_Principal(0));
+    pE->adicionar_estado(new Estados::Menus::Menu_Jogadores(1));
+    pE->adicionar_estado(new Estados::Menus::Menu_Fase(2, false));
+    pE->adicionar_estado(new Estados::Menus::Menu_Fase(3, true));
+    pE->adicionar_estado(new Estados::Menus::Ranking(4));
+    pE->adicionar_estado(new Estados::Menus::Pause(5));
+    pE->adicionar_estado(new Estados::Menus::Nome(10));
     Executar();
 }
-Jogo::~Jogo()
-{
-    delete pG;
+Jogo::~Jogo() {
+    // As telas pertencem exclusivamente ao gerenciador. Graficos saem por ultimo.
     delete pE;
     delete pEv;
-    delete menu_principal;
-    delete menu_jogadores;
-    delete menu_fase;
+    delete pG;
 }
-
-void Jogo::Executar()
-{
-    while (pG->get_JanelaAberta())
-    {
-        pG->limpar();
+void Jogo::Executar() {
+    sf::Font fonte;
+    fonte.loadFromFile("Design/fonte/fonte_simas.ttf");
+    while (pG->get_JanelaAberta()) {
         pEv->executar();
-        pE->executar(); // desenha a fase e o jogador
-        if(pE->get_estado_atual() > 5 && pE->get_estado_atual() < 10)
-            pG->mostrar();
+        if (!pG->get_JanelaAberta()) break;
+        pG->limpar();
+        pE->executar();
+        if (!pE->mensagem.empty()) {
+            const auto camera = pG->get_Janela()->getView();
+            pG->get_Janela()->setView(pG->get_Janela()->getDefaultView());
+            sf::RectangleShape fundo({1004, 70});
+            fundo.setFillColor(sf::Color(0, 0, 0, 220));
+            fundo.setPosition(10, 10);
+            sf::Text aviso(pE->mensagem, fonte, 18);
+            aviso.setPosition(20, 20);
+            const float largura = aviso.getLocalBounds().width;
+            if (largura > 980) aviso.setScale(980 / largura, 980 / largura);
+            pG->get_Janela()->draw(fundo);
+            pG->get_Janela()->draw(aviso);
+            pG->get_Janela()->setView(camera);
+        }
+        pG->mostrar();
     }
 }
-
-void Jogo::reseta_fase()
-{
-    //pE->
-}
+void Jogo::reseta_fase() {}

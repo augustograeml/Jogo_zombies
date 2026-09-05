@@ -1,4 +1,4 @@
-#include "../Entidades/Obstaculos/musgo.hpp"
+#include "../Entidades/Obstaculos/musgo.h"
 
 namespace Entidades
 {

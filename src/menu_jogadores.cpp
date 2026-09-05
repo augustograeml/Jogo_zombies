@@ -1,4 +1,4 @@
-#include "../Estados/Menus/menu_jogadores.hpp"
+#include "../Estados/Menus/menu_jogadores.h"
 
 namespace Estados
 {
@@ -17,7 +17,7 @@ namespace Estados
         {
         }
 
-        const bool Menu_Jogadores::get_jogador2()
+        bool Menu_Jogadores::get_jogador2()
         {
             return jogador2;
         }
@@ -64,75 +64,6 @@ namespace Estados
             }
         }
 
-        void Menu_Jogadores::loop_evento()
-        {
-            sf::Event evento;
-            while (pGG->get_Janela()->pollEvent(evento))
-            {
-                if (evento.type == sf::Event::Closed)
-                    pGG->fecharJanela();
-
-                if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right) && !selecionado)
-                {
-                    if (pos < 3)
-                    {
-                        pos++;
-                        selecionado = true;
-                        textos[pos].setOutlineThickness(4);
-                        textos[pos - 1].setOutlineThickness(0);
-                        selecionado = false;
-                    }
-                }
-
-                if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left) && !selecionado)
-                {
-                    if (pos > 1)
-                    {
-                        pos--;
-                        selecionado = true;
-                        textos[pos].setOutlineThickness(4);
-                        textos[pos + 1].setOutlineThickness(0);
-                        selecionado = false;
-                    }
-                }
-
-                if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up) && !selecionado)
-                {
-                    if (pos > 1)
-                    {
-                        pos--;
-                        selecionado = true;
-                        textos[pos].setOutlineThickness(4);
-                        textos[pos + 1].setOutlineThickness(0);
-                        selecionado = false;
-                    }
-                }
-
-                if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down) && !selecionado)
-                {
-                    if (pos < 3)
-                    {
-                        pos++;
-                        selecionado = true;
-                        textos[pos].setOutlineThickness(4);
-                        textos[pos - 1].setOutlineThickness(0);
-                        selecionado = false;
-                    }
-                }
-
-                if (sf::Keyboard::isKeyPressed(sf::Keyboard::Enter))
-                {
-                    if (pos == 3)
-                        pGE->set_estado_atual(0);
-                    else if (pos == 1)
-                        pGE->set_estado_atual(2);
-                    else if (pos == 2)
-                        pGE->set_estado_atual(3);
-                }
-
-                if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape))
-                    pGE->set_estado_atual(0);
-            }
-        }
+        void Menu_Jogadores::loop_evento() {}
     }
 }

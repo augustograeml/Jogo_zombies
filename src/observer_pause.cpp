@@ -1,5 +1,5 @@
-#include "../Observers/observer_pause.hpp"
-#include "../Estados/Menus/pause.hpp"
+#include "../Observers/observer_pause.h"
+#include "../Estados/Menus/pause.h"
 
 namespace Observers
 {

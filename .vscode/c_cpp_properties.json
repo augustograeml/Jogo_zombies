@@ -1,19 +1,11 @@
 {
     "configurations": [
-      {
-        "name": "Win32",
-        "includePath": [
-          "${workspaceFolder}/**",
-          "${workspaceFolder}\\src"
-        ],
-        "defines": [
-          "_DEBUG",
-          "UNICODE"
-        ],
-        "compilerPath": "C:\\MSYS2\\mingw64\\bin\\g++.exe",
-        "cStandard": "c17",
-        "cppStandard": "c++20"
-      }
+        {
+            "name": "Zombies++",
+            "includePath": ["${workspaceFolder}/**"],
+            "compilerPath": "g++",
+            "cppStandard": "c++17"
+        }
     ],
     "version": 4
 }

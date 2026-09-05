@@ -1,20 +1,15 @@
 {
-    // Use IntelliSense to learn about possible attributes.
-    // Hover to view descriptions of existing attributes.
-    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
         {
-            "name": " Launch",
-            "type": "cppvsdbg",
+            "name": "Zombies++",
+            "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}\\src\\main.exe",
-            "args": [],
-            "stopAtEntry": false,
+            "program": "${workspaceFolder}/prog",
             "cwd": "${workspaceFolder}",
-            "environment": [],
-            "console": "externalTerminal"
+            "MIMode": "gdb",
+            "preLaunchTask": "Compilar Zombies++",
+            "windows": { "program": "${workspaceFolder}/prog.exe" }
         }
-
     ]
 }

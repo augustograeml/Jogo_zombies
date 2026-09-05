@@ -1,4 +1,4 @@
-#include "../Estados/Menus/botao.hpp"
+#include "../Estados/Menus/botao.h"
 
 namespace Estados
 {

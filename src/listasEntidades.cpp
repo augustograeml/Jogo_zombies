@@ -1,4 +1,4 @@
-#include "../Listas/listaEntidades.hpp"
+#include "../Listas/listaEntidades.h"
  
  namespace Listas
  {
@@ -24,7 +24,7 @@
         LEs.remover(pE);
     }
 
-    const int ListaEntidade::get_tamanho() const
+    int ListaEntidade::get_tamanho() const
     {
         return LEs.get_tamanho();
     }

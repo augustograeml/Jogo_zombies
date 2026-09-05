@@ -1,4 +1,4 @@
-#include "../Estados/estado.hpp"
+#include "../Estados/estado.h"
 
 namespace Estados
 {
@@ -6,7 +6,7 @@ namespace Estados
 
     Estado::Estado(int i) :  id(i)
     {
-        pGE->adicionar_estado(this);
+        // O chamador registra somente objetos completamente construidos.
     }
 
     Estado::~Estado()

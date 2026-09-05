@@ -1,5 +1,7 @@
-#include "../Entidades/Personagens/zumbi.hpp"
-#include "../Entidades/Personagens/inimigo.hpp"
+#include "../Persistencia/entidades.h"
+#include "../Persistencia/aleatorio.h"
+#include "../Entidades/Personagens/zumbi.h"
+#include "../Entidades/Personagens/inimigo.h"
 
 namespace Entidades
 {
@@ -9,7 +11,7 @@ namespace Entidades
         {
             this->setSkin("Design/imagens/zumbi_bateu_morreu.png");
             direcao = 1;
-            pulo = rand() % 10;
+            pulo = Persistencia::sortear(10);
         }
 
         Zumbi::~Zumbi()
@@ -35,7 +37,7 @@ namespace Entidades
                     if (pulo == 2)
                         velocidade = Vector2f(0.3f, -2.0f);
                     else
-                        pulo = rand() % 10;
+                        pulo = Persistencia::sortear(10);
                 }
 
                 nochao = false;
@@ -50,7 +52,7 @@ namespace Entidades
                     if (pulo == 2)
                         velocidade = Vector2f(-0.3f, -2.0f);
                     else
-                        pulo = rand() % 10;
+                        pulo = Persistencia::sortear(10);
                 }
 
                 nochao = false;
@@ -87,50 +89,10 @@ namespace Entidades
             }
         }
 
-        void Zumbi::criar_zumbis(string arquivo)
+
+        void Zumbi::salvar(std::ostringstream* entrada)
         {
-            ifstream caminho(arquivo);
-
-            if (!caminho)
-            {
-                cout << "Nao foi possivel acessar o arquivo de criacao dos arqueiros";
-                exit(1);
-            }
-
-            string linha;
-            Entidade *aux = nullptr;
-            int j, i;
-
-            for (i = 0; getline(caminho, linha); i++)
-            {
-                j = 0;
-                for (char tipo : linha)
-                {
-                    switch (tipo)
-                    {
-                    case '3':
-                        aux = static_cast<Entidade *>(new Zumbi(sf::Vector2f(0.f, 0.f), sf::Vector2f(0.f, 0.f)));
-                        if (aux)
-                        {
-                            aux->setWindow(pGG->get_Janela());
-                            aux->setPosicao(sf::Vector2f(j * TAM, i * TAM));
-                            // incluir inmigos na lista
-                        }
-                        break;
-
-                    default:
-                        break;
-                        ;
-                    }
-                }
-            }
-        }
-
-        void Zumbi::salvar(std::ostringstream *entrada)
-        {
-            (*entrada) << "{ \"identidade\": [" << 5 << "] , \"posicao\": [" << corpo.getPosition().x << "," << corpo.getPosition().y << "], \"velocidade\": [" << velocidade.x << "," << velocidade.y << "] }" << std::endl;
-
-            numero_zumbi_salvos++;
+            *entrada << Persistencia::Serializador::salvar(*this).dump();
         }
     }
 }

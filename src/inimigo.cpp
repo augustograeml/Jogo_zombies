@@ -1,4 +1,6 @@
-#include "../Entidades/Personagens/inimigo.hpp"
+#include "../Persistencia/entidades.h"
+#include "../Persistencia/aleatorio.h"
+#include "../Entidades/Personagens/inimigo.h"
 #include <stdlib.h>
 #include <math.h>
 
@@ -6,9 +8,9 @@ namespace Entidades
 {
     namespace Personagens
     {
-        Inimigo::Inimigo(sf::Vector2f pos, sf::Vector2f vel) : Personagem(pos, vel), maldade(false), pjogador(nullptr)
+        Inimigo::Inimigo(sf::Vector2f pos, sf::Vector2f vel) : Personagem(pos, vel), pjogador(nullptr), maldade(false), direcao(false)
         {
-            int m = rand() % 6;
+            int m = Persistencia::sortear(6);
             if(m == 1)
                 maldade = true;
         }
@@ -42,7 +44,7 @@ namespace Entidades
 
         void Inimigo::salvar(std::ostringstream* entrada)
         {
-            (*entrada) << "{ \"posicao\": [" << corpo.getPosition().x<<","<<corpo.getPosition().y<<"], \"velocidade\": ["<<velocidade.x<<","<<velocidade.y<<"] }" << std::endl;
+            *entrada << Persistencia::Serializador::salvar(*this).dump();
         }
     }
 }

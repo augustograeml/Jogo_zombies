@@ -1,6 +1,6 @@
 //codigo reaproveitado do Peteco
 
-#include "../Observers/observer.hpp"
+#include "../Observers/observer.h"
 
 namespace Observers
 {

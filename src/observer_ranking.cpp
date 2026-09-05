@@ -1,5 +1,5 @@
-#include "../Observers/observer_ranking.hpp"
-#include "../Estados/Menus/ranking.hpp"
+#include "../Observers/observer_ranking.h"
+#include "../Estados/Menus/ranking.h"
 #include <iostream>
 
 namespace Observers
