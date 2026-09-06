@@ -1,3 +1,4 @@
+#include "../Recursos/catalogo.h"
 #include "../Estados/Menus/botao.h"
 
 namespace Estados
@@ -6,7 +7,7 @@ namespace Estados
     {
         Botao::Botao()
         {
-            fonte->loadFromFile("Design/fonte/sangue_escorrendo.ttf");
+            fonte->loadFromFile(Recursos::caminho("Design/fonte/sangue_escorrendo.ttf").string());
             texto.setFont(*fonte);
             texto.setFillColor(sf::Color::White);
             //talvez essa linha de baixo possa cagar o codigo, ficar experto

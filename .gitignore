@@ -13,3 +13,9 @@ sfml-*.dll
 
 # Documentacao local da analise.
 /ANALISE_E_MELHORIAS.md
+
+# Slots, copias de recuperacao e preferencias locais.
+/partida*.json*
+/ranking-pontos.json*
+/preferencias.json*
+/PLANO_MELHORIAS_JOGO.md
