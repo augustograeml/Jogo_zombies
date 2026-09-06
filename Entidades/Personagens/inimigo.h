@@ -15,10 +15,15 @@ namespace Entidades
                 Jogador* pjogador;
                 bool maldade;
                 bool direcao;
+                Animacao::Corrida animacao;
                     
             public:
                 Inimigo(sf::Vector2f pos, sf::Vector2f vel);
                 ~Inimigo();
+                const Animacao::Estado& get_animacao() const { return animacao.obter(); }
+                void restaurar_animacao(Animacao::Estado salvo) { animacao.restaurar(salvo); }
+                void avancar_animacao() { if(vivo) animacao.avancar(velocidade.x); }
+                void desenhar() override;
                 sf::Vector2f getPosicao();
                 void setPosicao(sf::Vector2f& p);
                 void update(sf::Vector2f& posicao_jogador);

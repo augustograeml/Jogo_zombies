@@ -1,3 +1,4 @@
+#include "../Animacao/articulada.h"
 #include "../Logica/movimento.h"
 #include <algorithm>
 #include <cmath>
@@ -49,6 +50,11 @@ namespace Entidades
         {
             // O sprite tem transformacao propria: trocar arte nunca altera a colisao.
             const auto& estado = animacao.obter();
+            if (jogador2) {
+                Animacao::desenhar_articulada(*pGG->get_Janela(),*Textura,corpo.getGlobalBounds(),estado,
+                    get_protecao() && (get_protecao()/5)%2 ? sf::Color(255,100,100,130) : sf::Color::White);
+                return;
+            }
             sf::Sprite visual;
             if (!jogador2) {
                 const auto& quadro = Recursos::corrida().at(estado.correndo ? estado.quadro : 9);

@@ -88,6 +88,8 @@ void Fase::simular_passo() {
     inimigos.executar();
     motor_fase = Persistencia::motor();
     gerenciar_colisoes();
+    for(auto it=inimigos.get_primeiro();it!=nullptr;++it)
+        static_cast<Entidades::Personagens::Inimigo*>(*it)->avancar_animacao();
     // Morte por queda evita uma partida sem possibilidade de terminar.
     for (auto it = jogadores.get_primeiro(); it != nullptr; ++it)
         if ((*it)->get_vida() <= 0 || (*it)->getPosicao().y > 2000) (*it)->morrer();

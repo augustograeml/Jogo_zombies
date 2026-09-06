@@ -15,6 +15,8 @@ struct Quadro {
     sf::IntRect regiao; // Limites dos pixels visiveis: alinhamento pelos pes.
 };
 const std::vector<Quadro>& corrida();
+enum class Animado { Zumbi, Arqueiro, Gigante };
+const std::vector<Quadro>& caminhada(Animado tipo);
 // Legenda: espaco=vazio; 0=neve; 1/2=marcadores; 3=zumbi; 4=arqueiro;
 // 5=espinho; 6=coracao; 7=musgo; 8=caixa; 9=gigante.
 std::vector<std::string> validar_mapa(const std::string& relativo);

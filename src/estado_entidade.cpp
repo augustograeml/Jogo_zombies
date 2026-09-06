@@ -54,6 +54,8 @@ Json Serializador::salvar(const Entidades::Entidade& e) {
     if (auto p = dynamic_cast<const Inimigo*>(&e)) {
         extra["direcao"] = p->direcao;
         extra["maldade"] = p->maldade;
+        const auto& a=p->get_animacao();
+        extra["animacao"]={{"correndo",a.correndo},{"quadro",a.quadro},{"passos",a.passos},{"direita",a.direita}};
     }
     return {{"tipo", tipo}, {"posicao", vetor(e.corpo.getPosition())},
             {"velocidade", vetor(e.velocidade)}, {"vida", e.vida}, {"vivo", e.vivo},
@@ -155,6 +157,11 @@ std::unique_ptr<Entidades::Entidade> Serializador::carregar(const Json& j) {
     if (auto p = dynamic_cast<Inimigo*>(e.get())) {
         p->direcao = x.at("direcao").get<bool>();
         p->maldade = x.at("maldade").get<bool>();
+        if(x.contains("animacao")) {
+            const auto& a=x.at("animacao");
+            p->restaurar_animacao({a.at("correndo").get<bool>(),static_cast<unsigned>(inteiro(a.at("quadro"),0,26)),
+                static_cast<unsigned>(inteiro(a.at("passos"),0,1)),a.at("direita").get<bool>()});
+        }
     }
     return e;
 }
