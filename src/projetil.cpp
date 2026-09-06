@@ -16,7 +16,7 @@ void Projetil::mover() {
 }
 void Projetil::atirar() {}
 void Projetil::salvar(std::ostringstream* saida) { *saida << Persistencia::Serializador::salvar(*this).dump(); }
-void Projetil::danar(Entidade* alvo) { if (alvo) alvo->set_vida(alvo->get_vida() - dano); }
+void Projetil::danar(Entidade* alvo) { if (alvo) alvo->receber_dano(dano); }
 void Projetil::colidir(Entidade* alvo, int lado) {
     if (vivo && lado) { danar(alvo); morrer(); }
 }

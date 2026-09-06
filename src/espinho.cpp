@@ -32,7 +32,7 @@ namespace Entidades
         }
         void Espinho::espinhar(Entidades::Personagens::Jogador* pJ)
         {
-            pJ->set_vida(pJ->get_vida() - get_dano());
+            pJ->receber_dano(get_dano());
         }
         void Espinho::colidir(Entidade* pE, int a)
         {

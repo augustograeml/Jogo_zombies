@@ -2,7 +2,9 @@
 
 #include "../Entidades/entidade.h"
 #include <iostream>
-#include <map>
+#include "../Recursos/catalogo.h"
+#include <algorithm>
+#include "../Entidades/Personagens/jogador.h"
 #include <stdexcept>
 #include "../Persistencia/entidades.h"
 
@@ -39,17 +41,19 @@ namespace Entidades
     {
         set_vivo(0);
     }
+    bool Entidade::receber_dano(int dano, unsigned duracao) {
+        if (!vivo || dano <= 0 || protecao) return false;
+        vida = std::max(0, vida - dano);
+        if (dynamic_cast<Personagens::Jogador*>(this)) protecao = duracao;
+        if (vida == 0) morrer();
+        return true;
+    }
+    void Entidade::curar(int quantidade, int maxima) {
+        if (vivo && quantidade > 0) vida = std::min(maxima, vida + quantidade);
+    }
     void Entidade::setSkin(const std::string filename)
     {
-        // Compartilhar a textura evita reler a mesma imagem para cada bloco do mapa.
-        static std::map<std::string, std::weak_ptr<sf::Texture>> cache;
-        Textura = cache[filename].lock();
-        if (!Textura) {
-            Textura = std::make_shared<sf::Texture>();
-            if (!Textura->loadFromFile(filename))
-                throw std::runtime_error("Imagem nao encontrada: " + filename);
-            cache[filename] = Textura;
-        }
+        Textura = Recursos::textura(filename);
         corpo.setTexture(Textura.get());
     }
 

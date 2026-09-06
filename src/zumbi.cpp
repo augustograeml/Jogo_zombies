@@ -69,7 +69,7 @@ namespace Entidades
 
         void Zumbi::atacar(Entidade *jg)
         {
-            jg->set_vida(jg->get_vida() - forca);
+            jg->receber_dano(forca);
         }
 
         void Zumbi::colidir(Entidade *pE, int a)
@@ -81,6 +81,8 @@ namespace Entidades
             }
             else if (a == 4)
             {
+                auto impulso = pE->getVelocidade(); impulso.y = -3.f;
+                pE->setVelocidade(impulso); pE->set_nochao(false);
                 morrer();
             }
             else

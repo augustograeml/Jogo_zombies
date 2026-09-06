@@ -72,6 +72,8 @@ namespace Entidades
             }
             else if (a == 4)
             {
+                auto impulso = pE->getVelocidade(); impulso.y = -3.f;
+                pE->setVelocidade(impulso); pE->set_nochao(false);
                 this->set_vida(this->get_vida() - 10);
             }
             else
@@ -83,7 +85,7 @@ namespace Entidades
 
         void Gigante::atacar(Entidade *jg)
         {
-            jg->set_vida(jg->get_vida() - forca);
+            jg->receber_dano(forca);
         }
 
         void Gigante::salvar(std::ostringstream* entrada)

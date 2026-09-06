@@ -39,6 +39,11 @@
         }
     }
     
+    void ListaEntidade::desenhar(const sf::FloatRect& area)
+    {
+        for (auto it = LEs.get_primeiro(); it != nullptr; ++it)
+            if ((*it)->get_vivo() && area.intersects((*it)->get_corpo()->getGlobalBounds())) (*it)->desenhar();
+    }
     void ListaEntidade::executar()
     {
         Lista<Entidades::Entidade>::Iterador aux = LEs.get_primeiro();

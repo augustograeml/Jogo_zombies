@@ -4,6 +4,10 @@
 #include "../Listas/listaEntidades.h"
 #include "../Entidades/entidade.h"
 #include <iostream>
+#include <map>
+#include <unordered_map>
+#include <vector>
+#include <cstdint>
 using namespace std;
 
 namespace Gerenciadores
@@ -19,13 +23,26 @@ namespace Gerenciadores
             Listas::ListaEntidade* gigantes;
             Listas::ListaEntidade* projeteis;
 
+            bool grade_suja = true;
+            bool usar_grade = true;
+            std::vector<Entidades::Entidade*> ordem_obstaculos;
+            std::unordered_map<Entidades::Entidade*, std::size_t> indices_obstaculos;
+            std::map<std::pair<int,int>, std::vector<std::size_t>> grade;
+            void construir_grade();
+            std::vector<Entidades::Entidade*> candidatos(Entidades::Entidade* entidade);
+            std::vector<Entidades::Entidade*> candidatos_apos(Entidades::Entidade*, Entidades::Entidade*);
             bool sem_inimigos;
             bool sem_jogadores;
         public:
+            struct Estatisticas { std::uint64_t pares_teoricos=0, testes_obstaculos=0; double microssegundos=0; };
+            Estatisticas medidas;
+            const Estatisticas& estatisticas() const { return medidas; }
+            void ativar_grade(bool ativa) { usar_grade = ativa; }
+            void invalidar_grade() { grade_suja = true; }
             Gerenciador_Colisoes();
             ~Gerenciador_Colisoes();
 
-            void set_obstaculos(Listas::ListaEntidade* obs) {if(obs) obstaculos = obs;}
+            void set_obstaculos(Listas::ListaEntidade* obs) {if(obs) { obstaculos = obs; invalidar_grade(); }}
             void set_jogadores(Listas::ListaEntidade* jog) {if(jog) jogadores = jog;}
             void set_inimigos(Listas::ListaEntidade* ini) {if(ini) inimigos = ini;}
             void set_zumbis(Listas::ListaEntidade* z) {if(z) zumbis = z;}

@@ -36,7 +36,7 @@ namespace Entidades
 
         void Coracao::curar(Entidades::Personagens::Jogador* pJ)
         {
-            pJ->set_vida(pJ->get_vida() + cura);
+            pJ->curar(cura);
         }
         void Coracao::colidir(Entidade* pE, int a)
         {

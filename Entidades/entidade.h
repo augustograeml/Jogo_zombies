@@ -4,6 +4,7 @@
 namespace Persistencia { class Serializador; }
 
 #include "../ente.h"
+#include "../Recursos/configuracao.h"
 
 #include <sstream>
 #include <fstream>
@@ -36,6 +37,7 @@ namespace Entidades
             bool vivo;
             int vida;
             bool nochao;
+            unsigned protecao = 0;
         public:
             Entidade(sf::Vector2f pos = sf::Vector2f(0.f,0.f));
             virtual ~Entidade();
@@ -49,6 +51,12 @@ namespace Entidades
             virtual void colidir(Entidade* pE, int a) = 0;
             
             void morrer();
+            // Protecao em passos de simulacao: pausa e salvamento preservam o intervalo.
+            bool receber_dano(int dano, unsigned duracao = Recursos::Configuracao::protecao_dano);
+            void curar(int quantidade, int maxima = 20);
+            void atualizar_protecao() { if (protecao) --protecao; }
+            unsigned get_protecao() const { return protecao; }
+            void set_protecao(unsigned valor) { protecao = valor; }
 
             const sf::Vector2f getPosicao() {return corpo.getPosition();}
             void setPosicao(sf::Vector2f p);

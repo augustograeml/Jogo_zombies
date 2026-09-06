@@ -25,6 +25,7 @@ namespace Listas
             static ListaEntidade* get_instancia_obstaculos();
             int get_tamanho() const;
             void desenhar();
+            void desenhar(const sf::FloatRect& area_visivel);
             void executar();
             Lista<Entidades::Entidade>::Iterador get_primeiro();
         };

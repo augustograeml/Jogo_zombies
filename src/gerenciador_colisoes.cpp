@@ -11,6 +11,9 @@
 #include "../Entidades/Obstaculos/neve.h"
 #include "../Entidades/Obstaculos/musgo.h"
 #include <math.h>
+#include <algorithm>
+#include <chrono>
+#include "../Fisica/aabb.h"
 #include <iostream>
 
 using namespace std;
@@ -37,45 +40,75 @@ namespace Gerenciadores
         projeteis = nullptr;
     }
 
-    void Gerenciador_Colisoes::colisao_jogadores_obstaculos()
-    {
-        Listas::Lista<Entidades::Entidade>::Iterador obst;
-        Listas::Lista<Entidades::Entidade>::Iterador jog = jogadores->get_primeiro();
-
-        while (jog != nullptr)
-        {
-            obst = obstaculos->get_primeiro();
-            while (obst != nullptr)
-            {
-                if ((*obst)->get_vivo())
-                {
-                    int id_colisao = colidiu(*jog, *obst);
-                    if (id_colisao)
-                    {
-                        (*obst)->colidir(*jog, id_colisao);
-                        (*jog)->colidir(*obst, id_colisao);
-                    }
-                }
-                obst++;
+    void Gerenciador_Colisoes::construir_grade() {
+        grade.clear(); ordem_obstaculos.clear(); indices_obstaculos.clear();
+        if (obstaculos) for (auto it=obstaculos->get_primeiro(); it!=nullptr; ++it) {
+            const auto r=(*it)->get_corpo()->getGlobalBounds();
+            const auto indice=ordem_obstaculos.size(); ordem_obstaculos.push_back(*it); indices_obstaculos[*it]=indice;
+            for(int x=static_cast<int>(std::floor(r.left/100)); x<=static_cast<int>(std::floor((r.left+r.width)/100)); ++x)
+                for(int y=static_cast<int>(std::floor(r.top/100)); y<=static_cast<int>(std::floor((r.top+r.height)/100)); ++y)
+                    grade[{x,y}].push_back(indice);
+        }
+        grade_suja=false;
+    }
+    std::vector<Entidades::Entidade*> Gerenciador_Colisoes::candidatos(Entidades::Entidade* entidade) {
+        if(grade_suja) construir_grade();
+        medidas.pares_teoricos += ordem_obstaculos.size();
+        if(!usar_grade) { medidas.testes_obstaculos += ordem_obstaculos.size(); return ordem_obstaculos; }
+        const auto r=entidade->get_corpo()->getGlobalBounds();
+        std::vector<std::size_t> indices;
+        for(int x=static_cast<int>(std::floor((r.left-.1f)/100)); x<=static_cast<int>(std::floor((r.left+r.width+.1f)/100)); ++x)
+            for(int y=static_cast<int>(std::floor((r.top-.1f)/100)); y<=static_cast<int>(std::floor((r.top+r.height+.1f)/100)); ++y) {
+                auto celula=grade.find({x,y});
+                if(celula!=grade.end()) indices.insert(indices.end(),celula->second.begin(),celula->second.end());
             }
-            jog++;
+        std::sort(indices.begin(),indices.end()); indices.erase(std::unique(indices.begin(),indices.end()),indices.end());
+        std::vector<Entidades::Entidade*> resultado;
+        for(auto i:indices) resultado.push_back(ordem_obstaculos[i]);
+        medidas.testes_obstaculos += resultado.size();
+        return resultado;
+    }
+    std::vector<Entidades::Entidade*> Gerenciador_Colisoes::candidatos_apos(Entidades::Entidade* movel, Entidades::Entidade* ultimo) {
+        auto proximos=candidatos(movel);
+        const auto limite=indices_obstaculos.at(ultimo);
+        proximos.erase(std::remove_if(proximos.begin(),proximos.end(),[&](auto* e) {
+            return indices_obstaculos.at(e)<=limite;
+        }),proximos.end());
+        return proximos;
+    }
+    void Gerenciador_Colisoes::colisao_jogadores_obstaculos() {
+        if(!jogadores || !obstaculos) return;
+        for(auto jog=jogadores->get_primeiro(); jog!=nullptr; ++jog) {
+            bool superficie_aplicada=false;
+            auto pendentes=candidatos(*jog);
+            for(std::size_t i=0;i<pendentes.size();) {
+                auto* obst=pendentes[i++];
+                const auto antes=(*jog)->getPosicao();
+                const int lado=colidiu(*jog,obst);
+                if(!lado) continue;
+                const bool superficie=dynamic_cast<Entidades::Obstaculos::Neve*>(obst) || dynamic_cast<Entidades::Obstaculos::Musgo*>(obst);
+                if(!superficie || (lado==4 && !superficie_aplicada)) {
+                    obst->colidir(*jog,lado);
+                    if(superficie) superficie_aplicada=true;
+                }
+                (*jog)->colidir(obst,lado);
+                // Uma separacao pode entrar em outra celula: reconsultar apenas itens
+                // posteriores preserva exatamente a ordem da varredura completa.
+                if(usar_grade && antes!=(*jog)->getPosicao()) { pendentes=candidatos_apos(*jog,obst); i=0; }
+            }
         }
     }
-    void Gerenciador_Colisoes::colisao_inimigos_obstaculos()
-    {
-        Listas::Lista<Entidades::Entidade>::Iterador obst;
-        Listas::Lista<Entidades::Entidade>::Iterador inim = inimigos->get_primeiro();
-        while (inim != nullptr)
-        {
-            obst = obstaculos->get_primeiro();
-            while (obst != nullptr)
-            {
-                if ((*obst)->get_vivo())
-                    colidiu(*inim, *obst);
-
-                obst++;
+    void Gerenciador_Colisoes::colisao_inimigos_obstaculos() {
+        if(!inimigos || !obstaculos) return;
+        for(auto inim=inimigos->get_primeiro(); inim!=nullptr; ++inim) {
+            auto pendentes=candidatos(*inim);
+            for(std::size_t i=0;i<pendentes.size();) {
+                auto* obst=pendentes[i++];
+                const auto antes=(*inim)->getPosicao();
+                const int lado=colidiu(*inim,obst);
+                if(lado==1 || lado==3) static_cast<Entidades::Personagens::Inimigo*>(*inim)->mudar_direcao();
+                if(usar_grade && antes!=(*inim)->getPosicao()) { pendentes=candidatos_apos(*inim,obst); i=0; }
             }
-            inim++;
         }
     }
 
@@ -124,8 +157,8 @@ namespace Gerenciadores
             if (!flechas) continue;
             for (auto& flecha : *flechas) {
                 if (!flecha.get_vivo()) continue;
-                for (auto obst = obstaculos->get_primeiro(); obst != nullptr; ++obst) {
-                    if ((*obst)->get_vivo() && (*obst)->get_corpo()->getGlobalBounds().intersects(
+                for (auto* obst : candidatos(&flecha)) {
+                    if (obst->get_vivo() && obst->get_corpo()->getGlobalBounds().intersects(
                             flecha.get_corpo()->getGlobalBounds())) {
                         flecha.morrer();
                         break;
@@ -167,6 +200,8 @@ namespace Gerenciadores
 
     void Gerenciador_Colisoes::gerenciar_colisoes()
     {
+        const auto inicio=std::chrono::steady_clock::now();
+        medidas = {};
         colisao_jogadores_obstaculos();
         colisao_jogadores_inimigos();
         colisao_inimigos_obstaculos();
@@ -174,51 +209,20 @@ namespace Gerenciadores
         colisao_obstaculos_projeteis();
         get_inimigos_vivos();
         get_jogadores_vivos();
+        medidas.microssegundos=std::chrono::duration<double,std::micro>(std::chrono::steady_clock::now()-inicio).count();
     }
 
-    int Gerenciador_Colisoes::colidiu(Entidades::Entidade *e1, Entidades::Entidade *e2)
-    {
-        if (!e1 || !e2 || !e1->get_vivo() || !e2->get_vivo()) return 0;
-
-        sf::Vector2f pos1 = e1->getPosicao(), pos2 = e2->getPosicao(), tam1 = e1->getTamanho(), tam2 = e2->getTamanho(),
-                     d(fabs(pos1.x - pos2.x) - ((tam1.x + tam2.x) / 2.f),
-                       fabs(pos1.y - pos2.y) - ((tam1.y + tam2.y) / 2.f));
-
-        if (d.x < 0 && d.y < 0)
-        {
-            if (d.x < d.y)
-            {
-                if (pos1.y <= pos2.y)
-                {
-                    e1->setPosicao(sf::Vector2f(e1->getPosicao().x, e2->getPosicao().y - (tam1.y + tam2.y) / 2));
-                    e1->set_nochao(true);
-                    e1->setVelocidade(sf::Vector2f(e1->getVelocidade().x, -e1->getVelocidade().y * ACL));
-                    return 4;
-                }
-                else
-                {
-                    e1->setPosicao(sf::Vector2f(e1->getPosicao().x, e2->getPosicao().y + (tam1.y + tam2.y) / 2));
-                    e1->setVelocidade(sf::Vector2f(e1->getVelocidade().x, -e1->getVelocidade().y * ACL));
-                    return 2;
-                }
-            }
-            else
-            {
-                if (pos1.x >= pos2.x)
-                {
-                    e1->setPosicao(sf::Vector2f(e2->getPosicao().x + (tam1.x + tam2.x) / 2, e1->getPosicao().y));
-                    e1->setVelocidade(sf::Vector2f(-e1->getVelocidade().x * ACL, e1->getVelocidade().y));
-                    return 1;
-                }
-                else
-                {
-                    e1->setPosicao(sf::Vector2f(e2->getPosicao().x - (tam1.x + tam2.x) / 2, e1->getPosicao().y));
-                    e1->setVelocidade(sf::Vector2f(-e1->getVelocidade().x * ACL, e1->getVelocidade().y));
-                    return 3;
-                }
-            }
-        }
-
-        return 0;
+    int Gerenciador_Colisoes::colidiu(Entidades::Entidade* e1, Entidades::Entidade* e2) {
+        if(!e1 || !e2 || !e1->get_vivo() || !e2->get_vivo()) return 0;
+        const auto a=e1->get_corpo()->getGlobalBounds(), b=e2->get_corpo()->getGlobalBounds();
+        auto v=e1->getVelocidade();
+        const auto contato=Fisica::resolver({a.left,a.top,a.width,a.height},{b.left,b.top,b.width,b.height},v.y);
+        if(!contato.lado) return 0;
+        e1->setPosicao(e1->getPosicao()+sf::Vector2f(contato.dx,contato.dy));
+        if(contato.lado==4) { e1->set_nochao(true); if(v.y>0) v.y=0; }
+        else if(contato.lado==2) { if(v.y<0) v.y=0; }
+        else { v.x=0; }
+        e1->setVelocidade(v);
+        return contato.lado;
     }
 }
