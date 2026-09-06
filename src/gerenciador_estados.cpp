@@ -1,3 +1,4 @@
+#include "../Audio/efeitos.h"
 #include "../Gerenciadores/gerenciador_estados.h"
 #include "../Estados/estado.h"
 #include "../Estados/Fases/fase.h"
@@ -20,6 +21,7 @@ void Gerenciador_Estados::set_estado_atual(int id) {
     if (id == estadoAtual) return;
     // Mesmo sem permissao de escrita, a simulacao deve parar na pausa.
     if (estadoAtual >= 6 && estadoAtual <= 9 && id == 5) salvar_partida();
+    if (Estados::eh_fase(estadoAtual) && !Estados::eh_fase(id) && id != Estados::codigo(Estados::Tela::Nome)) Audio::interromper();
     estadoAtual = id;
     if (id >= 6 && id <= 9) fase = id;
     destino->ao_entrar();

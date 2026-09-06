@@ -2,6 +2,7 @@
 
 #pragma once
 #include <vector>
+#include "../Estados/identificador.h"
 #include <string>
 
 using namespace std;
@@ -11,16 +12,7 @@ namespace Estados
     class Estado;
 }
 
-/*
-Estados:
-0 - Menu
-1 - Fase 1, um jogador
-2 - Fase 1, dois jogadores
-3 - Fase 2, um jogador
-4 - Fase 2, dois jogadores
-5 - ranking
-6 - Sair
-*/
+
 
 namespace Gerenciadores
 {
@@ -36,6 +28,7 @@ namespace Gerenciadores
 
             static Gerenciador_Estados* get_instancia();
             void set_estado_atual(int eA);
+            void set_estado_atual(Estados::Tela tela) { set_estado_atual(Estados::codigo(tela)); }
             void set_fase(int f);
 
             void deleta_estados(int i);

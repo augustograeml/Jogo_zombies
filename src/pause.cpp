@@ -1,11 +1,13 @@
+#include "../Audio/efeitos.h"
+#include "../Recursos/catalogo.h"
 #include "../Estados/Menus/pause.h"
 namespace Estados::Menus {
 Gerenciadores::Gerenciador_Grafico* Pause::pGG = Gerenciadores::Gerenciador_Grafico::get_instancia();
 Pause::Pause(int id) : Estado(id), fonte(new sf::Font), imagem(new sf::Texture) { inicializa_valores(); }
 Pause::~Pause() { delete fonte; delete imagem; }
 void Pause::inicializa_valores() {
-    imagem->loadFromFile("Design/imagens/pause.png");
-    fonte->loadFromFile("Design/fonte/sangue_escorrendo.ttf");
+    imagem->loadFromFile(Recursos::caminho("Design/imagens/pause.png").string());
+    fonte->loadFromFile(Recursos::caminho("Design/fonte/sangue_escorrendo.ttf").string());
     opcoes = {"Pausa", "Continuar", "Menu"};
     coordenadas = {{340, 185}, {390, 462}, {470, 605}};
     tamanhos = {150, 50, 50};
@@ -19,6 +21,12 @@ void Pause::inicializa_valores() {
 }
 void Pause::tratar_evento(const sf::Event& evento) {
     if (evento.type != sf::Event::KeyPressed) return;
+    if (evento.key.code == sf::Keyboard::M || evento.key.code == sf::Keyboard::Add ||
+        evento.key.code == sf::Keyboard::Equal || evento.key.code == sf::Keyboard::Subtract || evento.key.code == sf::Keyboard::Hyphen) {
+        const bool reduzir = evento.key.code==sf::Keyboard::Subtract || evento.key.code==sf::Keyboard::Hyphen;
+        Audio::configurar(evento.key.code==sf::Keyboard::M?0:reduzir?-10:10, evento.key.code==sf::Keyboard::M);
+        return;
+    }
     if (evento.key.code == sf::Keyboard::S) { pGE->salvar_partida(); return; }
     if (evento.key.code == sf::Keyboard::Up || evento.key.code == sf::Keyboard::Down) {
         textos[pos].setOutlineThickness(0); pos = pos == 1 ? 2 : 1; textos[pos].setOutlineThickness(4);
@@ -30,6 +38,10 @@ void Pause::tratar_evento(const sf::Event& evento) {
 void Pause::mostrar_menu() {
     pGG->resetarCamera(); pGG->desenharTextura(imagem);
     for (const auto& texto : textos) pGG->get_Janela()->draw(texto);
+    const auto& p=Audio::Preferencias::instancia();
+    sf::Text ajuda("S: salvar | M: silenciar | +/-: volume " + std::to_string(static_cast<int>(p.volume)) +
+        (p.mudo?" (mudo)":""), *fonte, 24);
+    ajuda.setPosition(80,800); pGG->get_Janela()->draw(ajuda);
 }
 void Pause::executar() { mostrar_menu(); }
 void Pause::loop_evento() {}
