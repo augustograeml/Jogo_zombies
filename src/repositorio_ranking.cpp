@@ -1,3 +1,5 @@
+#include "../Persistencia/pontos.h"
+#include "../Recursos/catalogo.h"
 #include "../Persistencia/ranking.h"
 #include <algorithm>
 #include <fstream>
@@ -30,7 +32,9 @@ std::vector<Resultado> RepositorioRanking::ler() const {
     } else {
         // O formato anterior nao informa o modo: seus registros entram no solo.
         for (int fase = 1; fase <= 2; ++fase) {
-            std::ifstream arquivo(legados / ("rankingfase" + std::to_string(fase) + ".txt"));
+            auto pasta = legados;
+            if (legados == std::filesystem::path("Design/imagens")) pasta=Recursos::caminho("Design/imagens");
+            std::ifstream arquivo(pasta / ("rankingfase" + std::to_string(fase) + ".txt"));
             std::string linha;
             std::size_t indice = 0;
             while (std::getline(arquivo, linha)) {
@@ -61,7 +65,8 @@ std::vector<Resultado> RepositorioRanking::consultar(int fase, int jogadores) co
     }), resultados.end());
     // Empates mantem a ordem de registro.
     std::stable_sort(resultados.begin(), resultados.end(), [](const Resultado& a, const Resultado& b) {
-        return a.segundos < b.segundos;
+        return CriterioTempo().precede({a.id,a.fase,a.jogadores,a.nomes,0,a.segundos,true},
+                                      {b.id,b.fase,b.jogadores,b.nomes,0,b.segundos,true});
     });
     return resultados;
 }

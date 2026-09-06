@@ -1,3 +1,6 @@
+#include <algorithm>
+#include "../Persistencia/pontos.h"
+#include "../Recursos/catalogo.h"
 #include "../Interface/painel.h"
 #include "../Persistencia/ranking.h"
 #include <cmath>
@@ -14,7 +17,7 @@ std::string formatar_tempo(double segundos) {
     return texto.str();
 }
 PainelPartida::PainelPartida() {
-    if (!fonte.loadFromFile("Design/fonte/fonte_simas.ttf"))
+    if (!fonte.loadFromFile(Recursos::caminho("Design/fonte/fonte_simas.ttf").string()))
         throw std::runtime_error("Fonte do painel nao encontrada.");
 }
 void PainelPartida::atualizar_recorde(int numero_fase, int quantidade) {
@@ -30,8 +33,11 @@ void PainelPartida::atualizar_recorde(int numero_fase, int quantidade) {
             }
         }
     } catch (const std::exception&) { erro_recorde = true; }
+    recorde_pontos=0;
+    try { auto p=Persistencia::RepositorioPontos().consultar(fase,jogadores); if(!p.empty()) recorde_pontos=p.front().pontos; }
+    catch(const std::exception&) { erro_recorde=true; }
 }
-void PainelPartida::desenhar(sf::RenderWindow& janela, double segundos) const {
+void PainelPartida::desenhar(sf::RenderWindow& janela, double segundos, int pontos, const std::vector<int>& vidas) const {
     const auto camera = janela.getView();
     janela.setView(janela.getDefaultView());
     const float largura = janela.getView().getSize().x;
@@ -57,6 +63,15 @@ void PainelPartida::desenhar(sf::RenderWindow& janela, double segundos) const {
     texto(recorde ? formatar_tempo(*recorde) : (erro_recorde ? "Indisponivel" : "Sem recorde"),
           divisao2, 37, 23, ouro, largura - divisao2 - 20);
     if (recorde) texto(titulares, divisao2, 73, 12, legenda, largura - divisao2 - 20);
+    sf::RectangleShape segunda({largura,58}); segunda.setPosition(0,100); segunda.setFillColor({8,15,23,245}); janela.draw(segunda);
+    for(std::size_t i=0;i<vidas.size();++i) {
+        const float x=20+190*i;
+        texto("J"+std::to_string(i+1)+"  "+std::to_string(std::max(0,vidas[i]))+"/20",x,103,14,legenda,170);
+        sf::RectangleShape base({160,12}); base.setPosition(x,132); base.setFillColor({55,65,75}); janela.draw(base);
+        base.setSize({160*std::clamp(vidas[i]/20.f,0.f,1.f),12}); base.setFillColor(vidas[i]<10?sf::Color(255,120,110):verde); janela.draw(base);
+    }
+    texto("PONTOS: "+std::to_string(pontos),440,110,20,verde,240);
+    texto("MELHOR: "+std::to_string(recorde_pontos),700,110,20,ouro,largura-720);
     janela.setView(camera);
 }
 }

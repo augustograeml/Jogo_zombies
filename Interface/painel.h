@@ -2,6 +2,7 @@
 #include <SFML/Graphics.hpp>
 #include <optional>
 #include <string>
+#include <vector>
 
 namespace Interface {
 std::string formatar_tempo(double segundos);
@@ -12,9 +13,10 @@ class PainelPartida {
     std::optional<double> recorde;
     std::string titulares;
     bool erro_recorde = false;
+    long long recorde_pontos = 0;
 public:
     PainelPartida();
     void atualizar_recorde(int numero_fase, int quantidade);
-    void desenhar(sf::RenderWindow& janela, double segundos) const;
+    void desenhar(sf::RenderWindow& janela, double segundos, int pontos=0, const std::vector<int>& vidas={}) const;
 };
 }

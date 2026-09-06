@@ -9,6 +9,7 @@ class Ranking : public Estado {
     sf::Texture imagem;
     std::vector<sf::Text> textos;
     int fase = 1, jogadores = 1;
+    bool por_pontos = false;
     void atualizar();
 public:
     explicit Ranking(int id);
