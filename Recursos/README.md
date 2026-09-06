@@ -20,9 +20,10 @@ A busca sobe no máximo oito níveis. Assim, o executável em `build` ou na raiz
 | --- | --- | --- |
 | Corrida do jogador 1 | `imagens/op1.png` até `imagens/op27.png` | Ordem numérica explícita; os 27 quadros foram conferidos em conjunto. |
 | Repouso do jogador 1 | `imagens/op10.png` | Pose fixa da mesma sequência; mantém a última direção. |
-| Jogador 2 | `imagens/luigiDireita.png` | Preserva Luigi e espelha a direção; não inventa quadros ausentes. |
+| Jogador 2 | `imagens/luigiDireita.png` | Anima pernas e braço com malha articulada em C++; preserva a imagem original e espelha a direção. |
 | Artes alternativas | `imagens/andando.png`, `imagens/parado.png` | Pertencem a outro personagem e não entram na sequência. |
-| Inimigos | `imagens/zumbi_bateu_morreu.png`, `imagens/zumbi_atirador.png`, `imagens/zumbi_gigante.png` | Zumbi, arqueiro e gigante. |
+| Caminhada dos inimigos | `imagens/zumbi_corrida_atlas.png`, `imagens/arqueiro_corrida_atlas.png`, `imagens/gigante_corrida_atlas.png` | Oito poses por personagem, carregadas e isoladas uma vez. |
+| Inimigos originais | `imagens/zumbi_bateu_morreu.png`, `imagens/zumbi_atirador.png`, `imagens/zumbi_gigante.png` | Zumbi, arqueiro e gigante. |
 | Obstáculos e cura | `imagens/plataforma.png`, `imagens/bloco_musgo.jpeg`, `imagens/espinho.png`, `imagens/caixa.png`, `imagens/saude.png` | Texturas reutilizadas pelas entidades do mapa. |
 
 O catálogo calcula o retângulo dos pixels visíveis de cada quadro uma única vez. O desenho normaliza a altura, centraliza os pés na base da caixa física e espelha o sprite para a esquerda. A caixa de colisão continua independente: não muda ao trocar quadro, parar ou virar.
@@ -57,3 +58,11 @@ As fontes ficam em `Design/fonte`, incluindo `fonte_simas.ttf` e `sangue_escorre
 `Recursos/configuracao.h` concentra aceleração, freio, velocidade máxima, gravidade, impulso de salto e cadência da corrida. A configuração inicial usa 60 passos por segundo e dois passos por quadro, formando um ciclo de 27 quadros em 0,9 segundo. Alterações de cadência ou quantidade de quadros exigem revisar a compatibilidade do estado de animação persistido; não basta apenas trocar o número da constante.
 
 A altura desenhada acompanha a caixa física do jogador. Mudar imagens não deve alterar dimensões físicas, parâmetros de movimento ou resultados de colisão.
+
+## Origem das novas sequências
+
+Os três arquivos `*_corrida_atlas.png` foram gerados com a ferramenta de imagens da OpenAI para esta atualização. O pedido foi manter o personagem de referência, suas cores e acessórios, com oito poses de caminhada organizadas em quatro colunas e duas linhas, sem texto. O arqueiro recebeu uma edição adicional de espaçamento: personagens completos, incluindo arco e flechas, separados por margens generosas.
+
+`src/atlas.cpp` isola as oito maiores silhuetas e mantém as texturas em cache. Para exportações RGB com fundo neutro quadriculado, remove somente o fundo conectado às bordas durante a carga. O arquivo de imagem permanece intacto.
+
+Luigi não recebeu imagem gerada: `src/animacao_articulada.cpp` transforma uma malha sobre `luigiDireita.png`. A pose parada permanece original; braços e pernas alternam durante a caminhada, sem mudar a colisão.

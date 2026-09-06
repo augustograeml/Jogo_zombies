@@ -47,7 +47,7 @@ build/teste-fisica$(EXE): tests/fisica.cpp src/aabb.cpp Fisica/aabb.h
 build/teste-persistencia$(EXE): tests/persistencia_extra.cpp src/arquivo.cpp src/slots.cpp src/pontos.cpp Persistencia/slots.h Persistencia/pontos.h
 	@mkdir -p build
 	$(CXX) $(CXXFLAGS) tests/persistencia_extra.cpp src/arquivo.cpp src/slots.cpp src/pontos.cpp -o $@
-build/teste-logica$(EXE): tests/logica.cpp Logica/eventos.h Logica/comportamento.h Logica/sessao.h Logica/movimento.h Recursos/configuracao.h Estados/identificador.h
+build/teste-logica$(EXE): tests/logica.cpp Audio/sintese.h Logica/entrada.h Logica/eventos.h Logica/comportamento.h Logica/sessao.h Logica/movimento.h Recursos/configuracao.h Estados/identificador.h
 	@mkdir -p build
 	$(CXX) $(CXXFLAGS) $< -o $@
 build/novidades$(EXE): tests/novidades.cpp $(TEST_OBJECTS) $(HEADERS)
@@ -58,12 +58,14 @@ test-logica: build/teste-animacao$(EXE) build/teste-fisica$(EXE) build/teste-per
 	./build/teste-fisica$(EXE)
 	./build/teste-persistencia$(EXE)
 	./build/teste-logica$(EXE)
-test-integracao: build/testes$(EXE) build/novidades$(EXE) build/superficies$(EXE) build/animacao-integracao$(EXE) build/resultado-falha$(EXE)
+test-integracao: build/caminhada$(EXE) build/testes$(EXE) build/novidades$(EXE) build/superficies$(EXE) build/animacao-integracao$(EXE) build/resultado-falha$(EXE) build/menu-saves$(EXE)
 	./build/testes$(EXE)
 	./build/novidades$(EXE)
 	./build/superficies$(EXE)
 	./build/animacao-integracao$(EXE)
 	./build/resultado-falha$(EXE)
+	./build/menu-saves$(EXE)
+	./build/caminhada$(EXE)
 
 build/superficies$(EXE): tests/superficies.cpp $(TEST_OBJECTS) $(HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS) tests/superficies.cpp $(TEST_OBJECTS) $(LDLIBS) -o $@
@@ -71,4 +73,10 @@ build/superficies$(EXE): tests/superficies.cpp $(TEST_OBJECTS) $(HEADERS)
 build/animacao-integracao$(EXE): tests/animacao_integracao.cpp $(TEST_OBJECTS) $(HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS) $< $(TEST_OBJECTS) $(LDLIBS) -o $@
 build/resultado-falha$(EXE): tests/resultado_falha.cpp $(TEST_OBJECTS) $(HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS) $< $(TEST_OBJECTS) $(LDLIBS) -o $@
+
+build/menu-saves$(EXE): tests/menu_saves.cpp $(TEST_OBJECTS) $(HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS) $< $(TEST_OBJECTS) $(LDLIBS) -o $@
+
+build/caminhada$(EXE): tests/caminhada.cpp $(TEST_OBJECTS) $(HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS) $< $(TEST_OBJECTS) $(LDLIBS) -o $@

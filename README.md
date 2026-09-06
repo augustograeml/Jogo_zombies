@@ -55,13 +55,14 @@ O VS Code foi ajustado para compilar o projeto inteiro, em vez de apenas o arqui
 
 ## Controles e salvamento
 
-- Jogador 1: `W`, `A`, `S`, `D`; jogador 2: setas.
+- Solo: `WASD` ou setas; `W`, seta para cima ou espaço pulam.
+- Dupla: jogador 1 usa `WASD`; jogador 2 usa setas.
 - Ao soltar as teclas horizontais, o jogador desacelera até parar, inclusive nas plataformas de neve. Teclas opostas também freiam.
 - Menus: setas e `Enter`; `Esc` volta.
 - Durante o jogo: `Esc` pausa e salva. Perder o foco também pausa.
 - Na pausa: `Esc` continua; `S` repete o salvamento, útil após um erro de escrita.
 - Fechar normalmente a janela salva a partida. Ao abrir novamente, escolha **Continuar**.
-- Menu principal: `1`, `2`, `3` escolhem o slot de Novo Jogo/Continuar; `R` recupera a cópia anterior do slot selecionado.
+- Os saves aparecem somente em **Continuar**. Nessa tela, setas ou `1`, `2`, `3` selecionam; `Enter` carrega; `R` recupera a cópia anterior; `Esc` volta. Novo Jogo usa o slot selecionado.
 - Ranking: setas mudam a fase, `Tab` muda solo/dupla, `P` alterna tempo/pontos, `Enter` ou `Esc` volta ao menu.
 - Pausa: `M` silencia; `+`/`-` ajustam o volume. Preferências persistem em `preferencias.json`.
 
@@ -96,12 +97,13 @@ No Windows, o executável de testes é `build/testes.exe`; substitua a pasta tem
 
 ## Melhorias implementadas
 
-- Corrida de 27 quadros para o jogador 1, pose parada e direção independente da colisão. Luigi mantém a arte original.
-- Colisões por canto superior esquerdo, chão sem rebote e efeito de superfície aplicado uma vez por passo.
+- Corrida de 27 quadros para o jogador 1, pose parada e direção independente da colisão. Luigi caminha com articulação da arte original em C++; os três tipos de zumbi usam sequências de oito poses. A animação acompanha a simulação e é salva.
+- Colisões por canto superior esquerdo, chão sem rebote e efeito de superfície aplicado uma vez por passo. O gelo freia menos, mas permite parar.
+- Pisões após uma queda maior que 300 unidades (seis blocos de 50) causam dano dobrado; acima de 500, triplo. O bônus é consumido no impacto, e a altura acumulada também é salva.
 - Proteção de 45 passos (0,75 s) após dano, reação visual e cura limitada a 20 vidas.
 - Arqueiro detecta o jogador vivo mais próximo até 650 unidades (diferença vertical até 120), sinaliza por 30 passos e dispara; recarga de 100 passos. Sem alvo, patrulha. Zumbis e gigantes mantêm suas diferenças existentes.
 - Grade espacial de obstáculos com ordem determinística e reconsulta após deslocamento; apenas o desenho é descartado fora da câmera. Entidades e flechas fora da tela continuam simulando.
-- Eventos de salto, disparo, dano, coleta e vitória acionam sons sintetizados inteiramente em C++. Pausa interrompe sons; carregar não repete eventos antigos. Música de fundo não faz parte desta entrega.
+- Salto, disparo, dano no jogador, coleta, impacto no inimigo, morte do inimigo, vitória e derrota têm oito sons distintos sintetizados inteiramente em C++. Pausa interrompe sons; carregar não repete eventos antigos. Música de fundo não faz parte desta entrega.
 - Catálogo, legenda de mapas e parâmetros documentados em [Recursos/README.md](Recursos/README.md).
 
 ### Pontuação
@@ -128,4 +130,4 @@ O save guarda o total e os estados dos objetos consumidos/derrotados. Recarregar
 
 A validação executada nesta entrega é Linux com GCC 14 e SFML 2.6.2. O caminho de compilação Windows foi mantido, mas esta revisão não foi executada no Windows. O binário Windows antigo do repositório precisa ser recompilado.
 
-Os testes imprimem tempos de colisão/simulação/desenho e candidatos consultados; são medições locais, não promessa de FPS em outro computador. O teste compara snapshots com grade ligada/desligada. As extensões opcionais de música de fundo, autosave periódico e novas artes do Luigi não foram incluídas no escopo aprovado inicialmente.
+Os testes imprimem tempos de colisão/simulação/desenho e candidatos consultados; são medições locais, não promessa de FPS em outro computador. O teste compara snapshots com grade ligada/desligada. Música de fundo e autosave periódico continuam como possibilidades futuras. Luigi usa a imagem existente articulada, sem uma nova folha de sprites. O plano local atualizado está em `PLANO_MELHORIAS_JOGO.md`, ignorado pelo Git.
