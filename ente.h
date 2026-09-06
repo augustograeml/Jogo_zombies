@@ -19,5 +19,5 @@ class Ente
         virtual ~Ente();
         virtual void executar() = 0;
         sf::RectangleShape* get_corpo();
-        void desenhar();
+        virtual void desenhar();
 };

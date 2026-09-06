@@ -2,6 +2,7 @@
 namespace Persistencia { class Serializador; }
 #include <SFML/Graphics.hpp>
 #include "personagem.h"
+#include "../../Animacao/corrida.h"
 #include "../../Gerenciadores/gerenciador_estados.h"
 
 namespace Entidades
@@ -17,6 +18,7 @@ namespace Entidades
             float poder;
             std::string nome;
             double tempo;
+            Animacao::Corrida animacao;
 
 
         public:
@@ -25,6 +27,9 @@ namespace Entidades
 
             void atualizar();
             void executar();
+            void desenhar() override;
+            const Animacao::Estado& get_animacao() const { return animacao.obter(); }
+            void restaurar_animacao(Animacao::Estado salvo) { animacao.restaurar(salvo); }
             void colidir(Entidade* pE, int a);
 
             void set_tempo(double x) {tempo = x;}

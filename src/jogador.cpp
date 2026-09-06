@@ -1,7 +1,10 @@
+#include "../Logica/movimento.h"
 #include <algorithm>
 #include <cmath>
 #include "../Persistencia/entidades.h"
 #include "../Entidades/Personagens/jogador.h"
+#include "../Recursos/catalogo.h"
+#include "../Recursos/configuracao.h"
 #include <iostream>
 #include <SFML/Graphics.hpp>
 
@@ -20,12 +23,14 @@ namespace Entidades
             if (!jog2)
             {
                 corpo.setFillColor(sf::Color::Green);
-                this->setSkin("Design/imagens/op1.png");
+                Textura = Recursos::corrida().front().textura;
+                corpo.setTexture(Textura.get());
             }
             else
             {
                 corpo.setFillColor(sf::Color::Green);
-                this->setSkin("Design/imagens/luigiDireita.png");
+                Textura = Recursos::textura("imagens/luigiDireita.png");
+                corpo.setTexture(Textura.get());
             }
            tempo = 0.0;
            nome = jog2 ? "Jogador 2" : "Jogador 1";
@@ -38,6 +43,27 @@ namespace Entidades
         void Jogador::atualizar()
         {
             corpo.setPosition(corpo.getPosition() + velocidade);
+        }
+
+        void Jogador::desenhar()
+        {
+            // O sprite tem transformacao propria: trocar arte nunca altera a colisao.
+            const auto& estado = animacao.obter();
+            sf::Sprite visual;
+            if (!jogador2) {
+                const auto& quadro = Recursos::corrida().at(estado.correndo ? estado.quadro : 9);
+                visual.setTexture(*quadro.textura);
+                visual.setTextureRect(quadro.regiao);
+            } else visual.setTexture(*Textura);
+            const auto area = visual.getLocalBounds();
+            const auto caixa = corpo.getGlobalBounds();
+            const float escala = caixa.height / area.height;
+            visual.setOrigin(area.width / 2.f, area.height);
+            visual.setScale(estado.direita ? escala : -escala, escala);
+            visual.setPosition(caixa.left + caixa.width / 2.f, caixa.top + caixa.height);
+            // Preserva a sinalizacao existente de saude; a geometria continua independente.
+            visual.setColor(get_protecao() && (get_protecao()/5)%2 ? sf::Color(255,100,100,130) : sf::Color::White);
+            pGG->get_Janela()->draw(visual);
         }
 
         void Jogador::executar()
@@ -102,22 +128,12 @@ namespace Entidades
 
         void Jogador::mover_com_controles(bool esquerda, bool direita, bool pular, bool descer)
         {
-            constexpr float aceleracao = 0.1f, freio = 0.2f, limite = 4.f;
-            const int sentido = static_cast<int>(direita) - static_cast<int>(esquerda);
-            if (sentido) velocidade.x = std::clamp(velocidade.x + sentido * aceleracao, -limite, limite);
-            else {
-                // Freio finito: atinge zero, sem deslizar indefinidamente.
-                velocidade.x = std::clamp(velocidade.x, -limite, limite);
-                if (std::abs(velocidade.x) <= freio) velocidade.x = 0;
-                else velocidade.x += velocidade.x > 0 ? -freio : freio;
-            }
-            if (!nochao) velocidade.y += 0.1f;
-            else velocidade.y = 0;
-            if (pular && nochao) velocidade.y = -6.f;
-            if (descer) velocidade.y += 0.1f;
+            const auto nova=Logica::mover({velocidade.x,velocidade.y},nochao,esquerda,direita,pular,descer);
+            velocidade={nova.x,nova.y};
             nochao = false;
             leu_fase = true;
             atualizar();
+            animacao.avancar(velocidade.x);
         }
 
         void Jogador::salvar(std::ostringstream* entrada)
