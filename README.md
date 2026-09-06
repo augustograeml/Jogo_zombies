@@ -56,6 +56,7 @@ O VS Code foi ajustado para compilar o projeto inteiro, em vez de apenas o arqui
 ## Controles e salvamento
 
 - Jogador 1: `W`, `A`, `S`, `D`; jogador 2: setas.
+- Ao soltar as teclas horizontais, o jogador desacelera até parar, inclusive nas plataformas de neve. Teclas opostas também freiam.
 - Menus: setas e `Enter`; `Esc` volta.
 - Durante o jogo: `Esc` pausa e salva. Perder o foco também pausa.
 - Na pausa: `Esc` continua; `S` repete o salvamento, útil após um erro de escrita.
@@ -63,6 +64,10 @@ O VS Code foi ajustado para compilar o projeto inteiro, em vez de apenas o arqui
 - Ranking: setas mudam a fase, `Tab` muda solo/dupla, `Enter` ou `Esc` volta ao menu.
 
 O arquivo `partida.json` mantém um slot completo, incluindo flechas em voo. Um novo jogo substitui esse slot. Os arquivos antigos de partida são preservados, mas não permitem reconstruir os estados ausentes; inicie uma partida nesta versão para usar a retomada completa.
+
+O painel superior mostra o tempo da partida e o menor tempo de conclusão da fase/modalidade atual, com o nome do recordista. O cronômetro começa em zero em **Novo Jogo**, para durante a pausa e é preservado ao continuar. No avanço automático para a fase 2, mantém o tempo total da partida; o ranking continua medindo cada fase separadamente.
+
+O jogo pede o nome de cada participante tanto na vitória quanto na derrota. Os nomes da derrota são salvos, mas apenas fases concluídas entram no ranking de tempos. Se fechar antes de confirmar os nomes, **Continuar** recupera a tela pendente, também após uma derrota.
 
 ## Testes em C++
 

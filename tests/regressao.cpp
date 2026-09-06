@@ -167,6 +167,84 @@ void ranking() {
 sf::Event tecla(sf::Keyboard::Key codigo) {
     sf::Event evento{}; evento.type = sf::Event::KeyPressed; evento.key.code = codigo; return evento;
 }
+void movimento_e_tempo() {
+    for (bool segundo : {false, true}) {
+        Entidades::Personagens::Jogador jogador({100, 100}, {0, 0}, segundo);
+        for (int i = 0; i < 120; ++i) {
+            jogador.set_nochao(true);
+            jogador.mover_com_controles(false, true, false, false);
+        }
+        exigir(jogador.getVelocidade().x == 4, "Movimento tem limite de velocidade");
+        Entidades::Obstaculos::Neve neve({0, 0});
+        for (int i = 0; i < 40; ++i) {
+            jogador.set_nochao(true);
+            jogador.mover_com_controles(false, false, false, false);
+            neve.escorregar(&jogador);
+        }
+        exigir(jogador.getVelocidade().x == 0, "Soltar teclas permite parar inclusive na neve");
+        const auto parado = jogador.getPosicao();
+        for (int i = 0; i < 60; ++i) {
+            jogador.set_nochao(true);
+            jogador.mover_com_controles(false, false, false, false);
+        }
+        exigir(jogador.getPosicao() == parado, "Jogador permanece parado sem entrada");
+        jogador.setVelocidade({-3, 0});
+        for (int i = 0; i < 30; ++i) {
+            jogador.set_nochao(true);
+            jogador.mover_com_controles(true, true, false, false);
+        }
+        exigir(jogador.getVelocidade().x == 0, "Teclas opostas freiam sem favorecer um lado");
+        jogador.set_nochao(true); jogador.mover_com_controles(false, false, true, false);
+        exigir(jogador.getVelocidade().y == -6, "Pulo continua funcionando");
+    }
+    auto fase = criar(6, false);
+    exigir(fase->get_tempo_sessao() == 0, "Novo jogo inicia cronometro zerado");
+    auto dados = cenario_de_teste(*fase); dados["passos"] = 0;
+    fase->restaurar(dados); fase->simular_passo();
+    exigir(fase->get_tempo_sessao() == 1.0 / 60, "Cronometro acompanha simulacao");
+    fase->continuar_sessao(600);
+    auto retomada = criar(6, true); retomada->restaurar(fase->capturar());
+    exigir(retomada->get_tempo_sessao() == 601.0 / 60, "Cronometro total e restaurado");
+    auto novo = criar(6, false);
+    exigir(novo->get_tempo_sessao() == 0, "Outra partida nao herda o tempo anterior");
+    auto anterior = fase->capturar(); anterior.erase("passos_anteriores"); anterior.erase("nomes_confirmados");
+    retomada->restaurar(anterior);
+    exigir(retomada->get_tempo_sessao() == retomada->get_tempo(), "Saves da versao anterior ainda carregam");
+    exigir(Interface::formatar_tempo(0) == "00:00.00" && Interface::formatar_tempo(65.5) == "01:05.50",
+           "Painel formata minutos, segundos e centesimos");
+}
+void derrota_com_nome() {
+    auto* ge = Gerenciadores::Gerenciador_Estados::get_instancia();
+    for (int id : {6, 9}) {
+        ge->set_estado_atual(0);
+        auto fase = criar(id, false); auto dados = cenario_de_teste(*fase);
+        for (auto& jogador : dados["jogadores"]) jogador["vida"] = 0;
+        fase->restaurar(dados); ge->adicionar_estado(fase.get()); fase.release(); ge->set_estado_atual(id);
+        auto* ativa = static_cast<Fase*>(ge->get_estado(id)); ativa->simular_passo();
+        exigir(ge->get_estado_atual() == 10 && !ativa->get_vitoria(), "Derrota pede o nome em ambos os modos");
+        ge->set_estado_atual(0); ge->deleta_estados(id); ge->set_fase(-1);
+        static_cast<Estados::Menus::Menu_Principal*>(ge->get_estado(0))->fase_salva();
+        exigir(ge->get_estado_atual() == 10, "Nome pendente da derrota sobrevive ao fechamento");
+        auto* gg = Gerenciadores::Gerenciador_Grafico::get_instancia();
+        gg->limpar(); ge->get_estado(10)->executar(); gg->mostrar();
+        sf::Texture imagem; imagem.create(gg->get_Janela()->getSize().x, gg->get_Janela()->getSize().y);
+        imagem.update(*gg->get_Janela()); imagem.copyToImage().saveToFile("derrota-verificada.png");
+        const auto antes = Persistencia::ler_json("ranking.json");
+        sf::Event letra{}; letra.type = sf::Event::TextEntered; letra.text.unicode = 'Z';
+        const int quantidade = id == 9 ? 2 : 1;
+        for (int i = 0; i < quantidade; ++i) {
+            ge->get_estado(10)->tratar_evento(letra);
+            ge->get_estado(10)->tratar_evento(tecla(sf::Keyboard::Enter));
+            if (i + 1 < quantidade) exigir(ge->get_estado_atual() == 10, "Derrota em dupla pede os dois nomes");
+        }
+        exigir(ge->get_estado_atual() == 0, "Derrota volta ao menu apos os nomes");
+        const auto salvo = Persistencia::ler_json("partida.json");
+        exigir(salvo["nomes_confirmados"] == true && salvo["ranking_registrado"] == false,
+               "Nome da derrota e salvo separadamente do ranking");
+        for (const auto& jogador : salvo["jogadores"]) exigir(jogador["extra"]["nome"] == "Z", "Nome da derrota persistido");
+        exigir(Persistencia::ler_json("ranking.json") == antes, "Derrota nao entra como tempo de conclusao");
+    }
+}
 void fluxos() {
     auto* ge = Gerenciadores::Gerenciador_Estados::get_instancia();
     auto* menu = static_cast<Estados::Menus::Menu_Principal*>(ge->get_estado(0));
@@ -212,7 +290,10 @@ void fluxos() {
     sf::Texture imagem; imagem.create(gg->get_Janela()->getSize().x, gg->get_Janela()->getSize().y);
     imagem.update(*gg->get_Janela()); imagem.copyToImage().saveToFile("ranking-verificado.png");
 
+    derrota_com_nome();
+
     // A fase 1 cooperativa registra os dois nomes e mantem o avanco original.
+    Persistencia::RepositorioRanking().registrar({"recorde-painel", 2, 2, {"Ana", "Bia"}, 12.5});
     ge->set_estado_atual(0);
     auto dupla = criar(7, false); auto fim_dupla = cenario_de_teste(*dupla);
     for (auto& inimigo : fim_dupla["inimigos"]) {
@@ -221,14 +302,19 @@ void fluxos() {
     }
     dupla->restaurar(fim_dupla); ge->adicionar_estado(dupla.get()); dupla.release(); ge->set_estado_atual(7);
     static_cast<Fase*>(ge->get_estado(7))->simular_passo();
+    const auto tempo_primeira_fase = static_cast<Fase*>(ge->get_estado(7))->get_passos_sessao();
     ge->get_estado(10)->tratar_evento(letra); ge->get_estado(10)->tratar_evento(tecla(sf::Keyboard::Enter));
     exigir(ge->get_estado_atual() == 10, "Dupla exige o segundo nome");
     letra.text.unicode = 'B'; ge->get_estado(10)->tratar_evento(letra);
     ge->get_estado(10)->tratar_evento(tecla(sf::Keyboard::Enter));
     exigir(ge->get_estado_atual() == 9 && ge->get_fase() == 9, "Dupla avanca para fase 2 corretamente");
+    exigir(static_cast<Fase*>(ge->get_estado(9))->get_passos_sessao() == tempo_primeira_fase,
+           "Troca automatica de fase preserva tempo total da partida");
     exigir(Persistencia::RepositorioRanking().consultar(1, 2).size() == 1, "Dupla registra um resultado de equipe");
 
     ge->get_estado(9)->executar(); gg->mostrar();
+    exigir(gg->get_Janela()->getView().getViewport().top > 0,
+           "Painel reserva espaco sem esconder os jogadores");
     imagem.update(*gg->get_Janela()); imagem.copyToImage().saveToFile("fase-verificada.png");
     fs::create_directory("partida.json.tmp");
     auto* eventos = Gerenciadores::Gerenciador_Eventos::get_instancia();
@@ -268,7 +354,7 @@ int main(int argc, char** argv) {
             exigir(fase->capturar() == Persistencia::ler_json("esperado.json"), "Continuacao em processo novo deve ser identica");
             std::cout << "Retomada em processo novo: todos os estados identicos apos 80 passos.\n";
         } else {
-            persistencia(); ranking(); fluxos();
+            persistencia(); ranking(); movimento_e_tempo(); fluxos();
             std::cout << verificacoes << " verificacoes aprovadas. Artefatos: " << pasta << '\n';
         }
         delete Gerenciadores::Gerenciador_Estados::get_instancia();

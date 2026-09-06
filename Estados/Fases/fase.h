@@ -14,6 +14,7 @@
 #include "../../Persistencia/arquivo.h"
 #include <cstdint>
 #include <random>
+#include "../../Interface/painel.h"
 
 namespace Estados::Fases {
 class Fase : public Ente, public Estado {
@@ -27,10 +28,13 @@ protected:
     int num_jogadores;
     sf::Clock relogio;
     std::uint64_t passos = 0;
+    std::uint64_t passos_anteriores = 0;
     double acumulador = 0;
     bool finalizada = false;
     bool vitoria = false;
     bool ranking_registrado = false;
+    bool nomes_confirmados = false;
+    Interface::PainelPartida painel;
     std::string partida_id;
     std::mt19937 motor_fase;
     void executar_comum();
@@ -47,9 +51,13 @@ public:
     bool get_finalizada() const { return finalizada; }
     bool get_vitoria() const { return vitoria; }
     bool get_ranking_registrado() const { return ranking_registrado; }
+    bool get_nomes_confirmados() const { return nomes_confirmados; }
     int get_num_jogadores() const { return num_jogadores; }
     int get_numero_fase() const { return Estado::id < 8 ? 1 : 2; }
     double get_tempo() const { return static_cast<double>(passos) / 60.0; }
+    std::uint64_t get_passos_sessao() const { return passos_anteriores + passos; }
+    double get_tempo_sessao() const { return static_cast<double>(get_passos_sessao()) / 60.0; }
+    void continuar_sessao(std::uint64_t anteriores) { passos_anteriores = anteriores; }
     void set_tempo_jogadores();
     void salvar(const std::filesystem::path& caminho = "partida.json");
     Persistencia::Json capturar();

@@ -33,7 +33,7 @@ void Menu_Principal::fase_salva() {
     if (estado < 8) fase = std::make_unique<Fases::Fase1>(estado, true);
     else fase = std::make_unique<Fases::Fase2>(estado, true);
     fase->restaurar(dados);
-    if (fase->get_finalizada() && (!fase->get_vitoria() || fase->get_ranking_registrado())) {
+    if (fase->get_finalizada() && fase->get_nomes_confirmados()) {
         pGE->mensagem = "Esta partida terminou. Escolha Novo Jogo.";
         return;
     }
@@ -47,7 +47,7 @@ void Menu_Principal::selecionar() {
     else if (pos == 2) {
         auto* fase = dynamic_cast<Fases::Fase*>(pGE->get_estado(pGE->get_fase()));
         if (fase && !fase->get_finalizada()) pGE->set_estado_atual(pGE->get_fase());
-        else if (fase && fase->get_vitoria() && !fase->get_ranking_registrado()) pGE->set_estado_atual(10);
+        else if (fase && fase->get_finalizada() && !fase->get_nomes_confirmados()) pGE->set_estado_atual(10);
         else fase_salva();
     } else if (pos == 3) pGE->set_estado_atual(4);
     else if (pos == 4 && pGE->salvar_partida()) pGG->fecharJanela();

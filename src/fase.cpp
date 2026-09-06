@@ -85,6 +85,7 @@ void Fase::criar_cenario(std::string caminho) {
     }
 }
 void Fase::ao_entrar() {
+    painel.atualizar_recorde(get_numero_fase(), num_jogadores);
     relogio.restart(); // Descarta tempo no menu, em pausa e fora do processo.
     atualizar();
 }
@@ -124,6 +125,7 @@ void Fase::executar_comum() {
         auto* projeteis = static_cast<Entidades::Personagens::Inimigo*>(*it)->get_projeteis();
         if (projeteis) for (auto& p : *projeteis) if (p.get_vivo()) p.desenhar();
     }
+    painel.desenhar(*pGG->get_Janela(), get_tempo_sessao());
 }
 void Fase::atualizar() {
     sf::Vector2f centro(0, 0);
@@ -132,6 +134,14 @@ void Fase::atualizar() {
         if ((*it)->get_vivo()) { centro += (*it)->getPosicao(); ++vivos; }
     }
     if (vivos) pGG->centralizarCamera(centro / static_cast<float>(vivos));
+    // Reserva uma faixa para o painel sem cobrir o jogador na plataforma inicial.
+    auto* janela = pGG->get_Janela();
+    auto camera = janela->getView();
+    const auto tamanho = janela->getDefaultView().getSize();
+    constexpr float altura_painel = 100;
+    camera.setSize(tamanho.x, tamanho.y - altura_painel);
+    camera.setViewport({0, altura_painel / tamanho.y, 1, 1 - altura_painel / tamanho.y});
+    janela->setView(camera);
 }
 void Fase::set_tempo_jogadores() {
     for (auto it = jogadores.get_primeiro(); it != nullptr; ++it)
@@ -145,16 +155,17 @@ void Fase::concluir(bool venceu) {
     set_tempo_jogadores();
     try { salvar(); }
     catch (const std::exception& erro) { pGE->mensagem = std::string("Falha ao salvar resultado: ") + erro.what(); }
-    pGE->set_estado_atual(venceu ? 10 : 0);
-    if (!venceu) pGE->mensagem = "Fim de jogo. Escolha Novo Jogo para tentar novamente.";
+    pGE->set_estado_atual(10);
 }
 Json Fase::capturar() {
     std::ostringstream aleatorio;
     aleatorio << motor_fase;
     return {{"formato", "zombies-partida"}, {"versao", 1}, {"estado", Estado::id},
             {"fase", get_numero_fase()}, {"numero_jogadores", num_jogadores},
-            {"passos", passos}, {"acumulador", acumulador}, {"partida_id", partida_id},
+            {"passos", passos}, {"passos_anteriores", passos_anteriores},
+            {"acumulador", acumulador}, {"partida_id", partida_id},
             {"finalizada", finalizada}, {"vitoria", vitoria}, {"ranking_registrado", ranking_registrado},
+            {"nomes_confirmados", nomes_confirmados},
             {"aleatorio", aleatorio.str()},
             {"jogadores", salvar_lista(jogadores)}, {"inimigos", salvar_lista(inimigos)},
             {"obstaculos", salvar_lista(obstaculos)}};
@@ -170,13 +181,18 @@ void Fase::restaurar(const Json& j) {
             throw std::runtime_error("Salvamento incompativel com esta fase.");
         if (!j.at("passos").is_number_integer()) throw std::runtime_error("Tempo de partida invalido.");
         auto novos_passos = static_cast<std::uint64_t>(Persistencia::numero(j.at("passos"), 0, 6e13));
+        const auto anteriores = j.value("passos_anteriores", Json(0));
+        if (!anteriores.is_number_integer()) throw std::runtime_error("Tempo anterior invalido.");
+        const auto novos_anteriores = static_cast<std::uint64_t>(Persistencia::numero(anteriores, 0, 6e13));
         double novo_acumulador = Persistencia::numero(j.at("acumulador"), 0, 0.25);
         auto novo_id = j.at("partida_id").get<std::string>();
         if (novo_id.empty() || novo_id.size() > 128) throw std::runtime_error("Identificador de partida invalido.");
         const bool terminou = j.at("finalizada").get<bool>();
         const bool venceu = j.at("vitoria").get<bool>();
         const bool registrado = j.at("ranking_registrado").get<bool>();
-        if ((venceu && !terminou) || (registrado && !venceu)) throw std::runtime_error("Resultado inconsistente.");
+        const bool confirmados = j.value("nomes_confirmados", registrado);
+        if ((venceu && !terminou) || (registrado && (!venceu || !confirmados)) || (confirmados && !terminou))
+            throw std::runtime_error("Resultado inconsistente.");
         auto novo_motor = Persistencia::ler_motor(j.at("aleatorio").get<std::string>());
         Listas::ListaEntidade novos_jogadores, novos_inimigos, novos_obstaculos;
         carregar_lista(j.at("jogadores"), novos_jogadores, 0);
@@ -192,26 +208,36 @@ void Fase::restaurar(const Json& j) {
         inimigos.trocar(novos_inimigos);
         obstaculos.trocar(novos_obstaculos);
         passos = novos_passos;
+        passos_anteriores = novos_anteriores;
         acumulador = novo_acumulador;
         partida_id = std::move(novo_id);
         finalizada = terminou;
         vitoria = venceu;
         ranking_registrado = registrado;
+        nomes_confirmados = confirmados;
         Persistencia::motor() = novo_motor;
         motor_fase = novo_motor;
         relogio.restart();
     } catch (...) { Persistencia::motor() = motor_anterior; throw; }
 }
 bool Fase::registrar_resultado(const std::vector<std::string>& nomes) {
-    if (!finalizada || !vitoria) throw std::runtime_error("A fase ainda nao foi vencida.");
-    if (ranking_registrado) { salvar(); return true; }
-    Persistencia::RepositorioRanking().registrar({partida_id, get_numero_fase(), num_jogadores, nomes, get_tempo()});
-    ranking_registrado = true;
+    if (!finalizada) throw std::runtime_error("A partida ainda nao terminou.");
+    if (nomes_confirmados) { salvar(); return ranking_registrado; }
+    if (nomes.size() != static_cast<std::size_t>(num_jogadores))
+        throw std::runtime_error("Informe o nome de cada jogador.");
+    std::vector<std::string> validados;
+    for (const auto& nome : nomes) validados.push_back(Persistencia::nome_valido(nome));
+    // Derrotas recebem nome, mas nao competem com tempos de fases concluidas.
+    if (vitoria) {
+        Persistencia::RepositorioRanking().registrar({partida_id, get_numero_fase(), num_jogadores, validados, get_tempo()});
+        ranking_registrado = true;
+    }
     for (auto it = jogadores.get_primeiro(); it != nullptr; ++it) {
         auto* jogador = static_cast<Entidades::Personagens::Jogador*>(*it);
-        jogador->set_nome(nomes.at(jogador->eh_jogador2() ? 1 : 0));
+        jogador->set_nome(validados.at(jogador->eh_jogador2() ? 1 : 0));
     }
+    nomes_confirmados = true;
     salvar();
-    return true;
+    return ranking_registrado;
 }
 }

@@ -24,12 +24,16 @@ void Nome::selecionar() {
     fase->registrar_resultado(nomes);
     pGE->mensagem.clear();
     // Preserva o avanco da fase 1 para a fase 2 no modo cooperativo original.
-    if (fase->get_numero_fase() == 1 && quantidade == 2) {
+    if (fase->get_vitoria() && fase->get_numero_fase() == 1 && quantidade == 2) {
         auto proxima = std::make_unique<Fases::Fase2>(9, false);
+        proxima->continuar_sessao(fase->get_passos_sessao());
         proxima->salvar();
         pGE->adicionar_estado(proxima.get()); proxima.release();
         pGE->set_estado_atual(9);
-    } else pGE->set_estado_atual(4);
+    } else {
+        pGE->set_estado_atual(fase->get_vitoria() ? 4 : 0);
+        if (!fase->get_vitoria()) pGE->mensagem = "Nome salvo. Conclua uma fase para entrar no ranking.";
+    }
 }
 void Nome::tratar_evento(const sf::Event& evento) {
     if (evento.type == sf::Event::TextEntered) {
@@ -46,20 +50,25 @@ void Nome::tratar_evento(const sf::Event& evento) {
 }
 void Nome::executar() {
     pGG->resetarCamera(); pGG->desenharTextura(imagem);
-    sf::Text titulo("Fase concluida!", *fonte, 45);
+    auto* fase = dynamic_cast<Fases::Fase*>(pGE->get_estado(pGE->get_fase()));
+    const bool venceu = fase && fase->get_vitoria();
+    sf::Text titulo(venceu ? "Fase concluida!" : "Fim de jogo", *fonte, 45);
     titulo.setPosition(130, 160);
     sf::Text instrucao("Nome do jogador " + std::to_string(std::min(static_cast<int>(nomes.size()) + 1, quantidade)) +
                        " (Enter confirma)", *fonte, 26);
     instrucao.setPosition(130, 320);
     sf::Text campo(entrada + "_", *fonte, 32); campo.setPosition(150, 480);
+    sf::Text resultado(venceu ? "Registre seu tempo no ranking." : "Conclua a fase para disputar o ranking.", *fonte, 20);
+    resultado.setPosition(130, 250);
     sf::Text ajuda("Esc: menu | Continuar recupera o resultado pendente", *fonte, 20);
     ajuda.setPosition(130, 650);
-    for (auto* texto : {&instrucao, &campo, &ajuda}) {
+    for (auto* texto : {&instrucao, &campo, &ajuda, &resultado}) {
         const float largura = texto->getLocalBounds().width;
         if (largura > 770) texto->setScale(770 / largura, 770 / largura);
         texto->setOutlineColor(sf::Color::Black); texto->setOutlineThickness(2);
     }
     pGG->get_Janela()->draw(titulo); pGG->get_Janela()->draw(instrucao);
+    pGG->get_Janela()->draw(resultado);
     pGG->get_Janela()->draw(campo); pGG->get_Janela()->draw(ajuda);
 }
 }

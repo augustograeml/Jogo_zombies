@@ -38,6 +38,8 @@ namespace Entidades
 
             void mover();
             void mover_jog2();
+            // Entrada separada da leitura do teclado para ambos os jogadores.
+            void mover_com_controles(bool esquerda, bool direita, bool pular, bool descer);
             void atacar(Entidade* jg);
             void salvar(std::ostringstream* entrada);
            

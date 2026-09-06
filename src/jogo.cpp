@@ -32,9 +32,10 @@ void Jogo::Executar() {
             pG->get_Janela()->setView(pG->get_Janela()->getDefaultView());
             sf::RectangleShape fundo({1004, 70});
             fundo.setFillColor(sf::Color(0, 0, 0, 220));
-            fundo.setPosition(10, 10);
+            const float y = pE->get_estado_atual() >= 6 && pE->get_estado_atual() <= 9 ? 110.f : 10.f;
+            fundo.setPosition(10, y);
             sf::Text aviso(pE->mensagem, fonte, 18);
-            aviso.setPosition(20, 20);
+            aviso.setPosition(20, y + 10);
             const float largura = aviso.getLocalBounds().width;
             if (largura > 980) aviso.setScale(980 / largura, 980 / largura);
             pG->get_Janela()->draw(fundo);
