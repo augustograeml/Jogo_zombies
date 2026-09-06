@@ -25,7 +25,7 @@ void Menu_Principal::inicializa_valores() {
     textos[0].setOutlineThickness(20);
     textos[1].setOutlineThickness(4);
 }
-void Menu_Principal::ao_entrar() { pGG->resetarCamera(); escolhendo_partida=false; }
+void Menu_Principal::ao_entrar() { pGG->resetarCamera(); escolhendo_partida=false; escolhendo_destino=false; confirmando_substituicao=false; }
 void Menu_Principal::atualizar_slots() {
     resumos.clear();
     for (const auto& r : Persistencia::Slots::instancia().listar()) {
@@ -33,18 +33,18 @@ void Menu_Principal::atualizar_slots() {
         if (r.valido) t += "Fase " + std::to_string(r.fase) + (r.jogadores==2?" Dupla ":" Solo ") +
             Interface::formatar_tempo(r.segundos) + (r.finalizada?" - encerrada":"");
         else t += r.existe ? "arquivo invalido" : "vazio";
-        if (r.backup_disponivel) t += " [R: recuperar anterior]";
+        if (r.backup_disponivel) t += escolhendo_destino ? " [copia anterior]" : " [R: recuperar anterior]";
         resumos.push_back(t);
     }
 }
 void Menu_Principal::executar() {
-    if (!escolhendo_partida) { mostrar_menu(); return; }
+    if (!escolhendo_partida && !escolhendo_destino) { mostrar_menu(); return; }
     pGG->resetarCamera(); pGG->desenharTextura(imagem);
     auto* janela=pGG->get_Janela();
     sf::RectangleShape fundo({920,580}); fundo.setPosition(52,225); fundo.setFillColor({8,15,23,245}); janela->draw(fundo);
-    sf::Text titulo("Continuar jogo",fonte_slots,34); titulo.setPosition(95,260); janela->draw(titulo);
+    sf::Text titulo(escolhendo_destino?"Novo jogo: escolher destino":"Continuar jogo",fonte_slots,34); titulo.setPosition(95,260); janela->draw(titulo);
     for (std::size_t i=0;i<resumos.size();++i) {
-        const bool atual=static_cast<int>(i+1)==Persistencia::Slots::instancia().selecionado();
+        const bool atual=static_cast<int>(i+1)==(escolhendo_destino?destino_novo:Persistencia::Slots::instancia().selecionado());
         sf::RectangleShape cartao({840,82}); cartao.setPosition(92,350+100*i);
         cartao.setFillColor(atual?sf::Color(29,75,71):sf::Color(27,35,45)); janela->draw(cartao);
         sf::Text t(resumos[i],fonte_slots,18); t.setPosition(110,376+100*i);
@@ -52,7 +52,11 @@ void Menu_Principal::executar() {
         if(t.getLocalBounds().width>800) t.setScale(800/t.getLocalBounds().width,1);
         janela->draw(t);
     }
-    sf::Text ajuda("Setas ou 1/2/3: escolher | Enter: continuar\nR: recuperar anterior | Esc: voltar",fonte_slots,18);
+    const std::string instrucoes = escolhendo_destino
+        ? (confirmando_substituicao ? "Substituir a partida do slot " + std::to_string(destino_novo) + "?\nEnter ou clique novamente: confirmar | Esc: cancelar\nA partida anterior ficara na copia de recuperacao."
+           : "Setas ou 1/2/3: escolher | Enter: usar este slot\nEsc: voltar sem iniciar uma partida")
+        : "Setas ou 1/2/3: escolher | Enter: continuar\nR: recuperar anterior | Esc: voltar";
+    sf::Text ajuda(instrucoes,fonte_slots,18);
     ajuda.setPosition(95,690); janela->draw(ajuda);
 }
 void Menu_Principal::escolher_slot(int numero) {
@@ -63,7 +67,7 @@ void Menu_Principal::escolher_slot(int numero) {
     pGE->mensagem.clear();
 }
 void Menu_Principal::tratar_evento(const sf::Event& e) {
-    if (!escolhendo_partida) {
+    if (!escolhendo_partida && !escolhendo_destino) {
         if(e.type==sf::Event::MouseButtonReleased && e.mouseButton.button==sf::Mouse::Left) {
             const auto ponto=pGG->get_Janela()->mapPixelToCoords({e.mouseButton.x,e.mouseButton.y},pGG->get_Janela()->getDefaultView());
             for(std::size_t i=1;i<textos.size();++i) if(textos[i].getGlobalBounds().contains(ponto)) {
@@ -72,6 +76,28 @@ void Menu_Principal::tratar_evento(const sf::Event& e) {
             }
         }
         Menu::tratar_evento(e); return;
+    }
+    if (escolhendo_destino) {
+        if (e.type==sf::Event::MouseButtonReleased && e.mouseButton.button==sf::Mouse::Left) {
+            const auto ponto=pGG->get_Janela()->mapPixelToCoords({e.mouseButton.x,e.mouseButton.y},pGG->get_Janela()->getDefaultView());
+            for (int i=0;i<3;++i) if (sf::FloatRect(92,350+100*i,840,82).contains(ponto)) {
+                if (destino_novo!=i+1) confirmando_substituicao=false;
+                destino_novo=i+1; iniciar_novo(); return;
+            }
+        }
+        if (e.type!=sf::Event::KeyPressed) return;
+        if (e.key.code==sf::Keyboard::Escape) {
+            if (confirmando_substituicao) confirmando_substituicao=false;
+            else escolhendo_destino=false;
+            pGE->mensagem.clear(); return;
+        }
+        if (e.key.code==sf::Keyboard::Enter) { iniciar_novo(); return; }
+        int numero=destino_novo;
+        if (e.key.code>=sf::Keyboard::Num1 && e.key.code<=sf::Keyboard::Num3) numero=e.key.code-sf::Keyboard::Num1+1;
+        else if (e.key.code==sf::Keyboard::Up) numero=numero==1?3:numero-1;
+        else if (e.key.code==sf::Keyboard::Down) numero=numero==3?1:numero+1;
+        if (numero!=destino_novo) { destino_novo=numero; confirmando_substituicao=false; pGE->mensagem.clear(); }
+        return;
     }
     if(e.type==sf::Event::MouseButtonReleased && e.mouseButton.button==sf::Mouse::Left) {
         const auto ponto=pGG->get_Janela()->mapPixelToCoords({e.mouseButton.x,e.mouseButton.y},pGG->get_Janela()->getDefaultView());
@@ -91,6 +117,22 @@ void Menu_Principal::tratar_evento(const sf::Event& e) {
         Persistencia::Slots::instancia().recuperar(); pGE->set_fase(-1);
         pGE->mensagem="Checkpoint anterior recuperado. Enter para continuar."; atualizar_slots();
     }
+}
+void Menu_Principal::iniciar_novo() {
+    auto& slots=Persistencia::Slots::instancia();
+    const auto resumo=slots.listar().at(destino_novo-1);
+    if (resumo.existe && !resumo.valido) {
+        pGE->mensagem="Slot invalido. Recupere-o em Continuar ou escolha outro destino.";
+        return;
+    }
+    if ((resumo.existe || resumo.backup_disponivel) && !confirmando_substituicao) {
+        confirmando_substituicao=true; return;
+    }
+    // A escolha nao grava nem remove arquivos. O primeiro save preserva a partida anterior em .bak.
+    if (!pGE->salvar_partida()) return;
+    slots.selecionar(destino_novo); pGE->set_fase(-1);
+    pGE->mensagem.clear(); escolhendo_destino=false; confirmando_substituicao=false;
+    pGE->set_estado_atual(Estados::Tela::Jogadores);
 }
 void Menu_Principal::fase_salva() {
     if (!std::filesystem::exists(Persistencia::Slots::instancia().caminho_atual())) {
@@ -113,7 +155,13 @@ void Menu_Principal::fase_salva() {
     pGE->set_estado_atual(pendente ? 10 : estado);
 }
 void Menu_Principal::selecionar() {
-    if (pos == 1) pGE->set_estado_atual(Estados::Tela::Jogadores);
+    if (pos == 1) {
+        if (!pGE->salvar_partida()) return;
+        auto& slots=Persistencia::Slots::instancia();
+        destino_novo=slots.selecionado();
+        for (const auto& resumo:slots.listar()) if (!resumo.existe && !resumo.backup_disponivel) { destino_novo=resumo.numero; break; }
+        escolhendo_destino=true; atualizar_slots(); pGE->mensagem.clear(); confirmando_substituicao=false;
+    }
     else if (pos == 2) {
         if (!pGE->salvar_partida()) return;
         pGE->mensagem.clear(); atualizar_slots(); escolhendo_partida=true;
