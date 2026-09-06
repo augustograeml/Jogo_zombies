@@ -1,3 +1,4 @@
+#include "../Recursos/catalogo.h"
 #include "../Estados/Menus/menu_fase.h"
 #include "../Estados/Fases/fase1.h"
 #include "../Estados/Fases/fase2.h"
@@ -6,8 +7,8 @@ namespace Estados::Menus {
 Menu_Fase::Menu_Fase(int id, bool dois) : Menu(id), pObserver(nullptr) { set_jogador2(dois); inicializa_valores(); }
 Menu_Fase::~Menu_Fase() = default;
 void Menu_Fase::inicializa_valores() {
-    imagem->loadFromFile("Design/imagens/menu2fases.png");
-    fonte->loadFromFile("Design/fonte/sangue_escorrendo.ttf");
+    imagem->loadFromFile(Recursos::caminho("Design/imagens/menu2fases.png").string());
+    fonte->loadFromFile(Recursos::caminho("Design/fonte/sangue_escorrendo.ttf").string());
     opcoes = {"Fases", "Fase 1", "Fase 2", "Sair"};
     coordenadas = {{270, 40}, {360, 604}, {600, 604}, {493, 650}};
     tamanhos = {200, 20, 20, 20};
@@ -20,7 +21,7 @@ void Menu_Fase::inicializa_valores() {
     textos[0].setOutlineThickness(20); textos[1].setOutlineThickness(4);
 }
 void Menu_Fase::selecionar() {
-    if (pos == 3) { pGE->set_estado_atual(1); return; }
+    if (pos == 3) { pGE->set_estado_atual(Estados::Tela::Jogadores); return; }
     const int estado = (pos == 1 ? 6 : 8) + (jogador2 ? 1 : 0);
     std::unique_ptr<Fases::Fase> fase;
     if (pos == 1) fase = std::make_unique<Fases::Fase1>(estado, false);

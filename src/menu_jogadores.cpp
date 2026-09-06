@@ -1,3 +1,4 @@
+#include "../Recursos/catalogo.h"
 #include "../Estados/Menus/menu_jogadores.h"
 
 namespace Estados
@@ -25,8 +26,8 @@ namespace Estados
         void Menu_Jogadores::inicializa_valores()
         {
             selecionado = deselecionado = jogador2 = false;
-            imagem->loadFromFile("Design/imagens/menu2jogadores.png");
-            fonte->loadFromFile("Design/fonte/sangue_escorrendo.ttf");
+            imagem->loadFromFile(Recursos::caminho("Design/imagens/menu2jogadores.png").string());
+            fonte->loadFromFile(Recursos::caminho("Design/fonte/sangue_escorrendo.ttf").string());
 
             opcoes = {"Players", "Um jogador", "Dois Jogadores", "Sair"};
             textos.resize(4);
@@ -56,11 +57,11 @@ namespace Estados
             if(!deselecionado)
             {
                 if (pos == 3)
-                    pGE->set_estado_atual(0);
+                    pGE->set_estado_atual(Estados::Tela::Principal);
                 else if (pos == 1)
-                    pGE->set_estado_atual(2);
+                    pGE->set_estado_atual(Estados::Tela::FasesSolo);
                 else if (pos == 2)
-                    pGE->set_estado_atual(3);
+                    pGE->set_estado_atual(Estados::Tela::FasesDupla);
             }
         }
 

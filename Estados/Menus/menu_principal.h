@@ -12,6 +12,9 @@ namespace Estados
         {
             private:
                 bool jacriado;
+                sf::Font fonte_slots;
+                std::vector<std::string> resumos;
+                void atualizar_slots();
                 Observers::Observer_Menu_Principal* pObserver;
             public:
                 Menu_Principal(int id);
@@ -22,6 +25,8 @@ namespace Estados
                 void selecionar();
                 void fase_salva();
                 void ao_entrar() override;
+                void executar() override;
+                void tratar_evento(const sf::Event&) override;
         };
     }
 }

@@ -1,11 +1,12 @@
+#include "../Recursos/catalogo.h"
 #include "../Estados/Menus/nome.h"
 #include "../Estados/Fases/fase2.h"
 #include <memory>
 namespace Estados::Menus {
 Nome::Nome(int id) : Menu(id) { inicializa_valores(); }
 void Nome::inicializa_valores() {
-    imagem->loadFromFile("Design/imagens/pegar_nome.png");
-    fonte->loadFromFile("Design/fonte/fonte_simas.ttf");
+    imagem->loadFromFile(Recursos::caminho("Design/imagens/pegar_nome.png").string());
+    fonte->loadFromFile(Recursos::caminho("Design/fonte/fonte_simas.ttf").string());
 }
 void Nome::ao_entrar() {
     entrada.clear(); nomes.clear();
@@ -24,15 +25,16 @@ void Nome::selecionar() {
     fase->registrar_resultado(nomes);
     pGE->mensagem.clear();
     // Preserva o avanco da fase 1 para a fase 2 no modo cooperativo original.
-    if (fase->get_vitoria() && fase->get_numero_fase() == 1 && quantidade == 2) {
+    const auto destino=Estados::apos_resultado(fase->get_vitoria(),fase->get_numero_fase(),quantidade);
+    if (destino==Estados::Tela::Fase2Dupla) {
         auto proxima = std::make_unique<Fases::Fase2>(9, false);
         proxima->continuar_sessao(fase->get_passos_sessao());
         proxima->salvar();
         pGE->adicionar_estado(proxima.get()); proxima.release();
-        pGE->set_estado_atual(9);
+        pGE->set_estado_atual(Estados::Tela::Fase2Dupla);
     } else {
-        pGE->set_estado_atual(fase->get_vitoria() ? 4 : 0);
-        if (!fase->get_vitoria()) pGE->mensagem = "Nome salvo. Conclua uma fase para entrar no ranking.";
+        pGE->set_estado_atual(destino);
+        if (!fase->get_vitoria()) pGE->mensagem = "Nome salvo. Pontos positivos disputam o ranking de pontos (tecla P).";
     }
 }
 void Nome::tratar_evento(const sf::Event& evento) {
@@ -45,7 +47,7 @@ void Nome::tratar_evento(const sf::Event& evento) {
     } else if (evento.type == sf::Event::KeyPressed && evento.key.code == sf::Keyboard::Enter) {
         selecionar();
     } else if (evento.type == sf::Event::KeyPressed && evento.key.code == sf::Keyboard::Escape) {
-        pGE->set_estado_atual(0); // Resultado pendente continua disponivel em Continuar.
+        pGE->set_estado_atual(Estados::Tela::Principal); // Resultado pendente continua disponivel em Continuar.
     }
 }
 void Nome::executar() {
@@ -58,7 +60,8 @@ void Nome::executar() {
                        " (Enter confirma)", *fonte, 26);
     instrucao.setPosition(130, 320);
     sf::Text campo(entrada + "_", *fonte, 32); campo.setPosition(150, 480);
-    sf::Text resultado(venceu ? "Registre seu tempo no ranking." : "Conclua a fase para disputar o ranking.", *fonte, 20);
+    sf::Text resultado("Pontuacao da equipe: " + std::to_string(fase ? fase->get_pontos() : 0) +
+        (venceu ? " | Tempo de conclusao registrado." : " | Pontos positivos entram no ranking."), *fonte, 20);
     resultado.setPosition(130, 250);
     sf::Text ajuda("Esc: menu | Continuar recupera o resultado pendente", *fonte, 20);
     ajuda.setPosition(130, 650);
