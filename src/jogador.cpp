@@ -128,11 +128,14 @@ namespace Entidades
 
         void Jogador::mover_com_controles(bool esquerda, bool direita, bool pular, bool descer)
         {
-            const auto nova=Logica::mover({velocidade.x,velocidade.y},nochao,esquerda,direita,pular,descer);
+            Logica::acompanhar_queda(movimento, getPosicao().y, nochao);
+            const auto nova=Logica::mover({velocidade.x,velocidade.y},nochao,esquerda,direita,pular,descer,movimento.gelo);
+            if(nova.y != 0.f) movimento.queda_ativa = true;
             velocidade={nova.x,nova.y};
             nochao = false;
             leu_fase = true;
             atualizar();
+            Logica::acompanhar_queda(movimento, getPosicao().y, false);
             animacao.avancar(velocidade.x);
         }
 

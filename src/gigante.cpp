@@ -74,7 +74,7 @@ namespace Entidades
             {
                 auto impulso = pE->getVelocidade(); impulso.y = -3.f;
                 pE->setVelocidade(impulso); pE->set_nochao(false);
-                this->set_vida(this->get_vida() - 10);
+                receber_dano(10);
             }
             else
             {

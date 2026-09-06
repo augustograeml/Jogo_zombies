@@ -83,7 +83,7 @@ namespace Entidades
             {
                 auto impulso = pE->getVelocidade(); impulso.y = -3.f;
                 pE->setVelocidade(impulso); pE->set_nochao(false);
-                morrer();
+                receber_dano(20);
             }
             else
             {

@@ -4,6 +4,7 @@
 #include "../Entidades/Personagens/jogador.h"
 #include "../Entidades/Personagens/inimigo.h"
 #include "../Entidades/Personagens/arqueiro.h"
+#include "../Entidades/Personagens/gigante.h"
 #include "../Entidades/Obstaculos/obstaculo.h"
 #include "../Entidades/Obstaculos/espinho.h"
 #include "../Entidades/Obstaculos/coracao.h"
@@ -79,13 +80,20 @@ namespace Gerenciadores
     void Gerenciador_Colisoes::colisao_jogadores_obstaculos() {
         if(!jogadores || !obstaculos) return;
         for(auto jog=jogadores->get_primeiro(); jog!=nullptr; ++jog) {
+            auto* jogador=static_cast<Entidades::Personagens::Jogador*>(*jog);
+            jogador->preparar_superficie();
             bool superficie_aplicada=false;
+            bool apoio_definido=false;
             auto pendentes=candidatos(*jog);
             for(std::size_t i=0;i<pendentes.size();) {
                 auto* obst=pendentes[i++];
                 const auto antes=(*jog)->getPosicao();
                 const int lado=colidiu(*jog,obst);
                 if(!lado) continue;
+                if(lado==4 && !apoio_definido) {
+                    jogador->pousar(dynamic_cast<Entidades::Obstaculos::Neve*>(obst)!=nullptr);
+                    apoio_definido=true;
+                }
                 const bool superficie=dynamic_cast<Entidades::Obstaculos::Neve*>(obst) || dynamic_cast<Entidades::Obstaculos::Musgo*>(obst);
                 if(!superficie || (lado==4 && !superficie_aplicada)) {
                     obst->colidir(*jog,lado);
@@ -123,10 +131,16 @@ namespace Gerenciadores
             {
                 if ((*inim)->get_vivo())
                 {
+                    const bool descendo=(*jog)->getVelocidade().y>0.f;
                     int j = colidiu(*jog, *inim);
-
-                    if (j)
-                        (*inim)->colidir(*jog, j);
+                    if(j==4 && descendo) {
+                        auto* jogador=static_cast<Entidades::Personagens::Jogador*>(*jog);
+                        const int base=dynamic_cast<Entidades::Personagens::Gigante*>(*inim)?10:20;
+                        (*inim)->receber_dano(jogador->consumir_dano_queda(base));
+                        auto impulso=jogador->getVelocidade(); impulso.y=-3.f;
+                        jogador->setVelocidade(impulso); jogador->set_nochao(false);
+                    } else if(j && j!=4) (*inim)->colidir(*jog,j);
+                    else if(j==4) static_cast<Entidades::Personagens::Jogador*>(*jog)->pousar(false);
                 }
                 inim++;
             }

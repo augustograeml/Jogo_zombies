@@ -81,7 +81,7 @@ namespace Entidades
                 mudar_direcao();
             }
             else if (a == 4)
-                morrer();
+                receber_dano(20);
             else
                 atacar(pE);
         }

@@ -20,8 +20,10 @@ Json Serializador::salvar(const Entidades::Entidade& e) {
     if (auto p = dynamic_cast<const Jogador*>(&e)) {
         tipo = "jogador";
         const auto& a = p->get_animacao();
+        const auto& m = p->get_movimento();
         extra = {{"jogador2", p->jogador2}, {"nome", p->nome}, {"tempo", p->tempo},
                  {"poder", p->poder}, {"leu_fase", p->leu_fase},
+                 {"movimento",{{"origem_queda",m.origem_queda},{"queda_ativa",m.queda_ativa},{"gelo",m.gelo}}},
                  {"animacao", {{"correndo",a.correndo},{"quadro",a.quadro},{"passos",a.passos},{"direita",a.direita}}}};
     } else if (auto p = dynamic_cast<const Arqueiro*>(&e)) {
         tipo = "arqueiro";
@@ -75,6 +77,11 @@ std::unique_ptr<Entidades::Entidade> Serializador::carregar(const Json& j) {
         p->tempo = numero(x.at("tempo"), 0, 1e12);
         p->poder = static_cast<float>(numero(x.at("poder"), 0, 1000000));
         p->leu_fase = x.at("leu_fase").get<bool>();
+        if (x.contains("movimento")) {
+            const auto& m=x.at("movimento");
+            p->restaurar_movimento({static_cast<float>(numero(m.at("origem_queda"),-1000000,1000000)),
+                m.at("queda_ativa").get<bool>(),m.at("gelo").get<bool>()});
+        } else p->restaurar_movimento({pos.y,false,false});
         if (x.contains("animacao")) {
             const auto& a = x.at("animacao");
             p->restaurar_animacao({a.at("correndo").get<bool>(),

@@ -181,13 +181,20 @@ void movimento_e_tempo() {
             jogador.mover_com_controles(false, false, false, false);
             neve.escorregar(&jogador);
         }
-        exigir(jogador.getVelocidade().x == 0, "Soltar teclas permite parar inclusive na neve");
+        exigir(jogador.getVelocidade().x > 0, "Gelo conserva deslizamento por mais tempo que piso normal");
+        for (int i = 0; i < 120; ++i) {
+            jogador.set_nochao(true);
+            jogador.mover_com_controles(false, false, false, false);
+            neve.escorregar(&jogador);
+        }
+        exigir(jogador.getVelocidade().x == 0, "Soltar teclas ainda permite parar na neve apos deslizar");
         const auto parado = jogador.getPosicao();
         for (int i = 0; i < 60; ++i) {
             jogador.set_nochao(true);
             jogador.mover_com_controles(false, false, false, false);
         }
         exigir(jogador.getPosicao() == parado, "Jogador permanece parado sem entrada");
+        jogador.pousar(false); // Teclas opostas no piso normal; gelo foi testado acima.
         jogador.setVelocidade({-3, 0});
         for (int i = 0; i < 30; ++i) {
             jogador.set_nochao(true);

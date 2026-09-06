@@ -1,5 +1,6 @@
 #include "../Gerenciadores/gerenciador_colisoes.h"
 #include "../Entidades/Personagens/jogador.h"
+#include "../Entidades/Personagens/gigante.h"
 #include "../Entidades/Obstaculos/neve.h"
 #include "../Entidades/Obstaculos/musgo.h"
 #include "../Entidades/Obstaculos/caixa.h"
@@ -15,7 +16,7 @@ int main() {
     auto* j=new Jogador({25,0},{1,0},false); jogadores.incluir(j);
     obstaculos.incluir(new Neve({0,50})); obstaculos.incluir(new Neve({50,50}));
     g.gerenciar_colisoes();
-    assert(std::abs(j->getVelocidade().x-1.02f)<.0001f); // Dois blocos: aplica uma vez.
+    assert(std::abs(j->getVelocidade().x-1.f)<.0001f); // Dois blocos: aplica uma vez.
     assert(j->getVelocidade().y==0 && j->getPosicao().y==0);
     for(int i=0;i<100;++i) { j->mover_com_controles(false,false,false,false); g.gerenciar_colisoes(); }
     assert(j->getVelocidade().x==0 && j->getPosicao().y==0);
@@ -36,5 +37,18 @@ int main() {
     if(j->getPosicao()!=esperado) {
         std::cerr << "Grade diverge: x="<<j->getPosicao().x<<", sequencial="<<esperado.x<<'\n'; return 1;
     }
+    obstaculos.limpar(); g.invalidar_grade();
+    auto* gigante=new Entidades::Personagens::Gigante({0,100},{0,0}); inimigos.incluir(gigante);
+    j->setPosicao({10,55}); j->setVelocidade({0,2});
+    j->restaurar_movimento({-300,true,false});
+    g.gerenciar_colisoes();
+    assert(gigante->get_vida()==80 && j->getVelocidade().y==-3);
+    j->setPosicao({10,55}); j->setVelocidade({0,2});
+    g.gerenciar_colisoes();
+    assert(gigante->get_vida()==70); // Queda anterior nao fortalece proximo golpe.
+    j->setPosicao({10,55}); j->setVelocidade({0,-2});
+    j->restaurar_movimento({-600,true,false});
+    g.gerenciar_colisoes();
+    assert(gigante->get_vida()==70); // Subindo nao causa golpe de queda.
     std::cout<<"Superficies, apoio continuo e grade com deslocamento entre celulas OK.\n";
 }

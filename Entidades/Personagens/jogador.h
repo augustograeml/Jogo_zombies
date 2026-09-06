@@ -3,6 +3,7 @@ namespace Persistencia { class Serializador; }
 #include <SFML/Graphics.hpp>
 #include "personagem.h"
 #include "../../Animacao/corrida.h"
+#include "../../Logica/movimento.h"
 #include "../../Gerenciadores/gerenciador_estados.h"
 
 namespace Entidades
@@ -19,12 +20,21 @@ namespace Entidades
             std::string nome;
             double tempo;
             Animacao::Corrida animacao;
+            Logica::EstadoMovimento movimento;
 
 
         public:
             Jogador(sf::Vector2f pos, sf::Vector2f vel, bool jog2);
             ~Jogador();
 
+            const Logica::EstadoMovimento& get_movimento() const { return movimento; }
+            void restaurar_movimento(Logica::EstadoMovimento salvo) { movimento = salvo; }
+            void preparar_superficie() { movimento.gelo = false; }
+            void pousar(bool gelo) {
+                movimento.gelo = gelo; movimento.queda_ativa = false;
+                movimento.origem_queda = getPosicao().y;
+            }
+            int consumir_dano_queda(int base) { return Logica::dano_queda(movimento, getPosicao().y, base); }
             void atualizar();
             void executar();
             void desenhar() override;
