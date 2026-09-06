@@ -21,11 +21,14 @@ namespace Entidades
             double tempo;
             Animacao::Corrida animacao;
             Logica::EstadoMovimento movimento;
+            bool controles_solo = false; // Derivado do modo da fase, inclusive ao carregar.
 
 
         public:
             Jogador(sf::Vector2f pos, sf::Vector2f vel, bool jog2);
             ~Jogador();
+            void set_controles_solo(bool solo) { controles_solo=solo; }
+            bool get_controles_solo() const { return controles_solo; }
 
             const Logica::EstadoMovimento& get_movimento() const { return movimento; }
             void restaurar_movimento(Logica::EstadoMovimento salvo) { movimento = salvo; }

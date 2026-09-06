@@ -50,7 +50,9 @@ Fase::Fase(int id, bool carregar) : Estado(id), ja_criado(carregar),
 void Fase::criar_jogadores() {
     // Insercao invertida mantem jogador 1 como primeiro elemento.
     if (jogador2) jogadores.incluir(new Entidades::Personagens::Jogador({150, 50}, {0, 0}, true));
-    jogadores.incluir(new Entidades::Personagens::Jogador({80, 50}, {0, 0}, false));
+    auto* primeiro=new Entidades::Personagens::Jogador({80, 50}, {0, 0}, false);
+    primeiro->set_controles_solo(num_jogadores==1);
+    jogadores.incluir(primeiro);
 }
 void Fase::criar_inimigos(std::string caminho) { ConstrutorCenario::inimigos(caminho, inimigos); }
 void Fase::criar_cenario(std::string caminho) { ConstrutorCenario::obstaculos(caminho, obstaculos); gC.invalidar_grade(); }
@@ -114,7 +116,6 @@ void Fase::simular_passo() {
         }
     }
     ++sessao.passos;
-    else eventos.publicar({Logica::Evento::Derrota});
     set_tempo_jogadores();
     if (gC.get_jogadores_vivos()) concluir(false);
     else if (gC.get_inimigos_vivos()) concluir(true);
@@ -231,8 +232,10 @@ void Fase::restaurar(const Json& dados) {
         carregar_lista(j.at("obstaculos"), novos_obstaculos, 2);
         if (novos_jogadores.get_tamanho() != num_jogadores) throw std::runtime_error("Quantidade de jogadores invalida.");
         std::set<bool> identidades;
-        for (auto it = novos_jogadores.get_primeiro(); it != nullptr; ++it)
+        for (auto it = novos_jogadores.get_primeiro(); it != nullptr; ++it) {
             identidades.insert(static_cast<Entidades::Personagens::Jogador*>(*it)->eh_jogador2());
+            static_cast<Entidades::Personagens::Jogador*>(*it)->set_controles_solo(num_jogadores==1);
+        }
         if (identidades.size() != static_cast<std::size_t>(num_jogadores) || !identidades.count(false))
             throw std::runtime_error("Identidades dos jogadores invalidas.");
         const int pontos = Persistencia::inteiro(j.value("pontos", Json(0)), 0, 1000000000);

@@ -1,3 +1,6 @@
+#include "../Logica/entrada.h"
+#include "../Audio/sintese.h"
+#include <set>
 #include "../Logica/movimento.h"
 #include "../Logica/eventos.h"
 #include "../Logica/comportamento.h"
@@ -6,6 +9,19 @@
 #include <cassert>
 #include <iostream>
 int main() {
+    Logica::Teclas teclas; teclas.esquerda=true; teclas.espaco=true;
+    assert(Logica::controles(teclas,false,true).esquerda && Logica::controles(teclas,false,true).pular);
+    assert(!Logica::controles(teclas,false,false).esquerda && !Logica::controles(teclas,false,false).pular);
+    assert(Logica::controles(teclas,true,false).esquerda && !Logica::controles(teclas,true,false).pular);
+    teclas.w=true; assert(Logica::controles(teclas,false,false).pular);
+    std::set<std::uint64_t> sons;
+    for(int i=0;i<8;++i) {
+        const auto pcm=Audio::sintetizar(static_cast<Logica::Evento>(i));
+        std::uint64_t assinatura=1469598103934665603ull; bool audivel=false;
+        for(auto amostra:pcm) { assinatura=(assinatura^static_cast<std::uint16_t>(amostra))*1099511628211ull; audivel|=amostra!=0; }
+        assert(audivel && pcm.front()==0); sons.insert(assinatura);
+    }
+    assert(sons.size()==8);
     Logica::Velocidade v{0,0};
     for(int i=0;i<100;++i) v=Logica::mover(v,true,false,true,false,false);
     assert(v.x==4);

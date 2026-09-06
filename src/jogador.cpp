@@ -1,3 +1,4 @@
+#include "../Logica/entrada.h"
 #include "../Animacao/articulada.h"
 #include "../Logica/movimento.h"
 #include <algorithm>
@@ -118,10 +119,14 @@ namespace Entidades
 
         void Jogador::mover()
         {
-            mover_com_controles(sf::Keyboard::isKeyPressed(sf::Keyboard::A),
-                               sf::Keyboard::isKeyPressed(sf::Keyboard::D),
-                               sf::Keyboard::isKeyPressed(sf::Keyboard::W),
-                               sf::Keyboard::isKeyPressed(sf::Keyboard::S));
+            const Logica::Teclas teclas{
+                sf::Keyboard::isKeyPressed(sf::Keyboard::A),sf::Keyboard::isKeyPressed(sf::Keyboard::D),
+                sf::Keyboard::isKeyPressed(sf::Keyboard::W),sf::Keyboard::isKeyPressed(sf::Keyboard::S),
+                sf::Keyboard::isKeyPressed(sf::Keyboard::Left),sf::Keyboard::isKeyPressed(sf::Keyboard::Right),
+                sf::Keyboard::isKeyPressed(sf::Keyboard::Up),sf::Keyboard::isKeyPressed(sf::Keyboard::Down),
+                sf::Keyboard::isKeyPressed(sf::Keyboard::Space)};
+            const auto c=Logica::controles(teclas,false,controles_solo);
+            mover_com_controles(c.esquerda,c.direita,c.pular,c.descer);
         }
 
         void Jogador::mover_jog2()
