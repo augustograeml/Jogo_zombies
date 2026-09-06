@@ -11,7 +11,6 @@ Menu_Principal::Menu_Principal(int id) : Menu(id), jacriado(false), pObserver(nu
 Menu_Principal::~Menu_Principal() = default;
 void Menu_Principal::inicializa_valores() {
     fonte_slots.loadFromFile(Recursos::caminho("Design/fonte/fonte_simas.ttf").string());
-    atualizar_slots();
     imagem->loadFromFile(Recursos::caminho("Design/imagens/menu_zombies++.jpg").string());
     fonte->loadFromFile(Recursos::caminho("Design/fonte/sangue_escorrendo.ttf").string());
     opcoes = {"Zombies++", "Novo Jogo", "Continuar", "Ranking", "Sair"};
@@ -26,7 +25,7 @@ void Menu_Principal::inicializa_valores() {
     textos[0].setOutlineThickness(20);
     textos[1].setOutlineThickness(4);
 }
-void Menu_Principal::ao_entrar() { pGG->resetarCamera(); atualizar_slots(); }
+void Menu_Principal::ao_entrar() { pGG->resetarCamera(); escolhendo_partida=false; }
 void Menu_Principal::atualizar_slots() {
     resumos.clear();
     for (const auto& r : Persistencia::Slots::instancia().listar()) {
@@ -39,33 +38,59 @@ void Menu_Principal::atualizar_slots() {
     }
 }
 void Menu_Principal::executar() {
-    mostrar_menu();
-    sf::RectangleShape fundo({980,150}); fundo.setPosition(22,500); fundo.setFillColor({8,15,23,235});
-    pGG->get_Janela()->draw(fundo);
+    if (!escolhendo_partida) { mostrar_menu(); return; }
+    pGG->resetarCamera(); pGG->desenharTextura(imagem);
+    auto* janela=pGG->get_Janela();
+    sf::RectangleShape fundo({920,580}); fundo.setPosition(52,225); fundo.setFillColor({8,15,23,245}); janela->draw(fundo);
+    sf::Text titulo("Continuar jogo",fonte_slots,34); titulo.setPosition(95,260); janela->draw(titulo);
     for (std::size_t i=0;i<resumos.size();++i) {
-        sf::Text t(resumos[i],fonte_slots,18); t.setPosition(35,535+30*i);
-        t.setFillColor(static_cast<int>(i+1)==Persistencia::Slots::instancia().selecionado()?sf::Color(107,243,211):sf::Color::White);
-        pGG->get_Janela()->draw(t);
+        const bool atual=static_cast<int>(i+1)==Persistencia::Slots::instancia().selecionado();
+        sf::RectangleShape cartao({840,82}); cartao.setPosition(92,350+100*i);
+        cartao.setFillColor(atual?sf::Color(29,75,71):sf::Color(27,35,45)); janela->draw(cartao);
+        sf::Text t(resumos[i],fonte_slots,18); t.setPosition(110,376+100*i);
+        t.setFillColor(atual?sf::Color(107,243,211):sf::Color::White);
+        if(t.getLocalBounds().width>800) t.setScale(800/t.getLocalBounds().width,1);
+        janela->draw(t);
     }
-    sf::Text ajuda("1 / 2 / 3: escolher slot para Novo Jogo ou Continuar",fonte_slots,18);
-    ajuda.setPosition(35,507); pGG->get_Janela()->draw(ajuda);
+    sf::Text ajuda("Setas ou 1/2/3: escolher | Enter: continuar\nR: recuperar anterior | Esc: voltar",fonte_slots,18);
+    ajuda.setPosition(95,690); janela->draw(ajuda);
+}
+void Menu_Principal::escolher_slot(int numero) {
+    if(numero!=Persistencia::Slots::instancia().selecionado()) {
+        if(!pGE->salvar_partida()) return;
+        Persistencia::Slots::instancia().selecionar(numero); pGE->set_fase(-1);
+    }
+    pGE->mensagem.clear();
 }
 void Menu_Principal::tratar_evento(const sf::Event& e) {
-    if (e.type == sf::Event::KeyPressed) {
-        if (e.key.code >= sf::Keyboard::Num1 && e.key.code <= sf::Keyboard::Num3) {
-            const int slot=e.key.code-sf::Keyboard::Num1+1;
-            if(slot!=Persistencia::Slots::instancia().selecionado()) {
-                if(!pGE->salvar_partida()) return;
-                Persistencia::Slots::instancia().selecionar(slot); pGE->set_fase(-1);
+    if (!escolhendo_partida) {
+        if(e.type==sf::Event::MouseButtonReleased && e.mouseButton.button==sf::Mouse::Left) {
+            const auto ponto=pGG->get_Janela()->mapPixelToCoords({e.mouseButton.x,e.mouseButton.y},pGG->get_Janela()->getDefaultView());
+            for(std::size_t i=1;i<textos.size();++i) if(textos[i].getGlobalBounds().contains(ponto)) {
+                textos[pos].setOutlineThickness(0); pos=static_cast<int>(i); textos[pos].setOutlineThickness(4);
+                pGE->mensagem.clear(); selecionar(); return;
             }
-            pGE->mensagem.clear(); atualizar_slots(); return;
         }
-        if(e.key.code==sf::Keyboard::R) {
-            Persistencia::Slots::instancia().recuperar(); pGE->set_fase(-1);
-            pGE->mensagem="Checkpoint anterior recuperado. Escolha Continuar."; atualizar_slots(); return;
+        Menu::tratar_evento(e); return;
+    }
+    if(e.type==sf::Event::MouseButtonReleased && e.mouseButton.button==sf::Mouse::Left) {
+        const auto ponto=pGG->get_Janela()->mapPixelToCoords({e.mouseButton.x,e.mouseButton.y},pGG->get_Janela()->getDefaultView());
+        for(int i=0;i<3;++i) if(sf::FloatRect(92,350+100*i,840,82).contains(ponto)) {
+            escolher_slot(i+1); if(Persistencia::Slots::instancia().selecionado()==i+1) fase_salva(); return;
         }
     }
-    Menu::tratar_evento(e);
+    if (e.type != sf::Event::KeyPressed) return;
+    const auto tecla=e.key.code;
+    if(tecla==sf::Keyboard::Escape) { escolhendo_partida=false; pGE->mensagem.clear(); return; }
+    if(tecla==sf::Keyboard::Enter) { pGE->mensagem.clear(); fase_salva(); return; }
+    if(tecla>=sf::Keyboard::Num1 && tecla<=sf::Keyboard::Num3) escolher_slot(tecla-sf::Keyboard::Num1+1);
+    else if(tecla==sf::Keyboard::Up || tecla==sf::Keyboard::Down) {
+        int numero=Persistencia::Slots::instancia().selecionado()+(tecla==sf::Keyboard::Up?-1:1);
+        escolher_slot(numero<1?3:numero>3?1:numero);
+    } else if(tecla==sf::Keyboard::R) {
+        Persistencia::Slots::instancia().recuperar(); pGE->set_fase(-1);
+        pGE->mensagem="Checkpoint anterior recuperado. Enter para continuar."; atualizar_slots();
+    }
 }
 void Menu_Principal::fase_salva() {
     if (!std::filesystem::exists(Persistencia::Slots::instancia().caminho_atual())) {
@@ -90,7 +115,8 @@ void Menu_Principal::fase_salva() {
 void Menu_Principal::selecionar() {
     if (pos == 1) pGE->set_estado_atual(Estados::Tela::Jogadores);
     else if (pos == 2) {
-        fase_salva();
+        if (!pGE->salvar_partida()) return;
+        pGE->mensagem.clear(); atualizar_slots(); escolhendo_partida=true;
     } else if (pos == 3) pGE->set_estado_atual(Estados::Tela::Ranking);
     else if (pos == 4 && pGE->salvar_partida()) pGG->fecharJanela();
 }
