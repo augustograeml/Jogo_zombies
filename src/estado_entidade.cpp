@@ -19,11 +19,16 @@ Json Serializador::salvar(const Entidades::Entidade& e) {
     Json extra = Json::object();
     if (auto p = dynamic_cast<const Jogador*>(&e)) {
         tipo = "jogador";
+        const auto& a = p->get_animacao();
         extra = {{"jogador2", p->jogador2}, {"nome", p->nome}, {"tempo", p->tempo},
-                 {"poder", p->poder}, {"leu_fase", p->leu_fase}};
+                 {"poder", p->poder}, {"leu_fase", p->leu_fase},
+                 {"animacao", {{"correndo",a.correndo},{"quadro",a.quadro},{"passos",a.passos},{"direita",a.direita}}}};
     } else if (auto p = dynamic_cast<const Arqueiro*>(&e)) {
         tipo = "arqueiro";
         extra = {{"recarga", p->recarregar}, {"atirando", p->atirando}, {"projeteis", Json::array()}};
+        const auto& c = p->get_comportamento();
+        extra["comportamento"] = {{"acao",static_cast<int>(c.acao)},{"alvo",c.alvo},
+            {"preparacao",c.preparacao},{"direita",c.direita}};
         for (const auto& flecha : p->vetor_projeteis) extra["projeteis"].push_back(salvar(flecha));
     } else if (auto p = dynamic_cast<const Zumbi*>(&e)) {
         tipo = "zumbi"; extra["pulo"] = p->pulo;
@@ -50,7 +55,7 @@ Json Serializador::salvar(const Entidades::Entidade& e) {
     }
     return {{"tipo", tipo}, {"posicao", vetor(e.corpo.getPosition())},
             {"velocidade", vetor(e.velocidade)}, {"vida", e.vida}, {"vivo", e.vivo},
-            {"nochao", e.nochao}, {"pausado", e.pausado},
+            {"protecao", e.get_protecao()}, {"nochao", e.nochao}, {"pausado", e.pausado},
             {"tamanho", vetor(e.corpo.getSize())}, {"escala", vetor(e.corpo.getScale())},
             {"origem", vetor(e.corpo.getOrigin())}, {"rotacao", e.corpo.getRotation()},
             {"cor", e.corpo.getFillColor().toInteger()}, {"extra", extra}};
@@ -70,11 +75,24 @@ std::unique_ptr<Entidades::Entidade> Serializador::carregar(const Json& j) {
         p->tempo = numero(x.at("tempo"), 0, 1e12);
         p->poder = static_cast<float>(numero(x.at("poder"), 0, 1000000));
         p->leu_fase = x.at("leu_fase").get<bool>();
+        if (x.contains("animacao")) {
+            const auto& a = x.at("animacao");
+            p->restaurar_animacao({a.at("correndo").get<bool>(),
+                static_cast<unsigned>(inteiro(a.at("quadro"),0,26)),
+                static_cast<unsigned>(inteiro(a.at("passos"),0,1)),a.at("direita").get<bool>()});
+        }
         e = std::move(p);
     } else if (tipo == "arqueiro") {
         auto p = std::make_unique<Arqueiro>(pos, vel);
         p->recarregar = inteiro(x.at("recarga"), 0, TEMPO_RECARGA);
         p->atirando = x.at("atirando").get<bool>();
+        if (x.contains("comportamento")) {
+            const auto& c=x.at("comportamento");
+            const int alvo=inteiro(c.at("alvo"),-1,2);
+            if (alvo==0) throw std::runtime_error("Alvo invalido.");
+            p->restaurar_comportamento({static_cast<Logica::AcaoArqueiro>(inteiro(c.at("acao"),0,2)),
+                alvo,static_cast<unsigned>(inteiro(c.at("preparacao"),0,29)),c.at("direita").get<bool>()});
+        }
         const auto& flechas = x.at("projeteis");
         if (!flechas.is_array() || flechas.size() > 4096) throw std::runtime_error("Lista de flechas invalida.");
         p->vetor_projeteis.reserve(flechas.size());
@@ -114,6 +132,7 @@ std::unique_ptr<Entidades::Entidade> Serializador::carregar(const Json& j) {
     e->corpo.setPosition(pos);
     e->posicao = pos;
     e->velocidade = vel;
+    e->set_protecao(static_cast<unsigned>(inteiro(j.value("protecao",Json(0)),0,600)));
     e->vida = inteiro(j.at("vida"), -1000000, 1000000);
     e->vivo = j.at("vivo").get<bool>();
     e->nochao = j.at("nochao").get<bool>();

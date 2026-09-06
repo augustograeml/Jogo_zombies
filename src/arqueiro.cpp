@@ -44,10 +44,19 @@ namespace Entidades
 
         void Arqueiro::executar()
         {
+            disparou = false;
             if (vivo)
             {
-                mover();
-                atirar();
+                const bool disparar = Logica::decidir_arqueiro(comportamento,
+                    getPosicao().x, getPosicao().y, alvos, recarregar > 0);
+                if (comportamento.acao == Logica::AcaoArqueiro::Preparando) {
+                    velocidade.x = 0;
+                    if (!nochao) velocidade.y += 0.1f; else velocidade.y = 0;
+                    atualizar(); nochao = false;
+                    corpo.setFillColor(sf::Color(255, 160, 100));
+                } else { mover(); corpo.setFillColor(sf::Color::White); }
+                if (recarregar > 0) --recarregar;
+                if (disparar) { direcao = comportamento.direita; atirar(); }
             }
             for (auto& flecha : vetor_projeteis) flecha.executar();
             vetor_projeteis.erase(std::remove_if(vetor_projeteis.begin(), vetor_projeteis.end(),
@@ -56,7 +65,7 @@ namespace Entidades
 
         void Arqueiro::atacar(Entidade *jg)
         {
-            jg->set_vida(jg->get_vida() - forca);
+            jg->receber_dano(forca);
         }
         
         void Arqueiro::colidir(Entidade *pE, int a)
@@ -86,6 +95,7 @@ namespace Entidades
                 novo_projetil.setPosicao(sf::Vector2f(this->getPosicao().x + 20.f, this->getPosicao().y + 15.f));
                 atirando = false;
                 vetor_projeteis.push_back(novo_projetil);
+                disparou = true;
                 atirando = false;
                 recarregar = TEMPO_RECARGA;
             }
