@@ -3,7 +3,7 @@
 #include <vector>
 
 namespace Logica {
-enum class Evento { Salto, Disparo, Dano, Coleta, InimigoDerrotado, Vitoria };
+enum class Evento { Salto, Disparo, Dano, Coleta, InimigoDerrotado, Vitoria, ImpactoInimigo, Derrota };
 struct Notificacao { Evento tipo; int valor = 0; };
 // Observer: a simulacao publica fatos; som e pontuacao reagem independentemente.
 class Observador {

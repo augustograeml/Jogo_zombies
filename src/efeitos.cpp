@@ -1,3 +1,4 @@
+#include "../Audio/sintese.h"
 #include "../Audio/efeitos.h"
 #include "../Persistencia/arquivo.h"
 #include <algorithm>
@@ -24,14 +25,8 @@ Preferencias& Preferencias::instancia() {
 void Preferencias::salvar() const { Persistencia::escrever_json("preferencias.json", {{"volume", volume}, {"mudo", mudo}}); }
 Efeitos::Efeitos() {
     constexpr unsigned taxa = 22050;
-    const float frequencias[] = {440, 180, 100, 880, 240, 660};
     for (std::size_t n = 0; n < buffers.size(); ++n) {
-        const unsigned tamanho = n == 5 ? taxa / 2 : taxa / 7;
-        std::vector<sf::Int16> amostras(tamanho);
-        for (unsigned i=0; i<tamanho; ++i) {
-            const double t=static_cast<double>(i)/taxa, envelope=1.-static_cast<double>(i)/tamanho;
-            amostras[i]=static_cast<sf::Int16>(6500*envelope*std::sin(6.28318530718*frequencias[n]*t));
-        }
+        const auto amostras = sintetizar(static_cast<Logica::Evento>(n),taxa);
         if (!buffers[n].loadFromSamples(amostras.data(), amostras.size(), 1, taxa))
             throw std::runtime_error("Nao foi possivel preparar os efeitos sonoros.");
     }

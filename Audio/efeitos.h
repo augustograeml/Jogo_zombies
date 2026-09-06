@@ -6,7 +6,7 @@
 namespace Audio {
 // Buffers sintetizados localmente em C++; nenhum arquivo de audio externo necessario.
 class Efeitos : public Logica::Observador {
-    std::array<sf::SoundBuffer, 6> buffers;
+    std::array<sf::SoundBuffer, 8> buffers;
     std::array<sf::Sound, 12> vozes;
     std::size_t proxima = 0;
     Efeitos();

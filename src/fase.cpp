@@ -101,6 +101,8 @@ void Fase::simular_passo() {
         }
         if (auto* arq = dynamic_cast<Entidades::Personagens::Arqueiro*>(e))
             if (arq->disparou_no_passo()) eventos.publicar({Logica::Evento::Disparo});
+        if (a.vivo && e->get_vida()<a.vida && dynamic_cast<Entidades::Personagens::Inimigo*>(e))
+            eventos.publicar({Logica::Evento::ImpactoInimigo});
         if (a.vivo && !e->get_vivo()) {
             using namespace Persistencia::Pontuacao;
             if (dynamic_cast<Entidades::Obstaculos::Coracao*>(e)) eventos.publicar({Logica::Evento::Coleta, coleta});
@@ -112,6 +114,7 @@ void Fase::simular_passo() {
         }
     }
     ++sessao.passos;
+    else eventos.publicar({Logica::Evento::Derrota});
     set_tempo_jogadores();
     if (gC.get_jogadores_vivos()) concluir(false);
     else if (gC.get_inimigos_vivos()) concluir(true);
@@ -175,6 +178,7 @@ void Fase::concluir(bool venceu) {
     resultado.finalizada = true;
     resultado.vitoria = venceu;
     if (venceu) eventos.publicar({Logica::Evento::Vitoria, Persistencia::Pontuacao::conclusao});
+    else eventos.publicar({Logica::Evento::Derrota});
     set_tempo_jogadores();
     try { salvar(); }
     catch (const std::exception& erro) { pGE->mensagem = std::string("Falha ao salvar resultado: ") + erro.what(); }
