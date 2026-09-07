@@ -23,7 +23,7 @@ namespace Entidades
                 ~Inimigo();
                 const Animacao::Estado& get_animacao() const { return animacao.obter(); }
                 void restaurar_animacao(Animacao::Estado salvo) { animacao.restaurar(salvo); }
-                void avancar_animacao() { if(vivo) animacao.avancar(velocidade.x); }
+                void avancar_animacao() { if(vivo) { atualizar_reacao(); animacao.avancar(velocidade.x); } }
                 void desenhar() override;
                 sf::Vector2f getPosicao();
                 void setPosicao(sf::Vector2f& p);

@@ -31,6 +31,7 @@ namespace Entidades
                 void colidir(Entidade* pE, int a);
                 void atirar();
                 void perceber(const std::vector<Logica::Alvo>& jogadores) { alvos = jogadores; }
+                int get_recarga() const { return recarregar; }
                 bool disparou_no_passo() const { return disparou; }
                 const Logica::EstadoArqueiro& get_comportamento() const { return comportamento; }
                 void restaurar_comportamento(Logica::EstadoArqueiro e) { comportamento = e; }

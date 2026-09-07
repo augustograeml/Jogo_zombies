@@ -8,6 +8,7 @@ Fase1::Fase1(int id, bool carregar) : Fase(id, carregar) {
         throw std::runtime_error("Imagem da fase 1 nao encontrada.");
     shape.setSize({2000.f, 1200.f});
     shape.setTexture(&Textura);
+    shape.setTextureRect(Recursos::area_cenario(Textura));
     if (!carregar) {
         criar_cenario("Design/cenario/cenario_fase1.txt");
         criar_inimigos("Design/cenario/cenario_fase1.txt");

@@ -38,6 +38,7 @@ namespace Entidades
             int vida;
             bool nochao;
             unsigned protecao = 0;
+            unsigned reacao_visual = 0; // Nao concede invulnerabilidade.
         public:
             Entidade(sf::Vector2f pos = sf::Vector2f(0.f,0.f));
             virtual ~Entidade();
@@ -54,7 +55,10 @@ namespace Entidades
             // Protecao em passos de simulacao: pausa e salvamento preservam o intervalo.
             bool receber_dano(int dano, unsigned duracao = Recursos::Configuracao::protecao_dano);
             void curar(int quantidade, int maxima = 20);
-            void atualizar_protecao() { if (protecao) --protecao; }
+            void atualizar_protecao() { if (protecao) --protecao; atualizar_reacao(); }
+            void atualizar_reacao() { if(reacao_visual) --reacao_visual; }
+            unsigned get_reacao() const { return reacao_visual; }
+            void set_reacao(unsigned valor) { reacao_visual=valor; }
             unsigned get_protecao() const { return protecao; }
             void set_protecao(unsigned valor) { protecao = valor; }
 

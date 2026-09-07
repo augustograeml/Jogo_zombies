@@ -14,6 +14,7 @@ struct Quadro {
     std::shared_ptr<sf::Texture> textura;
     sf::IntRect regiao; // Limites dos pixels visiveis: alinhamento pelos pes.
 };
+sf::IntRect area_cenario(const sf::Texture& textura);
 const std::vector<Quadro>& corrida();
 enum class Animado { Zumbi, Arqueiro, Gigante };
 const std::vector<Quadro>& caminhada(Animado tipo);

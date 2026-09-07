@@ -9,7 +9,7 @@ float suave(float inicio, float fim, float valor) {
 }
 }
 void desenhar_articulada(sf::RenderTarget& alvo, const sf::Texture& textura,
-                        sf::FloatRect caixa, const Estado& estado, sf::Color cor) {
+                        sf::FloatRect caixa, const Estado& estado, sf::Color cor, Pose pose, float progresso) {
     constexpr unsigned colunas=18, linhas=24;
     const auto tamanho=textura.getSize();
     const float altura=caixa.height, largura=altura*tamanho.x/tamanho.y;
@@ -26,7 +26,7 @@ void desenhar_articulada(sf::RenderTarget& alvo, const sf::Texture& textura,
             x+=peso*(px+dx*std::cos(angulo)-dy*std::sin(angulo)-(u-.5f)*largura);
             y+=peso*(py+dx*std::sin(angulo)+dy*std::cos(angulo)-(v-1.f)*altura);
         };
-        if(estado.correndo) {
+        if(estado.correndo && pose==Pose::Caminhada) {
             const float frente=suave(.49f,.72f,u)*suave(.37f,.49f,v)*(1.f-suave(.68f,.80f,v));
             const float tras=suave(.66f,.85f,v)*(1.f-suave(.48f,.63f,u));
             girar(.50f,.62f,.55f+.60f*passo,frente);
@@ -34,6 +34,11 @@ void desenhar_articulada(sf::RenderTarget& alvo, const sf::Texture& textura,
             const float braco=(1.f-suave(.20f,.40f,u))*suave(.40f,.56f,v)*(1.f-suave(.68f,.78f,v));
             girar(.30f,.48f,-.20f*passo,braco);
         }
+        const auto d=deformacao(pose,progresso);
+        x*=d.x; y*=d.y;
+        const float rad=d.angulo*3.14159265f/180;
+        const float rx=x*std::cos(rad)-y*std::sin(rad);
+        y=x*std::sin(rad)+y*std::cos(rad); x=rx;
         if (!estado.direita) x=-x;
         return sf::Vertex({caixa.left+caixa.width/2.f+x,caixa.top+caixa.height+y},cor,
                           {u*tamanho.x,v*tamanho.y});

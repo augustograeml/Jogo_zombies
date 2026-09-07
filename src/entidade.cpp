@@ -44,6 +44,7 @@ namespace Entidades
     bool Entidade::receber_dano(int dano, unsigned duracao) {
         if (!vivo || dano <= 0 || protecao) return false;
         vida = std::max(0, vida - dano);
+        reacao_visual=12;
         if (dynamic_cast<Personagens::Jogador*>(this)) protecao = duracao;
         if (vida == 0) morrer();
         return true;

@@ -86,3 +86,6 @@ build/servicos$(EXE): tests/servicos.cpp $(TEST_OBJECTS) $(HEADERS)
 
 build/camera$(EXE): tests/camera.cpp Interface/camera.h
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS) $< -lsfml-graphics -lsfml-window -lsfml-system -o $@
+
+build/apresentacao$(EXE): tests/apresentacao.cpp $(TEST_OBJECTS) $(HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS) $< $(TEST_OBJECTS) $(LDLIBS) -o $@

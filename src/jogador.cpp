@@ -51,14 +51,18 @@ namespace Entidades
         {
             // O sprite tem transformacao propria: trocar arte nunca altera a colisao.
             const auto& estado = animacao.obter();
+            const auto pose=Animacao::pose_jogador(estado.correndo?1.f:0.f,velocidade.y,get_reacao());
+            const auto deformacao=Animacao::deformacao(pose,get_reacao()/12.f);
             if (jogador2) {
                 Animacao::desenhar_articulada(*pGG->get_Janela(),*Textura,corpo.getGlobalBounds(),estado,
-                    get_protecao() && (get_protecao()/5)%2 ? sf::Color(255,100,100,130) : sf::Color::White);
+                    get_protecao() && (get_protecao()/5)%2 ? sf::Color(255,100,100,130) : sf::Color::White,pose,get_reacao()/12.f);
                 return;
             }
             sf::Sprite visual;
             if (!jogador2) {
-                const auto& quadro = Recursos::corrida().at(estado.correndo ? estado.quadro : 9);
+                const unsigned indice=pose==Animacao::Pose::Subida?4:pose==Animacao::Pose::Queda?17:
+                    pose==Animacao::Pose::Dano?12:estado.correndo?estado.quadro:9;
+                const auto& quadro = Recursos::corrida().at(indice);
                 visual.setTexture(*quadro.textura);
                 visual.setTextureRect(quadro.regiao);
             } else visual.setTexture(*Textura);
@@ -66,7 +70,8 @@ namespace Entidades
             const auto caixa = corpo.getGlobalBounds();
             const float escala = caixa.height / area.height;
             visual.setOrigin(area.width / 2.f, area.height);
-            visual.setScale(estado.direita ? escala : -escala, escala);
+            visual.setScale((estado.direita ? escala : -escala)*deformacao.x, escala*deformacao.y);
+            visual.setRotation((estado.direita?1:-1)*deformacao.angulo);
             visual.setPosition(caixa.left + caixa.width / 2.f, caixa.top + caixa.height);
             // Preserva a sinalizacao existente de saude; a geometria continua independente.
             visual.setColor(get_protecao() && (get_protecao()/5)%2 ? sf::Color(255,100,100,130) : sf::Color::White);

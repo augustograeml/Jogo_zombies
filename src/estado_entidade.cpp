@@ -75,7 +75,7 @@ Json Serializador::salvar(const Entidades::Entidade& e) {
     }
     return {{"tipo", tipo}, {"posicao", vetor(e.corpo.getPosition())},
             {"velocidade", vetor(e.velocidade)}, {"vida", e.vida}, {"vivo", e.vivo},
-            {"protecao", e.get_protecao()}, {"nochao", e.nochao}, {"pausado", e.pausado},
+            {"protecao", e.get_protecao()}, {"reacao_visual", e.get_reacao()}, {"nochao", e.nochao}, {"pausado", e.pausado},
             {"tamanho", vetor(e.corpo.getSize())}, {"escala", vetor(e.corpo.getScale())},
             {"origem", vetor(e.corpo.getOrigin())}, {"rotacao", e.corpo.getRotation()},
             {"cor", e.corpo.getFillColor().toInteger()}, {"extra", extra}};
@@ -161,6 +161,7 @@ std::unique_ptr<Entidades::Entidade> Serializador::carregar(const Json& j) {
     e->corpo.setPosition(pos);
     e->posicao = pos;
     e->velocidade = vel;
+    e->set_reacao(static_cast<unsigned>(inteiro(j.value("reacao_visual",Json(0)),0,12)));
     e->set_protecao(static_cast<unsigned>(inteiro(j.value("protecao",Json(0)),0,600)));
     e->vida = inteiro(j.at("vida"), -1000000, 1000000);
     e->vivo = j.at("vivo").get<bool>();
