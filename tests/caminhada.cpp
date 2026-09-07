@@ -53,5 +53,5 @@ int main() {
     assert(solo.controle_solo() && !dupla.controle_solo());
     reaberto.restaurar(solo.capturar()); assert(reaberto.controle_solo());
     std::cout<<"Caminhada: poses distintas, direcao, parada, desenho sem mutacao, snapshots e controles por modo OK. Imagem: "<<arquivo<<'\n';
-    delete gg;
+    gg->encerrar();
 }

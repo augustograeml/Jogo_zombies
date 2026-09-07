@@ -2,6 +2,7 @@
 
 #pragma once
 #include <SFML/Graphics.hpp>
+#include <memory>
 class Ente;
 
 #define LARGURA_TELA 1024.0  
@@ -14,13 +15,17 @@ namespace Gerenciadores
     class Gerenciador_Grafico
     {
         private:
-            sf::RenderWindow* janela;
+            mutable std::unique_ptr<sf::RenderWindow> janela;
             sf::View camera;
             //singleton
             Gerenciador_Grafico();
-            static Gerenciador_Grafico* instancia;
+
         public:
             ~Gerenciador_Grafico();
+            Gerenciador_Grafico(const Gerenciador_Grafico&) = delete;
+            Gerenciador_Grafico& operator=(const Gerenciador_Grafico&) = delete;
+            bool inicializado() const { return static_cast<bool>(janela); }
+            void encerrar();
 
             void desenharEnte(Ente* pE);
             void desenharTextura(sf::Texture* pT);

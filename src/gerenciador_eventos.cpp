@@ -4,9 +4,10 @@
 #include "../Estados/estado.h"
 
 namespace Gerenciadores {
-Gerenciador_Eventos* Gerenciador_Eventos::instancia = nullptr;
+
 Gerenciador_Eventos::Gerenciador_Eventos() : pGrafico(Gerenciador_Grafico::get_instancia()) {}
-Gerenciador_Eventos::~Gerenciador_Eventos() {
+Gerenciador_Eventos::~Gerenciador_Eventos() { encerrar(); }
+void Gerenciador_Eventos::encerrar() {
     // O destrutor do observer se desanexa; remover antes evita invalidar iteradores.
     while (!lista_observers.empty()) {
         auto* observer = lista_observers.front();
@@ -15,8 +16,8 @@ Gerenciador_Eventos::~Gerenciador_Eventos() {
     }
 }
 Gerenciador_Eventos* Gerenciador_Eventos::get_instancia() {
-    if (!instancia) instancia = new Gerenciador_Eventos;
-    return instancia;
+    static Gerenciador_Eventos instancia;
+    return &instancia;
 }
 void Gerenciador_Eventos::executar() {
     while (pGrafico->get_Janela()->pollEvent(evento))

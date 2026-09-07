@@ -1,16 +1,23 @@
 #include "../Audio/efeitos.h"
+#include "../Gerenciadores/gerenciador_eventos.h"
 #include "../Gerenciadores/gerenciador_estados.h"
 #include "../Estados/estado.h"
 #include "../Estados/Fases/fase.h"
 #include <stdexcept>
 
 namespace Gerenciadores {
-Gerenciador_Estados* Gerenciador_Estados::instancia = nullptr;
+
 Gerenciador_Estados::Gerenciador_Estados() : estadoAtual(0), fase(-1), estados(11, nullptr) {}
-Gerenciador_Estados::~Gerenciador_Estados() { for (auto* estado : estados) delete estado; }
+Gerenciador_Estados::~Gerenciador_Estados() { encerrar(); }
+void Gerenciador_Estados::encerrar() {
+    for(auto*& estado:estados) { delete estado; estado=nullptr; }
+    estadoAtual=0; fase=-1; mensagem.clear();
+}
 Gerenciador_Estados* Gerenciador_Estados::get_instancia() {
-    if (!instancia) instancia = new Gerenciador_Estados;
-    return instancia;
+    // Eventos e graficos vivem mais que as telas/observers que os utilizam.
+    Gerenciador_Eventos::get_instancia();
+    static Gerenciador_Estados instancia;
+    return &instancia;
 }
 Estados::Estado* Gerenciador_Estados::get_estado(int id) {
     return id >= 0 && id < static_cast<int>(estados.size()) ? estados[id] : nullptr;

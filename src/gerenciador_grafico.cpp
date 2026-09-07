@@ -6,24 +6,16 @@
 
 namespace Gerenciadores
 {
-    Gerenciador_Grafico* Gerenciador_Grafico::instancia(nullptr);
 
-    Gerenciador_Grafico::Gerenciador_Grafico():
-    janela(new sf::RenderWindow(sf::VideoMode(LARGURA_TELA, ALTURA_TELA), "zombies++")),
-    camera(sf::Vector2f((LARGURA_TELA / 2.f)/*+ 50.f*/, (ALTURA_TELA / 2.f)), sf::Vector2f(LARGURA_TELA /*- 50.f*/, ALTURA_TELA)) // posição e tamanho
-    {
-        janela->setFramerateLimit(60);
-        janela->setKeyRepeatEnabled(false);
-        janela->setView(camera);
-    }
-    Gerenciador_Grafico::~Gerenciador_Grafico()
-    {
-        delete janela;
-    }
+
+    Gerenciador_Grafico::Gerenciador_Grafico() :
+        camera(sf::Vector2f(512,512),sf::Vector2f(1024,1024)) {}
+    Gerenciador_Grafico::~Gerenciador_Grafico() = default;
+    void Gerenciador_Grafico::encerrar() { janela.reset(); }
     void Gerenciador_Grafico::desenharEnte(Ente *pE)
     {
         if (pE)
-            janela->draw(*pE->get_corpo());
+            get_Janela()->draw(*pE->get_corpo());
     }
     void Gerenciador_Grafico::desenharTextura(sf::Texture* pT)
     {
@@ -31,32 +23,31 @@ namespace Gerenciadores
         {
             sf::Sprite sprite;
             sprite.setTexture(*pT);
-            janela->draw(sprite);
+            get_Janela()->draw(sprite);
         }
     }
     void Gerenciador_Grafico::desenharFundo(sf::RectangleShape* pR)
     {
         if (pR)
         {
-            janela->draw(*pR);
+            get_Janela()->draw(*pR);
         }
     }
     void Gerenciador_Grafico::desenharTexto(sf::Text* pT)
     {
         if (pT)
         {
-            janela->draw(*pT);
+            get_Janela()->draw(*pT);
         }
     }
     bool Gerenciador_Grafico::get_JanelaAberta() const
     {
-        return janela->isOpen();
+        return janela && janela->isOpen();
     }
     Gerenciador_Grafico *Gerenciador_Grafico::get_instancia()
     {
-        if (!instancia)
-            instancia = new Gerenciador_Grafico();
-        return instancia;
+        static Gerenciador_Grafico instancia;
+        return &instancia;
     }
     void Gerenciador_Grafico::mostrar()
     {
@@ -75,12 +66,18 @@ namespace Gerenciadores
     }
     sf::RenderWindow *Gerenciador_Grafico::get_Janela() const
     {
-        return janela;
+        if(!janela) {
+            janela=std::make_unique<sf::RenderWindow>(sf::VideoMode(LARGURA_TELA,ALTURA_TELA),"zombies++");
+            janela->setFramerateLimit(60);
+            janela->setKeyRepeatEnabled(false);
+            get_Janela()->setView(camera);
+        }
+        return janela.get();
     }
     void Gerenciador_Grafico::resetarCamera()
     {
         camera.setCenter(sf::Vector2f(LARGURA_TELA / 2.f, ALTURA_TELA / 2.f));
-        janela->setView(camera);
+        get_Janela()->setView(camera);
     }
     void Gerenciador_Grafico::centralizarCamera(sf::Vector2f p)//Entidades:Personagens:Jogador* pJ1, Entidades:Personagens:Jogador* pJ2)
     {        
@@ -103,6 +100,6 @@ namespace Gerenciadores
         else
             camera.setCenter(p);
            
-        janela->setView(camera);        
+        get_Janela()->setView(camera);        
     }
 }

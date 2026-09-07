@@ -21,10 +21,13 @@ namespace Gerenciadores
         private:
             int estadoAtual, fase;
             vector<Estados::Estado*> estados;
-            static Gerenciador_Estados* instancia;
+
             Gerenciador_Estados();
         public:
             ~Gerenciador_Estados();
+            void encerrar();
+            Gerenciador_Estados(const Gerenciador_Estados&) = delete;
+            Gerenciador_Estados& operator=(const Gerenciador_Estados&) = delete;
 
             static Gerenciador_Estados* get_instancia();
             void set_estado_atual(int eA);

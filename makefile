@@ -80,3 +80,6 @@ build/menu-saves$(EXE): tests/menu_saves.cpp $(TEST_OBJECTS) $(HEADERS)
 
 build/caminhada$(EXE): tests/caminhada.cpp $(TEST_OBJECTS) $(HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS) $< $(TEST_OBJECTS) $(LDLIBS) -o $@
+
+build/servicos$(EXE): tests/servicos.cpp $(TEST_OBJECTS) $(HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS) $< $(TEST_OBJECTS) $(LDLIBS) -o $@

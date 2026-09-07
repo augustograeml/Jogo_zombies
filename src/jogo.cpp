@@ -10,6 +10,7 @@
 Jogo::Jogo() : pG(Gerenciadores::Gerenciador_Grafico::get_instancia()),
     pE(Gerenciadores::Gerenciador_Estados::get_instancia()),
     pEv(Gerenciadores::Gerenciador_Eventos::get_instancia()) {
+    pG->get_Janela(); // Inicializacao explicita apenas ao iniciar o jogo.
     Persistencia::Slots::instancia().definir_validador([](const Persistencia::Json& j) {
         const auto motor = Persistencia::motor();
         try {
@@ -33,9 +34,10 @@ Jogo::Jogo() : pG(Gerenciadores::Gerenciador_Grafico::get_instancia()),
 }
 Jogo::~Jogo() {
     // As telas pertencem exclusivamente ao gerenciador. Graficos saem por ultimo.
-    delete pE;
-    delete pEv;
-    delete pG;
+    Audio::interromper();
+    pE->encerrar();
+    pEv->encerrar();
+    pG->encerrar();
 }
 void Jogo::Executar() {
     sf::Font fonte;

@@ -364,9 +364,9 @@ int main(int argc, char** argv) {
             persistencia(); ranking(); movimento_e_tempo(); fluxos();
             std::cout << verificacoes << " verificacoes aprovadas. Artefatos: " << pasta << '\n';
         }
-        delete Gerenciadores::Gerenciador_Estados::get_instancia();
-        delete Gerenciadores::Gerenciador_Eventos::get_instancia();
-        delete Gerenciadores::Gerenciador_Grafico::get_instancia();
+        Gerenciadores::Gerenciador_Estados::get_instancia()->encerrar();
+        Gerenciadores::Gerenciador_Eventos::get_instancia()->encerrar();
+        Gerenciadores::Gerenciador_Grafico::get_instancia()->encerrar();
         return 0;
     } catch (const std::exception& erro) { std::cerr << "FALHA: " << erro.what() << '\n'; return 1; }
 }

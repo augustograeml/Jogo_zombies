@@ -142,6 +142,6 @@ int main() {
         Audio::habilitar(); Audio::publicar({Logica::Evento::Salto}); Audio::configurar(0,true);
         Audio::publicar({Logica::Evento::Vitoria}); Audio::interromper();
         std::cout<<"Novidades: animacao, dano, grade, slots, recovery, pontos, HUD e audio OK. Artefatos: "<<pasta<<'\n';
-        delete ge; delete gg;
+        ge->encerrar(); gg->encerrar();
     } catch(const std::exception& e) { std::cerr<<e.what()<<'\n'; return 1; }
 }

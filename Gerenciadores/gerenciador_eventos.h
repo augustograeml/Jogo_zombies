@@ -19,7 +19,7 @@ namespace Gerenciadores
     {
         private:
             Gerenciador_Grafico* pGrafico;
-            static Gerenciador_Eventos* instancia;
+
             Gerenciador_Eventos();
             Event evento;
 
@@ -27,6 +27,9 @@ namespace Gerenciadores
             list<Observers::Observer*>::iterator it;
         public:
             ~Gerenciador_Eventos();
+            void encerrar();
+            Gerenciador_Eventos(const Gerenciador_Eventos&) = delete;
+            Gerenciador_Eventos& operator=(const Gerenciador_Eventos&) = delete;
             void executar();
             bool processar_evento(const sf::Event& evento);
             static Gerenciador_Eventos* get_instancia();
