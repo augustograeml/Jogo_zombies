@@ -34,14 +34,10 @@ int main() {
     assert(Persistencia::ler_json("partida.json.bak")==primeiro);
     ge->set_estado_atual(0); menu->tratar_evento(tecla(sf::Keyboard::Enter));
     menu->tratar_evento(tecla(sf::Keyboard::Num1)); menu->tratar_evento(tecla(sf::Keyboard::Enter));
-    assert(menu->substituicao_pendente() && ge->get_estado_atual()==0 && slots.selecionado()==3);
-    menu->tratar_evento(tecla(sf::Keyboard::Escape));
-    assert(!menu->substituicao_pendente() && menu->destinos_abertos());
-    menu->tratar_evento(tecla(sf::Keyboard::Enter)); menu->tratar_evento(tecla(sf::Keyboard::Enter));
     assert(ge->get_estado_atual()==1 && slots.selecionado()==1);
     assert(slots.ler()==anterior && Persistencia::ler_json("partida.json.bak")==primeiro);
     auto nova=primeiro; nova["partida_id"]="nova-partida"; slots.salvar(nova);
     assert(slots.ler()==nova && Persistencia::ler_json("partida.json.bak")==anterior);
     assert(!fs::exists("partida-slot2.json") && !fs::exists("partida-slot3.json"));
-    std::cout<<"Novo jogo: sugestao vazia, escolha de destino, cancelamento, confirmacao e backup OK.\n";
+    std::cout<<"Novo jogo: sugestao vazia, escolha de destino, cancelamento, escolha direta e backup OK.\n";
 }

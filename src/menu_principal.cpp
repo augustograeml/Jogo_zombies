@@ -26,7 +26,7 @@ void Menu_Principal::inicializa_valores() {
     textos[0].setOutlineThickness(20);
     textos[1].setOutlineThickness(4);
 }
-void Menu_Principal::ao_entrar() { pGG->resetarCamera(); escolhendo_partida=false; escolhendo_destino=false; confirmando_substituicao=false; }
+void Menu_Principal::ao_entrar() { pGG->resetarCamera(); escolhendo_partida=false; escolhendo_destino=false; }
 void Menu_Principal::atualizar_slots() {
     resumos.clear();
     for (const auto& r : Persistencia::Slots::instancia().listar()) {
@@ -54,8 +54,7 @@ void Menu_Principal::executar() {
         janela->draw(t);
     }
     const std::string instrucoes = escolhendo_destino
-        ? (confirmando_substituicao ? "Substituir a partida do slot " + std::to_string(destino_novo) + "?\nEnter ou clique novamente: confirmar | Esc: cancelar\nA partida anterior ficara na copia de recuperacao."
-           : "Setas ou 1/2/3: escolher | Enter: usar este slot\nEsc: voltar sem iniciar uma partida")
+        ? "Setas ou 1/2/3: escolher | Enter ou clique: usar este slot\nA partida anterior fica na copia de recuperacao | Esc: voltar"
         : "Setas ou 1/2/3: escolher | Enter: continuar\nR: recuperar anterior | Esc: voltar";
     sf::Text ajuda(instrucoes,fonte_slots,18);
     ajuda.setPosition(95,690); Interface::aplicar_texto(ajuda,820); janela->draw(ajuda);
@@ -87,14 +86,12 @@ void Menu_Principal::tratar_evento(const sf::Event& e) {
         if (e.type==sf::Event::MouseButtonReleased && e.mouseButton.button==sf::Mouse::Left) {
             const auto ponto=pGG->get_Janela()->mapPixelToCoords({e.mouseButton.x,e.mouseButton.y},pGG->get_view_interface());
             for (int i=0;i<3;++i) if (sf::FloatRect(92,350+100*i,840,82).contains(ponto)) {
-                if (destino_novo!=i+1) confirmando_substituicao=false;
                 destino_novo=i+1; iniciar_novo(); return;
             }
         }
         if (e.type!=sf::Event::KeyPressed) return;
         if (e.key.code==sf::Keyboard::Escape) {
-            if (confirmando_substituicao) confirmando_substituicao=false;
-            else escolhendo_destino=false;
+            escolhendo_destino=false;
             pGE->mensagem.clear(); return;
         }
         if (e.key.code==sf::Keyboard::Enter) { iniciar_novo(); return; }
@@ -102,7 +99,7 @@ void Menu_Principal::tratar_evento(const sf::Event& e) {
         if (e.key.code>=sf::Keyboard::Num1 && e.key.code<=sf::Keyboard::Num3) numero=e.key.code-sf::Keyboard::Num1+1;
         else if (e.key.code==sf::Keyboard::Up) numero=numero==1?3:numero-1;
         else if (e.key.code==sf::Keyboard::Down) numero=numero==3?1:numero+1;
-        if (numero!=destino_novo) { destino_novo=numero; confirmando_substituicao=false; pGE->mensagem.clear(); }
+        if (numero!=destino_novo) { destino_novo=numero; pGE->mensagem.clear(); }
         return;
     }
     if(e.type==sf::Event::MouseButtonReleased && e.mouseButton.button==sf::Mouse::Left) {
@@ -131,13 +128,10 @@ void Menu_Principal::iniciar_novo() {
         pGE->mensagem="Slot invalido. Recupere-o em Continuar ou escolha outro destino.";
         return;
     }
-    if ((resumo.existe || resumo.backup_disponivel) && !confirmando_substituicao) {
-        confirmando_substituicao=true; return;
-    }
     // A escolha nao grava nem remove arquivos. O primeiro save preserva a partida anterior em .bak.
     if (!pGE->salvar_partida()) return;
     slots.selecionar(destino_novo); pGE->set_fase(-1);
-    pGE->mensagem.clear(); escolhendo_destino=false; confirmando_substituicao=false;
+    pGE->mensagem.clear(); escolhendo_destino=false;
     pGE->set_estado_atual(Estados::Tela::Jogadores);
 }
 void Menu_Principal::fase_salva() {
@@ -166,7 +160,7 @@ void Menu_Principal::selecionar() {
         auto& slots=Persistencia::Slots::instancia();
         destino_novo=slots.selecionado();
         for (const auto& resumo:slots.listar()) if (!resumo.existe && !resumo.backup_disponivel) { destino_novo=resumo.numero; break; }
-        escolhendo_destino=true; atualizar_slots(); pGE->mensagem.clear(); confirmando_substituicao=false;
+        escolhendo_destino=true; atualizar_slots(); pGE->mensagem.clear();
     }
     else if (pos == 2) {
         if (!pGE->salvar_partida()) return;
