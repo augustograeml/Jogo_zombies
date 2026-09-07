@@ -2,15 +2,8 @@ name: Build and Release
 
 on:
   push:
-    tags:
-      - "v*.*.*"
-
-  workflow_dispatch:
-    inputs:
-      tag:
-        description: "Versão da release, por exemplo v1.0.0"
-        required: true
-        type: string
+    branches:
+      - master
 
 permissions:
   contents: write
@@ -77,7 +70,7 @@ jobs:
 
           chmod +x linuxdeploy.AppImage
 
-      - name: Incluir bibliotecas no AppDir
+      - name: Incluir bibliotecas
         run: |
           APPIMAGE_EXTRACT_AND_RUN=1 ./linuxdeploy.AppImage \
             --appdir AppDir \
@@ -94,24 +87,18 @@ jobs:
           chmod +x appimagetool.AppImage
 
       - name: Gerar AppImage
-        shell: bash
         run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            TAG="${{ inputs.tag }}"
-          else
-            TAG="${GITHUB_REF_NAME}"
-          fi
-
           ARCH=x86_64 APPIMAGE_EXTRACT_AND_RUN=1 \
             ./appimagetool.AppImage \
             AppDir \
-            "Zombies++-${TAG}-Linux-x86_64.AppImage"
+            Zombies++-Linux-x86_64.AppImage
 
-      - name: Upload do build Linux
+      - name: Salvar build Linux
         uses: actions/upload-artifact@v4
         with:
           name: linux
-          path: Zombies++-*-Linux-x86_64.AppImage
+          path: Zombies++-Linux-x86_64.AppImage
+
 
   windows:
     name: Windows x86-64
@@ -152,23 +139,18 @@ jobs:
             fi
           done
 
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            TAG="${{ inputs.tag }}"
-          else
-            TAG="${GITHUB_REF_NAME}"
-          fi
-
           cd dist
-          zip -r "../Zombies++-${TAG}-Windows-x86_64.zip" Zombies++
+          zip -r ../Zombies++-Windows-x86_64.zip Zombies++
 
-      - name: Upload do build Windows
+      - name: Salvar build Windows
         uses: actions/upload-artifact@v4
         with:
           name: windows
-          path: Zombies++-*-Windows-x86_64.zip
+          path: Zombies++-Windows-x86_64.zip
+
 
   release:
-    name: Publicar Release
+    name: Criar nova versão
     needs:
       - linux
       - windows
@@ -176,28 +158,78 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout com histórico e tags
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - name: Baixar builds
         uses: actions/download-artifact@v4
         with:
           path: dist
           merge-multiple: true
 
-      - name: Publicar release
+      - name: Calcular versão, criar tag e publicar
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: bash
         run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            TAG="${{ inputs.tag }}"
-          else
-            TAG="${GITHUB_REF_NAME}"
-          fi
+          git fetch --tags origin
 
-          if gh release view "$TAG" >/dev/null 2>&1; then
-            gh release upload "$TAG" dist/* --clobber
-          else
-            gh release create "$TAG" \
-              dist/* \
-              --title "Zombies++ $TAG" \
-              --generate-notes
-          fi
+          # Tenta criar a próxima versão.
+          # O loop evita colisão caso dois builds terminem quase juntos.
+          while true; do
+
+            LATEST="$(
+              git tag -l 'v[0-9]*.[0-9]*.[0-9]*' \
+                --sort=-v:refname \
+                | head -n 1
+            )"
+
+            if [ -z "$LATEST" ]; then
+              MAJOR=1
+              MINOR=0
+              PATCH=0
+            else
+              VERSION="${LATEST#v}"
+
+              IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
+
+              PATCH=$((PATCH + 1))
+            fi
+
+            TAG="v${MAJOR}.${MINOR}.${PATCH}"
+
+            echo "Tentando criar ${TAG}..."
+
+            git tag "$TAG" "$GITHUB_SHA"
+
+            if git push origin "$TAG"; then
+              break
+            fi
+
+            echo "A tag ${TAG} já foi criada por outro workflow."
+            echo "Calculando a próxima..."
+
+            git tag -d "$TAG" || true
+            git fetch --tags origin
+
+            sleep 2
+          done
+
+          echo "Nova versão: $TAG"
+
+          mv \
+            dist/Zombies++-Linux-x86_64.AppImage \
+            "dist/Zombies++-${TAG}-Linux-x86_64.AppImage"
+
+          mv \
+            dist/Zombies++-Windows-x86_64.zip \
+            "dist/Zombies++-${TAG}-Windows-x86_64.zip"
+
+          gh release create "$TAG" \
+            "dist/Zombies++-${TAG}-Linux-x86_64.AppImage" \
+            "dist/Zombies++-${TAG}-Windows-x86_64.zip" \
+            --title "Zombies++ $TAG" \
+            --generate-notes \
+            --latest
