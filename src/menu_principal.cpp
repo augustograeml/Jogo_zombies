@@ -1,5 +1,6 @@
 #include "../Persistencia/slots.h"
 #include "../Interface/painel.h"
+#include "../Interface/preferencias.h"
 #include "../Recursos/catalogo.h"
 #include "../Estados/Menus/menu_principal.h"
 #include "../Estados/Fases/fase1.h"
@@ -41,15 +42,15 @@ void Menu_Principal::executar() {
     if (!escolhendo_partida && !escolhendo_destino) { mostrar_menu(); return; }
     pGG->resetarCamera(); pGG->desenharTextura(imagem);
     auto* janela=pGG->get_Janela();
-    sf::RectangleShape fundo({920,580}); fundo.setPosition(52,225); fundo.setFillColor({8,15,23,245}); janela->draw(fundo);
-    sf::Text titulo(escolhendo_destino?"Novo jogo: escolher destino":"Continuar jogo",fonte_slots,34); titulo.setPosition(95,260); janela->draw(titulo);
+    sf::RectangleShape fundo({920,580}); fundo.setPosition(52,225); fundo.setFillColor(Interface::Preferencias::instancia().contraste?sf::Color::Black:sf::Color(8,15,23,245)); janela->draw(fundo);
+    sf::Text titulo(escolhendo_destino?"Novo jogo: escolher destino":"Continuar jogo",fonte_slots,34); titulo.setPosition(95,260); Interface::aplicar_texto(titulo,820); janela->draw(titulo);
     for (std::size_t i=0;i<resumos.size();++i) {
         const bool atual=static_cast<int>(i+1)==(escolhendo_destino?destino_novo:Persistencia::Slots::instancia().selecionado());
         sf::RectangleShape cartao({840,82}); cartao.setPosition(92,350+100*i);
         cartao.setFillColor(atual?sf::Color(29,75,71):sf::Color(27,35,45)); janela->draw(cartao);
-        sf::Text t(resumos[i],fonte_slots,18); t.setPosition(110,376+100*i);
+        sf::Text t((atual?"> ":"  ")+resumos[i],fonte_slots,18); t.setPosition(110,376+100*i);
         t.setFillColor(atual?sf::Color(107,243,211):sf::Color::White);
-        if(t.getLocalBounds().width>800) t.setScale(800/t.getLocalBounds().width,1);
+        Interface::aplicar_texto(t,800);
         janela->draw(t);
     }
     const std::string instrucoes = escolhendo_destino
@@ -57,7 +58,7 @@ void Menu_Principal::executar() {
            : "Setas ou 1/2/3: escolher | Enter: usar este slot\nEsc: voltar sem iniciar uma partida")
         : "Setas ou 1/2/3: escolher | Enter: continuar\nR: recuperar anterior | Esc: voltar";
     sf::Text ajuda(instrucoes,fonte_slots,18);
-    ajuda.setPosition(95,690); janela->draw(ajuda);
+    ajuda.setPosition(95,690); Interface::aplicar_texto(ajuda,820); janela->draw(ajuda);
 }
 void Menu_Principal::escolher_slot(int numero) {
     if(numero!=Persistencia::Slots::instancia().selecionado()) {
@@ -70,9 +71,14 @@ void Menu_Principal::tratar_evento(const sf::Event& e) {
     if (!escolhendo_partida && !escolhendo_destino) {
         if(e.type==sf::Event::MouseButtonReleased && e.mouseButton.button==sf::Mouse::Left) {
             const auto ponto=pGG->get_Janela()->mapPixelToCoords({e.mouseButton.x,e.mouseButton.y},pGG->get_Janela()->getDefaultView());
-            for(std::size_t i=1;i<textos.size();++i) if(textos[i].getGlobalBounds().contains(ponto)) {
+            for(std::size_t i=1;i<textos.size();++i) {
+                auto alvo=textos[i];
+                if(i==static_cast<std::size_t>(pos)) alvo.setString(sf::String("> ")+alvo.getString());
+                Interface::aplicar_texto(alvo,1000-alvo.getPosition().x);
+                if(alvo.getGlobalBounds().contains(ponto)) {
                 textos[pos].setOutlineThickness(0); pos=static_cast<int>(i); textos[pos].setOutlineThickness(4);
                 pGE->mensagem.clear(); selecionar(); return;
+                }
             }
         }
         Menu::tratar_evento(e); return;

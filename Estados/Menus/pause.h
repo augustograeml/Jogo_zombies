@@ -13,6 +13,8 @@ namespace Estados
             protected:
                  static Gerenciadores::Gerenciador_Grafico* pGG;
                 int pos;
+                bool preferencias_abertas=false;
+                int preferencia=0;
                 //o deselecionar é necessario porque como o loop pra rodar o jogo eh rapido pode acontecer de uma opcao ser selecionada duplicada no menu
                 bool selecionado, deselecionado, inicio;
 

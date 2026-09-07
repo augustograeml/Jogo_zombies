@@ -1,4 +1,5 @@
 #include <algorithm>
+#include "../Interface/preferencias.h"
 #include "../Persistencia/pontos.h"
 #include "../Recursos/catalogo.h"
 #include "../Interface/painel.h"
@@ -9,6 +10,7 @@
 #include <stdexcept>
 
 namespace Interface {
+float altura_painel() { return 190.f*Preferencias::instancia().escala; }
 std::string formatar_tempo(double segundos) {
     const auto centesimos = static_cast<std::uint64_t>(std::llround(segundos * 100));
     std::ostringstream texto;
@@ -39,17 +41,20 @@ void PainelPartida::atualizar_recorde(int numero_fase, int quantidade) {
 }
 void PainelPartida::desenhar(sf::RenderWindow& janela, double segundos, int pontos, const std::vector<int>& vidas) const {
     const auto camera = janela.getView();
-    janela.setView(janela.getDefaultView());
+    auto vista=janela.getDefaultView();
+    const auto& preferencias=Preferencias::instancia();
+    const auto tamanho=vista.getSize()/preferencias.escala;
+    vista.setSize(tamanho); vista.setCenter(tamanho/2.f); janela.setView(vista);
     const float largura = janela.getView().getSize().x;
     const float divisao1 = largura * 0.22f, divisao2 = largura * 0.55f;
     sf::RectangleShape fundo({largura, 100});
-    fundo.setFillColor(sf::Color(8, 15, 23, 232)); janela.draw(fundo);
+    fundo.setFillColor(preferencias.contraste?sf::Color::Black:sf::Color(8, 15, 23, 232)); janela.draw(fundo);
     sf::RectangleShape detalhe({largura, 3}); detalhe.setPosition(0, 98);
     detalhe.setFillColor(sf::Color(66, 218, 181)); janela.draw(detalhe);
     auto texto = [&](const std::string& valor, float x, float y, unsigned tamanho,
                      sf::Color cor, float limite) {
-        sf::Text t(sf::String::fromUtf8(valor.begin(), valor.end()), fonte, tamanho);
-        t.setPosition(x, y); t.setFillColor(cor);
+        sf::Text t(sf::String::fromUtf8(valor.begin(), valor.end()), preferencias.legivel?fonte_legivel():fonte, tamanho);
+        t.setPosition(x, y); t.setFillColor(preferencias.contraste?sf::Color::White:cor);
         const float w = t.getLocalBounds().width;
         if (w > limite) t.setScale(limite / w, limite / w);
         janela.draw(t);
@@ -63,15 +68,15 @@ void PainelPartida::desenhar(sf::RenderWindow& janela, double segundos, int pont
     texto(recorde ? formatar_tempo(*recorde) : (erro_recorde ? "Indisponivel" : "Sem recorde"),
           divisao2, 37, 23, ouro, largura - divisao2 - 20);
     if (recorde) texto(titulares, divisao2, 73, 12, legenda, largura - divisao2 - 20);
-    sf::RectangleShape segunda({largura,58}); segunda.setPosition(0,100); segunda.setFillColor({8,15,23,245}); janela.draw(segunda);
+    sf::RectangleShape segunda({largura,90}); segunda.setPosition(0,100); segunda.setFillColor(preferencias.contraste?sf::Color::Black:sf::Color(8,15,23,245)); janela.draw(segunda);
     for(std::size_t i=0;i<vidas.size();++i) {
         const float x=20+190*i;
         texto("J"+std::to_string(i+1)+"  "+std::to_string(std::max(0,vidas[i]))+"/20",x,103,14,legenda,170);
         sf::RectangleShape base({160,12}); base.setPosition(x,132); base.setFillColor({55,65,75}); janela.draw(base);
         base.setSize({160*std::clamp(vidas[i]/20.f,0.f,1.f),12}); base.setFillColor(vidas[i]<10?sf::Color(255,120,110):verde); janela.draw(base);
     }
-    texto("PONTOS: "+std::to_string(pontos),440,110,20,verde,240);
-    texto("MELHOR: "+std::to_string(recorde_pontos),700,110,20,ouro,largura-720);
+    texto("PONTOS: "+std::to_string(pontos),20,158,18,verde,largura*.48f-20);
+    texto("MELHOR: "+std::to_string(recorde_pontos),largura*.5f,158,18,ouro,largura*.5f-20);
     janela.setView(camera);
 }
 }

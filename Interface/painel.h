@@ -6,6 +6,7 @@
 
 namespace Interface {
 std::string formatar_tempo(double segundos);
+float altura_painel();
 // O recorde e consultado ao entrar na fase; o desenho nao acessa o disco.
 class PainelPartida {
     sf::Font fonte;

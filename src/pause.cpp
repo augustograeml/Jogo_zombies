@@ -1,4 +1,5 @@
 #include "../Audio/efeitos.h"
+#include "../Interface/preferencias.h"
 #include "../Recursos/catalogo.h"
 #include "../Estados/Menus/pause.h"
 namespace Estados::Menus {
@@ -21,6 +22,18 @@ void Pause::inicializa_valores() {
 }
 void Pause::tratar_evento(const sf::Event& evento) {
     if (evento.type != sf::Event::KeyPressed) return;
+    const auto tecla=evento.key.code;
+    if(tecla==sf::Keyboard::F) { preferencias_abertas=!preferencias_abertas; return; }
+    if(preferencias_abertas) {
+        if(tecla==sf::Keyboard::Escape) { preferencias_abertas=false; return; }
+        if(tecla==sf::Keyboard::Up) preferencia=(preferencia+5)%6;
+        if(tecla==sf::Keyboard::Down) preferencia=(preferencia+1)%6;
+        if(tecla==sf::Keyboard::Enter || tecla==sf::Keyboard::Right || tecla==sf::Keyboard::Left) {
+            if(preferencia<3) Interface::configurar(preferencia);
+            else Audio::configurar_categoria(static_cast<Audio::Categoria>(preferencia-3),tecla==sf::Keyboard::Left?-10:10);
+        }
+        return;
+    }
     if (evento.key.code == sf::Keyboard::M || evento.key.code == sf::Keyboard::Add ||
         evento.key.code == sf::Keyboard::Equal || evento.key.code == sf::Keyboard::Subtract || evento.key.code == sf::Keyboard::Hyphen) {
         const bool reduzir = evento.key.code==sf::Keyboard::Subtract || evento.key.code==sf::Keyboard::Hyphen;
@@ -37,10 +50,32 @@ void Pause::tratar_evento(const sf::Event& evento) {
 }
 void Pause::mostrar_menu() {
     pGG->resetarCamera(); pGG->desenharTextura(imagem);
-    for (const auto& texto : textos) pGG->get_Janela()->draw(texto);
+    auto& janela=*pGG->get_Janela();
+    if(Interface::Preferencias::instancia().contraste || preferencias_abertas) { sf::RectangleShape fundo({1024,1024}); fundo.setFillColor(sf::Color::Black); janela.draw(fundo); }
+    if(preferencias_abertas) {
+        const auto& p=Interface::Preferencias::instancia(); const auto& a=Audio::Preferencias::instancia();
+        const std::vector<std::string> linhas={
+            "Escala: "+std::to_string(static_cast<int>(p.escala*100))+"%",
+            std::string("Fonte legivel: ")+(p.legivel?"sim":"nao"),
+            std::string("Alto contraste: ")+(p.contraste?"sim":"nao"),
+            "Movimento e coleta: "+std::to_string(static_cast<int>(a.volumes[0]))+"%",
+            "Combate: "+std::to_string(static_cast<int>(a.volumes[1]))+"%",
+            "Vitoria e derrota: "+std::to_string(static_cast<int>(a.volumes[2]))+"%"};
+        auto escrever=[&](std::string valor,float y,unsigned tamanho) { sf::Text t(valor,Interface::fonte_legivel(),tamanho); t.setPosition(90,y); Interface::aplicar_texto(t,840); janela.draw(t); };
+        escrever("Preferencias",90,42);
+        for(std::size_t i=0;i<linhas.size();++i) escrever((preferencia==static_cast<int>(i)?"> ":"  ")+linhas[i],230+80*i,26);
+        escrever("Setas: selecionar/ajustar | Enter: alterar",810,22);
+        escrever("Esc ou F: voltar | Preferencias salvas automaticamente",860,20);
+        return;
+    }
+    for (std::size_t i=0;i<textos.size();++i) {
+        auto texto=textos[i];
+        if(i==static_cast<std::size_t>(pos)) texto.setString(sf::String("> ")+texto.getString());
+        Interface::aplicar_texto(texto,1000-texto.getPosition().x);
+        janela.draw(texto); }
     const auto& p=Audio::Preferencias::instancia();
-    sf::Text ajuda("S: salvar | M: silenciar | +/-: volume " + std::to_string(static_cast<int>(p.volume)) +
-        (p.mudo?" (mudo)":""), *fonte, 24);
+    sf::Text ajuda("F: preferencias | S: salvar | M: mudo | +/-: volume " + std::to_string(static_cast<int>(p.volume)) +
+        (p.mudo?" (mudo)":""), Interface::fonte_legivel(), 20);
     ajuda.setPosition(80,800); pGG->get_Janela()->draw(ajuda);
 }
 void Pause::executar() { mostrar_menu(); }
