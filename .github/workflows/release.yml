@@ -26,7 +26,8 @@ jobs:
             libsfml-dev \
             curl \
             file \
-            patchelf
+            patchelf \
+            imagemagick
 
       - name: Compilar
         run: |
@@ -43,8 +44,11 @@ jobs:
 
           cat > AppDir/AppRun <<'EOF'
           #!/bin/sh
+
           APPDIR="$(dirname "$(readlink -f "$0")")"
+
           export ZOMBIES_RECURSOS="$APPDIR/usr/share/zombies"
+
           exec "$APPDIR/usr/bin/zombies" "$@"
           EOF
 
@@ -60,7 +64,13 @@ jobs:
           Terminal=false
           EOF
 
-          cp Design/imagens/zumbi_bateu_morreu.png AppDir/zombies.png
+          # O linuxdeploy exige um ícone quadrado em resolução válida.
+          convert Design/imagens/zumbi_bateu_morreu.png \
+            -thumbnail 224x224 \
+            -background none \
+            -gravity center \
+            -extent 256x256 \
+            AppDir/zombies.png
 
       - name: Baixar linuxdeploy
         run: |
@@ -98,6 +108,7 @@ jobs:
         with:
           name: linux
           path: Zombies++-Linux-x86_64.AppImage
+          if-no-files-found: error
 
 
   windows:
@@ -116,41 +127,100 @@ jobs:
           install: >-
             make
             zip
+            git
             mingw-w64-x86_64-gcc
-            mingw-w64-x86_64-sfml
+            mingw-w64-x86_64-cmake
+            mingw-w64-x86_64-ninja
 
-      - name: Compilar
+      - name: Compilar SFML 2.6.2
         shell: msys2 {0}
         run: |
+          git clone \
+            --depth 1 \
+            --branch 2.6.2 \
+            https://github.com/SFML/SFML.git \
+            SFML-src
+
+          cmake \
+            -S SFML-src \
+            -B SFML-build \
+            -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DBUILD_SHARED_LIBS=ON \
+            -DSFML_BUILD_EXAMPLES=OFF \
+            -DSFML_BUILD_DOC=OFF \
+            -DCMAKE_INSTALL_PREFIX="$PWD/SFML-local"
+
+          cmake --build SFML-build --parallel 4
+          cmake --install SFML-build
+
+      - name: Compilar Zombies++
+        shell: msys2 {0}
+        run: |
+          export PATH="$PWD/SFML-local/bin:$PATH"
+
           make clean
-          make -j4
+
+          make -j4 \
+            SFML_ROOT="$PWD/SFML-local"
 
       - name: Montar pacote Windows
         shell: msys2 {0}
         run: |
+          export PATH="$PWD/SFML-local/bin:$PATH"
+
           mkdir -p dist/Zombies++
 
-          cp prog.exe dist/Zombies++/Zombies++.exe
-          cp -r Design dist/Zombies++/Design
+          cp prog.exe \
+            dist/Zombies++/Zombies++.exe
 
-          ldd prog.exe | awk '/=> \// {print $3}' | while read dll; do
-            if [ -f "$dll" ]; then
-              cp -n "$dll" dist/Zombies++/ || true
-            fi
-          done
+          cp -r Design \
+            dist/Zombies++/Design
+
+          # DLLs da SFML 2.6.2 compilada pelo workflow.
+          cp -n SFML-local/bin/*.dll \
+            dist/Zombies++/
+
+          # Dependências extras distribuídas pela própria SFML,
+          # como OpenAL, caso estejam presentes.
+          if [ -d SFML-src/extlibs/bin/x64 ]; then
+            cp -n \
+              SFML-src/extlibs/bin/x64/*.dll \
+              dist/Zombies++/ \
+              2>/dev/null || true
+          fi
+
+          # Runtime do MinGW necessário para rodar o .exe
+          # em uma máquina Windows sem MSYS2 instalado.
+          ldd prog.exe \
+            | awk '/=> \/mingw64\// {print $3}' \
+            | sort -u \
+            | while read -r dll; do
+
+                if [ -f "$dll" ]; then
+                  cp -n "$dll" \
+                    dist/Zombies++/ || true
+                fi
+
+              done
 
           cd dist
-          zip -r ../Zombies++-Windows-x86_64.zip Zombies++
+
+          zip -r \
+            ../Zombies++-Windows-x86_64.zip \
+            Zombies++
 
       - name: Salvar build Windows
         uses: actions/upload-artifact@v4
         with:
           name: windows
           path: Zombies++-Windows-x86_64.zip
+          if-no-files-found: error
 
 
   release:
     name: Criar nova versão
+
     needs:
       - linux
       - windows
@@ -172,30 +242,39 @@ jobs:
       - name: Calcular versão, criar tag e publicar
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
         shell: bash
+
         run: |
           git fetch --tags origin
 
-          # Tenta criar a próxima versão.
-          # O loop evita colisão caso dois builds terminem quase juntos.
           while true; do
 
             LATEST="$(
-              git tag -l 'v[0-9]*.[0-9]*.[0-9]*' \
+              git tag \
+                -l 'v[0-9]*.[0-9]*.[0-9]*' \
                 --sort=-v:refname \
-                | head -n 1
+              | head -n 1
             )"
 
             if [ -z "$LATEST" ]; then
+
               MAJOR=1
               MINOR=0
               PATCH=0
+
             else
+
               VERSION="${LATEST#v}"
 
-              IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
+              IFS='.' read -r \
+                MAJOR \
+                MINOR \
+                PATCH \
+                <<< "$VERSION"
 
               PATCH=$((PATCH + 1))
+
             fi
 
             TAG="v${MAJOR}.${MINOR}.${PATCH}"
@@ -208,13 +287,13 @@ jobs:
               break
             fi
 
-            echo "A tag ${TAG} já foi criada por outro workflow."
-            echo "Calculando a próxima..."
+            echo "A tag ${TAG} já existe. Recalculando..."
 
             git tag -d "$TAG" || true
             git fetch --tags origin
 
             sleep 2
+
           done
 
           echo "Nova versão: $TAG"
