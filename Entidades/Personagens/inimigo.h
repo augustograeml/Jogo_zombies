@@ -2,6 +2,7 @@
 namespace Persistencia { class Serializador; }
 #include "../entidade.h"
 #include "../projetil.h"
+#include "../../Logica/comportamento.h"
 #include "jogador.h"  
 
 namespace Entidades
@@ -29,6 +30,7 @@ namespace Entidades
                 void update(sf::Vector2f& posicao_jogador);
                 void mudar_direcao();
 
+                virtual void perceber(const std::vector<Logica::Alvo>&) {}
                 virtual void atualizar() = 0;
                 virtual void mover() = 0;
 

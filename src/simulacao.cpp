@@ -24,8 +24,8 @@ FimPasso simular(Mundo& m) {
         antes.push_back({j,j->get_vida(),j->get_vivo(),j->getVelocidade().y});
     }
     for (auto it = inimigos.get_primeiro(); it != nullptr; ++it) {
-        auto* a = dynamic_cast<Entidades::Personagens::Arqueiro*>(*it);
-        if (a) a->perceber(alvos);
+        auto* inimigo = static_cast<Entidades::Personagens::Inimigo*>(*it);
+        inimigo->perceber(alvos);
         antes.push_back({*it,(*it)->get_vida(),(*it)->get_vivo(),0});
     }
     for (auto it = obstaculos.get_primeiro(); it != nullptr; ++it)

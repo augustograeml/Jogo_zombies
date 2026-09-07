@@ -63,8 +63,16 @@ namespace Entidades
 
         void Zumbi::executar()
         {
-            if (vivo)
-                mover();
+            if (vivo) {
+                comportamento.direita=direcao;
+                Logica::decidir_zumbi(comportamento,getPosicao().x,getPosicao().y,alvos);
+                direcao=comportamento.direita;
+                if(comportamento.acao==Logica::AcaoCorpo::Perseguindo) {
+                    velocidade.x=direcao?0.65f:-0.65f;
+                    velocidade.y=nochao?0.f:velocidade.y+0.1f;
+                    nochao=false; atualizar();
+                } else mover();
+            }
         }
 
         void Zumbi::atacar(Entidade *jg)

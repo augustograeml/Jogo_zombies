@@ -60,15 +60,27 @@ namespace Entidades
 
         void Gigante::executar()
         {
-            if (vivo)
-                mover();
+            if (vivo) {
+                if(comportamento.acao==Logica::AcaoCorpo::Patrulha) comportamento.direita=direcao;
+                Logica::decidir_gigante(comportamento,getPosicao().x,getPosicao().y,alvos);
+                direcao=comportamento.direita;
+                if(comportamento.acao==Logica::AcaoCorpo::Patrulha) mover();
+                else {
+                    velocidade.x=comportamento.acao==Logica::AcaoCorpo::Golpe?(direcao?0.9f:-0.9f):0.f;
+                    velocidade.y=nochao?0.f:velocidade.y+0.1f;
+                    nochao=false; atualizar();
+                }
+                corpo.setFillColor(comportamento.acao==Logica::AcaoCorpo::Preparando?sf::Color(255,180,90):
+                    comportamento.acao==Logica::AcaoCorpo::Golpe?sf::Color(255,95,95):
+                    comportamento.acao==Logica::AcaoCorpo::Recuperando?sf::Color(170,190,210):sf::Color::White);
+            }
         }
         void Gigante::colidir(Entidade *pE, int a)
         {
             if (a == 1 || a == 3)
             {
                 atacar(pE);
-                mudar_direcao();
+                if(comportamento.acao==Logica::AcaoCorpo::Patrulha) mudar_direcao();
             }
             else if (a == 4)
             {
@@ -85,7 +97,7 @@ namespace Entidades
 
         void Gigante::atacar(Entidade *jg)
         {
-            jg->receber_dano(forca);
+            if(comportamento.acao==Logica::AcaoCorpo::Golpe) jg->receber_dano(forca);
         }
 
         void Gigante::salvar(std::ostringstream* entrada)

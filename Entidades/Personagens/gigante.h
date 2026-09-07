@@ -1,6 +1,7 @@
 #pragma once
 namespace Persistencia { class Serializador; }
 #include "inimigo.h"
+#include "../../Logica/corpo_a_corpo.h"
 
 namespace Entidades
 {
@@ -10,6 +11,8 @@ namespace Entidades
         {
         friend class Persistencia::Serializador;
             private:
+                Logica::EstadoCorpo comportamento;
+                std::vector<Logica::Alvo> alvos;
                 bool ja_inc;
                 double tempo_pulo;
                 int numero_salvo_gigantes;
@@ -18,6 +21,9 @@ namespace Entidades
                 ~Gigante();
 
                 void executar();
+                void perceber(const std::vector<Logica::Alvo>& jogadores) override { alvos=jogadores; }
+                const Logica::EstadoCorpo& get_comportamento() const { return comportamento; }
+                void restaurar_comportamento(Logica::EstadoCorpo e) { comportamento=e; }
                 void mover();
                 void atualizar();
                 void colidir(Entidade* pE, int a);

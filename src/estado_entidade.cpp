@@ -9,6 +9,20 @@ sf::Vector2f vetor(const Json& j, double minimo = -1000000, double maximo = 1000
             static_cast<float>(numero(j[1], minimo, maximo))};
 }
 Json vetor(sf::Vector2f v) { return Json::array({v.x, v.y}); }
+Json corpo_a_corpo(const Logica::EstadoCorpo& c) {
+    return {{"acao",static_cast<int>(c.acao)},{"alvo",c.alvo},{"passos",c.passos},
+        {"direita",c.direita},{"origem",c.origem},{"iniciado",c.iniciado}};
+}
+Logica::EstadoCorpo corpo_a_corpo(const Json& c, bool gigante) {
+    const int acao=inteiro(c.at("acao"),0,4), alvo=inteiro(c.at("alvo"),-1,2);
+    if(alvo==0 || (gigante?acao==1:acao>1)) throw std::runtime_error("Comportamento invalido.");
+    const int limite=acao==2?41:acao==3?11:acao==4?59:0;
+    const unsigned passos=static_cast<unsigned>(inteiro(c.at("passos"),0,limite));
+    if((acao==1 || acao==2 || acao==3) != (alvo!=-1)) throw std::runtime_error("Alvo incoerente.");
+    return {static_cast<Logica::AcaoCorpo>(acao),alvo,passos,c.at("direita").get<bool>(),
+        static_cast<float>(numero(c.at("origem"),-1000000,1000000)),c.at("iniciado").get<bool>()};
+}
+
 }
 
 Json Serializador::salvar(const Entidades::Entidade& e) {
@@ -34,8 +48,10 @@ Json Serializador::salvar(const Entidades::Entidade& e) {
         for (const auto& flecha : p->vetor_projeteis) extra["projeteis"].push_back(salvar(flecha));
     } else if (auto p = dynamic_cast<const Zumbi*>(&e)) {
         tipo = "zumbi"; extra["pulo"] = p->pulo;
+        extra["comportamento"]=corpo_a_corpo(p->get_comportamento());
     } else if (auto p = dynamic_cast<const Gigante*>(&e)) {
         tipo = "gigante"; extra = {{"ja_inc", p->ja_inc}, {"tempo_pulo", p->tempo_pulo}};
+        extra["comportamento"]=corpo_a_corpo(p->get_comportamento());
     } else if (auto p = dynamic_cast<const Projetil*>(&e)) {
         tipo = "projetil"; extra = {{"dano", p->dano}, {"direcao", p->direcao}};
     } else if (auto p = dynamic_cast<const Coracao*>(&e)) {
@@ -113,11 +129,15 @@ std::unique_ptr<Entidades::Entidade> Serializador::carregar(const Json& j) {
         e = std::move(p);
     } else if (tipo == "zumbi") {
         auto p = std::make_unique<Zumbi>(pos, vel);
-        p->pulo = inteiro(x.at("pulo"), 0, 9); e = std::move(p);
+        p->pulo = inteiro(x.at("pulo"), 0, 9);
+        if(x.contains("comportamento")) p->restaurar_comportamento(corpo_a_corpo(x.at("comportamento"),false));
+        e = std::move(p);
     } else if (tipo == "gigante") {
         auto p = std::make_unique<Gigante>(pos, vel);
         p->ja_inc = x.at("ja_inc").get<bool>();
-        p->tempo_pulo = numero(x.at("tempo_pulo"), 0, 1e12); e = std::move(p);
+        p->tempo_pulo = numero(x.at("tempo_pulo"), 0, 1e12);
+        if(x.contains("comportamento")) p->restaurar_comportamento(corpo_a_corpo(x.at("comportamento"),true));
+        e = std::move(p);
     } else if (tipo == "projetil") {
         auto p = std::make_unique<Projetil>(pos, x.at("direcao").get<bool>());
         p->dano = inteiro(x.at("dano"), 0, 1000000); e = std::move(p);
