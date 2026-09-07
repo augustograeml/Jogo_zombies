@@ -1,0 +1,203 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Versão da release, por exemplo v1.0.0"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  linux:
+    name: Linux x86-64
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Instalar dependências
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            g++ \
+            make \
+            libsfml-dev \
+            curl \
+            file \
+            patchelf
+
+      - name: Compilar
+        run: |
+          make clean
+          make -j"$(nproc)"
+
+      - name: Montar AppDir
+        run: |
+          mkdir -p AppDir/usr/bin
+          mkdir -p AppDir/usr/share/zombies
+
+          cp prog AppDir/usr/bin/zombies
+          cp -r Design AppDir/usr/share/zombies/Design
+
+          cat > AppDir/AppRun <<'EOF'
+          #!/bin/sh
+          APPDIR="$(dirname "$(readlink -f "$0")")"
+          export ZOMBIES_RECURSOS="$APPDIR/usr/share/zombies"
+          exec "$APPDIR/usr/bin/zombies" "$@"
+          EOF
+
+          chmod +x AppDir/AppRun
+
+          cat > AppDir/zombies.desktop <<'EOF'
+          [Desktop Entry]
+          Type=Application
+          Name=Zombies++
+          Exec=zombies
+          Icon=zombies
+          Categories=Game;
+          Terminal=false
+          EOF
+
+          cp Design/imagens/zumbi_bateu_morreu.png AppDir/zombies.png
+
+      - name: Baixar linuxdeploy
+        run: |
+          curl -L \
+            -o linuxdeploy.AppImage \
+            https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
+
+          chmod +x linuxdeploy.AppImage
+
+      - name: Incluir bibliotecas no AppDir
+        run: |
+          APPIMAGE_EXTRACT_AND_RUN=1 ./linuxdeploy.AppImage \
+            --appdir AppDir \
+            --executable AppDir/usr/bin/zombies \
+            --desktop-file AppDir/zombies.desktop \
+            --icon-file AppDir/zombies.png
+
+      - name: Baixar appimagetool
+        run: |
+          curl -L \
+            -o appimagetool.AppImage \
+            https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
+
+          chmod +x appimagetool.AppImage
+
+      - name: Gerar AppImage
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            TAG="${{ inputs.tag }}"
+          else
+            TAG="${GITHUB_REF_NAME}"
+          fi
+
+          ARCH=x86_64 APPIMAGE_EXTRACT_AND_RUN=1 \
+            ./appimagetool.AppImage \
+            AppDir \
+            "Zombies++-${TAG}-Linux-x86_64.AppImage"
+
+      - name: Upload do build Linux
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux
+          path: Zombies++-*-Linux-x86_64.AppImage
+
+  windows:
+    name: Windows x86-64
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configurar MSYS2
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: true
+          install: >-
+            make
+            zip
+            mingw-w64-x86_64-gcc
+            mingw-w64-x86_64-sfml
+
+      - name: Compilar
+        shell: msys2 {0}
+        run: |
+          make clean
+          make -j4
+
+      - name: Montar pacote Windows
+        shell: msys2 {0}
+        run: |
+          mkdir -p dist/Zombies++
+
+          cp prog.exe dist/Zombies++/Zombies++.exe
+          cp -r Design dist/Zombies++/Design
+
+          ldd prog.exe | awk '/=> \// {print $3}' | while read dll; do
+            if [ -f "$dll" ]; then
+              cp -n "$dll" dist/Zombies++/ || true
+            fi
+          done
+
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            TAG="${{ inputs.tag }}"
+          else
+            TAG="${GITHUB_REF_NAME}"
+          fi
+
+          cd dist
+          zip -r "../Zombies++-${TAG}-Windows-x86_64.zip" Zombies++
+
+      - name: Upload do build Windows
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows
+          path: Zombies++-*-Windows-x86_64.zip
+
+  release:
+    name: Publicar Release
+    needs:
+      - linux
+      - windows
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Baixar builds
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Publicar release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            TAG="${{ inputs.tag }}"
+          else
+            TAG="${GITHUB_REF_NAME}"
+          fi
+
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" dist/* --clobber
+          else
+            gh release create "$TAG" \
+              dist/* \
+              --title "Zombies++ $TAG" \
+              --generate-notes
+          fi
