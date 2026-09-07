@@ -1,4 +1,5 @@
 #include "../Persistencia/pontos.h"
+#include "../Interface/preferencias.h"
 #include "../Recursos/catalogo.h"
 #include "../Estados/Menus/ranking.h"
 #include "../Persistencia/ranking.h"
@@ -54,9 +55,12 @@ void Ranking::tratar_evento(const sf::Event& evento) {
 void Ranking::executar() {
     auto* grafico = Gerenciadores::Gerenciador_Grafico::get_instancia();
     grafico->resetarCamera(); grafico->desenharTextura(&imagem);
+    if(Interface::Preferencias::instancia().contraste) {
+        sf::RectangleShape fundo({1024,1024}); fundo.setFillColor(sf::Color::Black); grafico->get_Janela()->draw(fundo);
+    }
     sf::RectangleShape painel({870, 500});
     painel.setPosition(75, 260); painel.setFillColor(sf::Color(12, 8, 22, 210));
     grafico->get_Janela()->draw(painel);
-    for (const auto& texto : textos) grafico->get_Janela()->draw(texto);
+    for (auto texto : textos) { Interface::aplicar_texto(texto,840); grafico->get_Janela()->draw(texto); }
 }
 }

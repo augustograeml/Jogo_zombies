@@ -66,3 +66,13 @@ Os três arquivos `*_corrida_atlas.png` foram gerados com a ferramenta de imagen
 `src/atlas.cpp` isola as oito maiores silhuetas e mantém as texturas em cache. Para exportações RGB com fundo neutro quadriculado, remove somente o fundo conectado às bordas durante a carga. O arquivo de imagem permanece intacto.
 
 Luigi não recebeu imagem gerada: `src/animacao_articulada.cpp` transforma uma malha sobre `luigiDireita.png`. A pose parada permanece original; braços e pernas alternam durante a caminhada, sem mudar a colisão.
+
+## Ciclos e apresentação da atualização P08/P09
+
+`Animacao/pose.h` escolhe poses de subida, queda e reação a dano; preparação/golpe/recuperação derivam dos contadores de comportamento persistidos dos inimigos. As transformações são somente visuais. `reacao_visual` é um campo opcional, limitado a 12 passos, com valor zero para saves antigos.
+
+A geração de uma folha nova do Luigi foi solicitada à ferramenta integrada de imagens em 07/09/2026: doze poses em grade 4×3 (oito de caminhada, repouso, salto, dano e pisão), preservando a aparência da referência e fundo transparente. A ferramenta rejeitou a saída (`moderation_blocked`, categoria `other`). Nenhum arquivo dessa tentativa foi incorporado. Continuam pendentes a nova folha e a padronização dos atlas; os recursos existentes permanecem em uso.
+
+`Recursos::area_cenario` identifica a região ilustrada dos fundos durante a carga, e `setTextureRect` exclui as margens brancas do desenho sem modificar os PNGs.
+
+A fonte alternativa `Design/fonte/DejaVuSans.ttf` acompanha a licença em `Design/fonte/DejaVu-LICENCA.md`. Pode ser ativada nas preferências da pausa, junto com escala, contraste e volumes por categoria.

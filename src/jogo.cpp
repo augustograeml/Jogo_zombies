@@ -34,7 +34,7 @@ Jogo::Jogo() : pG(Gerenciadores::Gerenciador_Grafico::get_instancia()),
 }
 Jogo::~Jogo() {
     // As telas pertencem exclusivamente ao gerenciador. Graficos saem por ultimo.
-    Audio::interromper();
+    Audio::desligar();
     pE->encerrar();
     pEv->encerrar();
     pG->encerrar();

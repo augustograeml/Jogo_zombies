@@ -19,3 +19,5 @@ sfml-*.dll
 /ranking-pontos.json*
 /preferencias.json*
 /PLANO_MELHORIAS_JOGO.md
+
+/interface.json*

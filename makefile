@@ -53,12 +53,13 @@ build/teste-logica$(EXE): tests/logica.cpp Audio/sintese.h Logica/entrada.h Logi
 build/novidades$(EXE): tests/novidades.cpp $(TEST_OBJECTS) $(HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS) tests/novidades.cpp $(TEST_OBJECTS) $(LDLIBS) -o $@
 .PHONY: test-logica test-integracao
-test-logica: build/teste-animacao$(EXE) build/teste-fisica$(EXE) build/teste-persistencia$(EXE) build/teste-logica$(EXE)
+test-logica: build/comportamentos$(EXE) build/teste-animacao$(EXE) build/teste-fisica$(EXE) build/teste-persistencia$(EXE) build/teste-logica$(EXE)
 	./build/teste-animacao$(EXE)
 	./build/teste-fisica$(EXE)
 	./build/teste-persistencia$(EXE)
 	./build/teste-logica$(EXE)
-test-integracao: build/caminhada$(EXE) build/testes$(EXE) build/novidades$(EXE) build/superficies$(EXE) build/animacao-integracao$(EXE) build/resultado-falha$(EXE) build/menu-saves$(EXE)
+	./build/comportamentos$(EXE)
+test-integracao: build/apresentacao$(EXE) build/novo-slot$(EXE) build/comportamentos-integracao$(EXE) build/acessibilidade$(EXE) build/servicos$(EXE) build/camera$(EXE) build/caminhada$(EXE) build/testes$(EXE) build/novidades$(EXE) build/superficies$(EXE) build/animacao-integracao$(EXE) build/resultado-falha$(EXE) build/menu-saves$(EXE)
 	./build/testes$(EXE)
 	./build/novidades$(EXE)
 	./build/superficies$(EXE)
@@ -66,6 +67,12 @@ test-integracao: build/caminhada$(EXE) build/testes$(EXE) build/novidades$(EXE) 
 	./build/resultado-falha$(EXE)
 	./build/menu-saves$(EXE)
 	./build/caminhada$(EXE)
+	./build/novo-slot$(EXE)
+	./build/comportamentos-integracao$(EXE)
+	./build/acessibilidade$(EXE)
+	./build/servicos$(EXE) janela
+	./build/camera$(EXE)
+	./build/apresentacao$(EXE)
 
 build/superficies$(EXE): tests/superficies.cpp $(TEST_OBJECTS) $(HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS) tests/superficies.cpp $(TEST_OBJECTS) $(LDLIBS) -o $@
@@ -86,6 +93,15 @@ build/servicos$(EXE): tests/servicos.cpp $(TEST_OBJECTS) $(HEADERS)
 
 build/camera$(EXE): tests/camera.cpp Interface/camera.h
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS) $< -lsfml-graphics -lsfml-window -lsfml-system -o $@
+
+build/novo-slot$(EXE): tests/novo_slot.cpp $(TEST_OBJECTS) $(HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS) $< $(TEST_OBJECTS) $(LDLIBS) -o $@
+build/comportamentos$(EXE): tests/comportamentos.cpp Logica/corpo_a_corpo.h
+	$(CXX) $(CXXFLAGS) $< -o $@
+build/comportamentos-integracao$(EXE): tests/comportamentos_integracao.cpp $(TEST_OBJECTS) $(HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS) $< $(TEST_OBJECTS) $(LDLIBS) -o $@
+build/acessibilidade$(EXE): tests/acessibilidade.cpp $(TEST_OBJECTS) $(HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS) $< $(TEST_OBJECTS) $(LDLIBS) -o $@
 
 build/apresentacao$(EXE): tests/apresentacao.cpp $(TEST_OBJECTS) $(HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS) $< $(TEST_OBJECTS) $(LDLIBS) -o $@

@@ -1,4 +1,5 @@
 #include "../Recursos/catalogo.h"
+#include "../Interface/preferencias.h"
 #include "../Estados/Menus/nome.h"
 #include "../Estados/Fases/fase2.h"
 #include <memory>
@@ -52,6 +53,9 @@ void Nome::tratar_evento(const sf::Event& evento) {
 }
 void Nome::executar() {
     pGG->resetarCamera(); pGG->desenharTextura(imagem);
+    if(Interface::Preferencias::instancia().contraste) {
+        sf::RectangleShape fundo({1024,1024}); fundo.setFillColor(sf::Color::Black); pGG->get_Janela()->draw(fundo);
+    }
     auto* fase = dynamic_cast<Fases::Fase*>(pGE->get_estado(pGE->get_fase()));
     const bool venceu = fase && fase->get_vitoria();
     sf::Text titulo(venceu ? "Fase concluida!" : "Fim de jogo", *fonte, 45);
@@ -65,9 +69,8 @@ void Nome::executar() {
     resultado.setPosition(130, 250);
     sf::Text ajuda("Esc: menu | Continuar recupera o resultado pendente", *fonte, 20);
     ajuda.setPosition(130, 650);
-    for (auto* texto : {&instrucao, &campo, &ajuda, &resultado}) {
-        const float largura = texto->getLocalBounds().width;
-        if (largura > 770) texto->setScale(770 / largura, 770 / largura);
+    for (auto* texto : {&titulo, &instrucao, &campo, &ajuda, &resultado}) {
+        Interface::aplicar_texto(*texto,770);
         texto->setOutlineColor(sf::Color::Black); texto->setOutlineThickness(2);
     }
     pGG->get_Janela()->draw(titulo); pGG->get_Janela()->draw(instrucao);
