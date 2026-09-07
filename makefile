@@ -83,3 +83,6 @@ build/caminhada$(EXE): tests/caminhada.cpp $(TEST_OBJECTS) $(HEADERS)
 
 build/servicos$(EXE): tests/servicos.cpp $(TEST_OBJECTS) $(HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS) $< $(TEST_OBJECTS) $(LDLIBS) -o $@
+
+build/camera$(EXE): tests/camera.cpp Interface/camera.h
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS) $< -lsfml-graphics -lsfml-window -lsfml-system -o $@

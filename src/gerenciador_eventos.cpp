@@ -30,6 +30,7 @@ bool Gerenciador_Eventos::processar_evento(const sf::Event& evento) {
         if (estados->salvar_partida()) pGrafico->fecharJanela();
         return true;
     }
+    if(evento.type==sf::Event::Resized) { pGrafico->resetarCamera(); return false; }
     const int anterior = estados->get_estado_atual();
     try {
         if (auto* estado = estados->get_estado(anterior)) estado->tratar_evento(evento);

@@ -18,6 +18,7 @@
 #include "../../Logica/sessao.h"
 #include <random>
 #include "../../Interface/painel.h"
+#include "../../Interface/camera.h"
 
 namespace Logica { struct Mundo; }
 namespace Estados::Fases {
@@ -37,11 +38,14 @@ protected:
     Logica::Pontuacao pontuacao;
     Audio::ObservadorSom som;
     Interface::PainelPartida painel;
+    Interface::CameraDupla camera_dupla;
+    std::vector<sf::View> vistas;
     std::string partida_id;
     std::mt19937 motor_fase;
     double micros_simulacao=0, micros_desenho=0;
     Logica::Mundo mundo();
     void executar_comum();
+    void desenhar_partida();
     void concluir(bool venceu);
 public:
     explicit Fase(int id, bool carregar = false);

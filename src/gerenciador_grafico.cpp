@@ -3,6 +3,7 @@
 #include "../Gerenciadores/gerenciador_grafico.h"
 #include "../ente.h"
 #include <iostream>
+#include "../Interface/camera.h"
 
 namespace Gerenciadores
 {
@@ -74,9 +75,12 @@ namespace Gerenciadores
         }
         return janela.get();
     }
+    sf::View Gerenciador_Grafico::get_view_interface() const {
+        return Interface::vista_interface(get_Janela()->getSize());
+    }
     void Gerenciador_Grafico::resetarCamera()
     {
-        camera.setCenter(sf::Vector2f(LARGURA_TELA / 2.f, ALTURA_TELA / 2.f));
+        camera=get_view_interface();
         get_Janela()->setView(camera);
     }
     void Gerenciador_Grafico::centralizarCamera(sf::Vector2f p)//Entidades:Personagens:Jogador* pJ1, Entidades:Personagens:Jogador* pJ2)

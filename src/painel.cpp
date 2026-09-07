@@ -1,4 +1,5 @@
 #include <algorithm>
+#include "../Interface/camera.h"
 #include "../Interface/preferencias.h"
 #include "../Persistencia/pontos.h"
 #include "../Recursos/catalogo.h"
@@ -41,7 +42,7 @@ void PainelPartida::atualizar_recorde(int numero_fase, int quantidade) {
 }
 void PainelPartida::desenhar(sf::RenderWindow& janela, double segundos, int pontos, const std::vector<int>& vidas) const {
     const auto camera = janela.getView();
-    auto vista=janela.getDefaultView();
+    auto vista=vista_interface(janela.getSize());
     const auto& preferencias=Preferencias::instancia();
     const auto tamanho=vista.getSize()/preferencias.escala;
     vista.setSize(tamanho); vista.setCenter(tamanho/2.f); janela.setView(vista);

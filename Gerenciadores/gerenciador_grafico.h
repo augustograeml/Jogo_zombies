@@ -36,6 +36,7 @@ namespace Gerenciadores
             void mostrar();
             void limpar();
             void fecharJanela();
+            sf::View get_view_interface() const;
             void resetarCamera();
             void centralizarCamera(sf::Vector2f p );//Entidades:Personagens:Jogador* pJ1, Entidades:Personagens:Jogador* pJ2 );
             sf::RenderWindow* get_Janela() const;

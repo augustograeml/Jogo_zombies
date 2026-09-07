@@ -1,4 +1,5 @@
 #include "../Logica/mundo.h"
+#include "../Interface/preferencias.h"
 #include "../Persistencia/mundo.h"
 #include "../Estados/Fases/construtor_cenario.h"
 #include "../Persistencia/slots.h"
@@ -51,8 +52,13 @@ void Fase::executar_comum() {
         simular_passo();
     }
     if (pGE->get_estado_atual() != Estado::id) return;
+    desenhar_partida();
+}
+void Fase::desenhar_partida() {
     const auto inicio_desenho=std::chrono::steady_clock::now();
     atualizar();
+    for(const auto& vista:vistas) {
+    pGG->get_Janela()->setView(vista);
     pGG->desenharFundo(&shape);
     const auto& camera=pGG->get_Janela()->getView();
     const auto canto=camera.getCenter()-camera.getSize()/2.f;
@@ -65,33 +71,37 @@ void Fase::executar_comum() {
         auto* projeteis = static_cast<Entidades::Personagens::Inimigo*>(*it)->get_projeteis();
         if (projeteis) for (auto& p : *projeteis) if (p.get_vivo() && visivel.intersects(p.get_corpo()->getGlobalBounds())) p.desenhar();
     }
+    }
     std::vector<int> vidas;
     for(auto it=jogadores.get_primeiro();it!=nullptr;++it) vidas.push_back((*it)->get_vida());
     painel.desenhar(*pGG->get_Janela(), get_tempo_sessao(), get_pontos(), vidas);
+    if(vistas.size()==2) {
+        auto* janela=pGG->get_Janela(); const auto anterior=janela->getView();
+        janela->setView(Interface::vista_interface(janela->getSize()));
+        const auto tela=Interface::enquadramento(janela->getSize());
+        for(std::size_t i=0;i<vistas.size();++i) {
+            const auto area=vistas[i].getViewport();
+            const float x=(area.left-tela.left)/tela.width*1024;
+            const float y=(area.top-tela.top)/tela.height*1024;
+            sf::RectangleShape borda({area.width/tela.width*1024,area.height/tela.height*1024});
+            borda.setPosition(x,y); borda.setFillColor(sf::Color::Transparent);
+            borda.setOutlineThickness(-2); borda.setOutlineColor(sf::Color::White); janela->draw(borda);
+            sf::RectangleShape etiqueta({44,30}); etiqueta.setPosition(x+4,y+4);
+            etiqueta.setFillColor(sf::Color::Black); janela->draw(etiqueta);
+            sf::Text nome("J"+std::to_string(i+1),Interface::fonte_legivel(),20);
+            nome.setPosition(x+10,y+5); janela->draw(nome);
+        }
+        janela->setView(anterior);
+    }
     micros_desenho=std::chrono::duration<double,std::micro>(std::chrono::steady_clock::now()-inicio_desenho).count();
 }
 void Fase::atualizar() {
-    sf::Vector2f centro(0, 0);
-    int vivos = 0;
-    for (auto it = jogadores.get_primeiro(); it != nullptr; ++it) {
-        if ((*it)->get_vivo()) { centro += (*it)->getPosicao(); ++vivos; }
-    }
-    // Reserva uma faixa para o painel sem cobrir o jogador na plataforma inicial.
-    auto* janela = pGG->get_Janela();
-    auto camera = janela->getView();
-    const auto tamanho = janela->getDefaultView().getSize();
-    constexpr float altura_painel = 158;
-    camera.setSize(tamanho.x, tamanho.y - altura_painel);
-    if (vivos) {
-        centro = centro/static_cast<float>(vivos) + sf::Vector2f(25,25);
-        const auto metade=camera.getSize()/2.f;
-        const auto limites=shape.getGlobalBounds();
-        centro.x=std::clamp(centro.x,metade.x,std::max(metade.x,limites.width-metade.x));
-        centro.y=std::clamp(centro.y,metade.y,std::max(metade.y,limites.height-metade.y));
-        camera.setCenter(centro);
-    }
-    camera.setViewport({0, altura_painel / tamanho.y, 1, 1 - altura_painel / tamanho.y});
-    janela->setView(camera);
+    std::vector<sf::Vector2f> vivos;
+    for(auto it=jogadores.get_primeiro();it!=nullptr;++it)
+        if((*it)->get_vivo()) vivos.push_back((*it)->getPosicao()+sf::Vector2f(25,25));
+    auto* janela=pGG->get_Janela();
+    vistas=camera_dupla.atualizar(vivos,shape.getGlobalBounds(),Interface::altura_painel(),janela->getSize());
+    janela->setView(vistas.front());
 }
 void Fase::set_tempo_jogadores() {
     for (auto it = jogadores.get_primeiro(); it != nullptr; ++it)

@@ -49,7 +49,7 @@ void Jogo::Executar() {
         pE->executar();
         if (!pE->mensagem.empty()) {
             const auto camera = pG->get_Janela()->getView();
-            pG->get_Janela()->setView(pG->get_Janela()->getDefaultView());
+            pG->get_Janela()->setView(pG->get_view_interface());
             sf::RectangleShape fundo({1004, 70});
             fundo.setFillColor(sf::Color(0, 0, 0, 220));
             const float y = pE->get_estado_atual() >= 6 && pE->get_estado_atual() <= 9 ? 168.f : 10.f;

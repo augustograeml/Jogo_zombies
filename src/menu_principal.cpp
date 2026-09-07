@@ -70,7 +70,7 @@ void Menu_Principal::escolher_slot(int numero) {
 void Menu_Principal::tratar_evento(const sf::Event& e) {
     if (!escolhendo_partida && !escolhendo_destino) {
         if(e.type==sf::Event::MouseButtonReleased && e.mouseButton.button==sf::Mouse::Left) {
-            const auto ponto=pGG->get_Janela()->mapPixelToCoords({e.mouseButton.x,e.mouseButton.y},pGG->get_Janela()->getDefaultView());
+            const auto ponto=pGG->get_Janela()->mapPixelToCoords({e.mouseButton.x,e.mouseButton.y},pGG->get_view_interface());
             for(std::size_t i=1;i<textos.size();++i) {
                 auto alvo=textos[i];
                 if(i==static_cast<std::size_t>(pos)) alvo.setString(sf::String("> ")+alvo.getString());
@@ -85,7 +85,7 @@ void Menu_Principal::tratar_evento(const sf::Event& e) {
     }
     if (escolhendo_destino) {
         if (e.type==sf::Event::MouseButtonReleased && e.mouseButton.button==sf::Mouse::Left) {
-            const auto ponto=pGG->get_Janela()->mapPixelToCoords({e.mouseButton.x,e.mouseButton.y},pGG->get_Janela()->getDefaultView());
+            const auto ponto=pGG->get_Janela()->mapPixelToCoords({e.mouseButton.x,e.mouseButton.y},pGG->get_view_interface());
             for (int i=0;i<3;++i) if (sf::FloatRect(92,350+100*i,840,82).contains(ponto)) {
                 if (destino_novo!=i+1) confirmando_substituicao=false;
                 destino_novo=i+1; iniciar_novo(); return;
@@ -106,7 +106,7 @@ void Menu_Principal::tratar_evento(const sf::Event& e) {
         return;
     }
     if(e.type==sf::Event::MouseButtonReleased && e.mouseButton.button==sf::Mouse::Left) {
-        const auto ponto=pGG->get_Janela()->mapPixelToCoords({e.mouseButton.x,e.mouseButton.y},pGG->get_Janela()->getDefaultView());
+        const auto ponto=pGG->get_Janela()->mapPixelToCoords({e.mouseButton.x,e.mouseButton.y},pGG->get_view_interface());
         for(int i=0;i<3;++i) if(sf::FloatRect(92,350+100*i,840,82).contains(ponto)) {
             escolher_slot(i+1); if(Persistencia::Slots::instancia().selecionado()==i+1) fase_salva(); return;
         }
