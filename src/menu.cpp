@@ -9,12 +9,28 @@ void Menu::mostrar_menu() {
     pGG->resetarCamera();
     pGG->desenharTextura(imagem);
     if(Interface::Preferencias::instancia().contraste) { sf::RectangleShape fundo({1024,1024}); fundo.setFillColor(sf::Color::Black); pGG->get_Janela()->draw(fundo); }
-    for (std::size_t i=0;i<textos.size();++i) {
-        auto texto=textos[i];
-        if(i==static_cast<std::size_t>(pos)) texto.setString(sf::String("> ")+texto.getString());
-        Interface::aplicar_texto(texto,1000-texto.getPosition().x);
-        pGG->get_Janela()->draw(texto); }
+    if(!textos.empty()) { auto titulo=textos[0]; pGG->get_Janela()->draw(titulo); }
+    for(std::size_t i=1;i<textos.size();++i) {
+        const auto area=area_opcao(i); const bool ativo=i==static_cast<std::size_t>(pos);
+        sf::RectangleShape botao({area.width,area.height}); botao.setPosition(area.left,area.top);
+        botao.setFillColor(ativo?sf::Color(255,211,100):sf::Color(16,27,43));
+        botao.setOutlineColor(ativo?sf::Color::White:sf::Color(111,145,163));
+        botao.setOutlineThickness(ativo?3:1); pGG->get_Janela()->draw(botao);
+        sf::Text texto((ativo?"> ":"")+opcoes[i],Interface::fonte_legivel(),20);
+        texto.setStyle(sf::Text::Bold); texto.setFillColor(ativo?sf::Color(16,27,43):sf::Color(239,245,248));
+        const auto limite=texto.getLocalBounds();
+        const float escala=std::min(Interface::Preferencias::instancia().escala,(area.width-20)/std::max(1.f,limite.width));
+        texto.setScale(escala,escala); texto.setOrigin(limite.left+limite.width/2,limite.top+limite.height/2);
+        texto.setPosition(area.left+area.width/2,area.top+area.height/2); pGG->get_Janela()->draw(texto);
+    }
 }
+sf::FloatRect Menu::area_opcao(std::size_t i) const {
+    if(id==0) return {400,690+62.f*(i-1),224,46};
+    if(i==1) return {310,600,170,46};
+    if(i==2) return {550,600,170,46};
+    return {427,666,170,46};
+}
+
 bool Menu::get_jogador2() const { return jogador2; }
 void Menu::set_jogador2(bool valor) { jogador2 = valor; }
 void Menu::executar() { mostrar_menu(); }

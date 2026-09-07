@@ -44,6 +44,7 @@ namespace Estados
                 void baixo(int i);
                 virtual void selecionar() = 0;
 
+                sf::FloatRect area_opcao(std::size_t indice) const;
                 void mostrar_menu();
                 void executar();
                 void tratar_evento(const sf::Event& evento) override;

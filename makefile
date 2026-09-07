@@ -105,3 +105,6 @@ build/acessibilidade$(EXE): tests/acessibilidade.cpp $(TEST_OBJECTS) $(HEADERS)
 
 build/apresentacao$(EXE): tests/apresentacao.cpp $(TEST_OBJECTS) $(HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS) $< $(TEST_OBJECTS) $(LDLIBS) -o $@
+
+build/design-menus$(EXE): tests/design_menus.cpp $(TEST_OBJECTS) $(HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS) $< $(TEST_OBJECTS) $(LDLIBS) -o $@

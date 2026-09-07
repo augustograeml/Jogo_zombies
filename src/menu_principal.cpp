@@ -71,10 +71,7 @@ void Menu_Principal::tratar_evento(const sf::Event& e) {
         if(e.type==sf::Event::MouseButtonReleased && e.mouseButton.button==sf::Mouse::Left) {
             const auto ponto=pGG->get_Janela()->mapPixelToCoords({e.mouseButton.x,e.mouseButton.y},pGG->get_view_interface());
             for(std::size_t i=1;i<textos.size();++i) {
-                auto alvo=textos[i];
-                if(i==static_cast<std::size_t>(pos)) alvo.setString(sf::String("> ")+alvo.getString());
-                Interface::aplicar_texto(alvo,1000-alvo.getPosition().x);
-                if(alvo.getGlobalBounds().contains(ponto)) {
+                if(area_opcao(i).contains(ponto)) {
                 textos[pos].setOutlineThickness(0); pos=static_cast<int>(i); textos[pos].setOutlineThickness(4);
                 pGE->mensagem.clear(); selecionar(); return;
                 }
