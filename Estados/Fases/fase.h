@@ -19,6 +19,7 @@
 #include <random>
 #include "../../Interface/painel.h"
 
+namespace Logica { struct Mundo; }
 namespace Estados::Fases {
 class Fase : public Ente, public Estado {
 protected:
@@ -39,6 +40,7 @@ protected:
     std::string partida_id;
     std::mt19937 motor_fase;
     double micros_simulacao=0, micros_desenho=0;
+    Logica::Mundo mundo();
     void executar_comum();
     void concluir(bool venceu);
 public:
