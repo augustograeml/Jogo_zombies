@@ -1,5 +1,6 @@
 #include "../Audio/efeitos.h"
 #include "../Interface/preferencias.h"
+#include "../Interface/tema.h"
 #include "../Recursos/catalogo.h"
 #include "../Estados/Menus/pause.h"
 namespace Estados::Menus {
@@ -52,6 +53,7 @@ void Pause::mostrar_menu() {
     pGG->resetarCamera(); pGG->desenharTextura(imagem);
     auto& janela=*pGG->get_Janela();
     if(Interface::Preferencias::instancia().contraste || preferencias_abertas) { sf::RectangleShape fundo({1024,1024}); fundo.setFillColor(sf::Color::Black); janela.draw(fundo); }
+    Interface::Tema::painel(janela,{55,55,914,880});
     if(preferencias_abertas) {
         const auto& p=Interface::Preferencias::instancia(); const auto& a=Audio::Preferencias::instancia();
         const std::vector<std::string> linhas={
@@ -63,16 +65,14 @@ void Pause::mostrar_menu() {
             "Vitoria e derrota: "+std::to_string(static_cast<int>(a.volumes[2]))+"%"};
         auto escrever=[&](std::string valor,float y,unsigned tamanho) { sf::Text t(valor,Interface::fonte_legivel(),tamanho); t.setPosition(90,y); Interface::aplicar_texto(t,840); janela.draw(t); };
         escrever("Preferencias",90,42);
-        for(std::size_t i=0;i<linhas.size();++i) escrever((preferencia==static_cast<int>(i)?"> ":"  ")+linhas[i],230+80*i,26);
+        for(std::size_t i=0;i<linhas.size();++i) Interface::Tema::botao(janela,{80,225+80.f*i,864,60},linhas[i],preferencia==static_cast<int>(i),24);
         escrever("Setas: selecionar/ajustar | Enter: alterar",810,22);
         escrever("Esc ou F: voltar | Preferencias salvas automaticamente",860,20);
         return;
     }
-    for (std::size_t i=0;i<textos.size();++i) {
-        auto texto=textos[i];
-        if(i==static_cast<std::size_t>(pos)) texto.setString(sf::String("> ")+texto.getString());
-        Interface::aplicar_texto(texto,1000-texto.getPosition().x);
-        janela.draw(texto); }
+    Interface::Tema::titulo(janela,"Pausa",125);
+    Interface::Tema::botao(janela,{320,440,384,60},"Continuar",pos==1,26);
+    Interface::Tema::botao(janela,{320,535,384,60},"Menu",pos==2,26);
     const auto& p=Audio::Preferencias::instancia();
     sf::Text ajuda("F: preferencias | S: salvar | M: mudo | +/-: volume " + std::to_string(static_cast<int>(p.volume)) +
         (p.mudo?" (mudo)":""), Interface::fonte_legivel(), 20);
