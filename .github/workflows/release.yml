@@ -4,9 +4,14 @@ on:
   push:
     branches:
       - master
+  workflow_dispatch:
+
+concurrency:
+  group: release-master
+  cancel-in-progress: false
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   linux:
@@ -27,12 +32,19 @@ jobs:
             curl \
             file \
             patchelf \
-            imagemagick
+            imagemagick \
+            xvfb \
+            xauth
 
       - name: Compilar
         run: |
           make clean
           make -j"$(nproc)"
+
+      - name: Testar
+        run: |
+          make test-logica
+          ALSOFT_DRIVERS=null xvfb-run -a make -j4 test-integracao
 
       - name: Montar AppDir
         run: |
@@ -41,6 +53,7 @@ jobs:
 
           cp prog AppDir/usr/bin/zombies
           cp -r Design AppDir/usr/share/zombies/Design
+          rm -rf AppDir/usr/share/zombies/Design/imagens/legacy
 
           cat > AppDir/AppRun <<'EOF'
           #!/bin/sh
@@ -74,7 +87,7 @@ jobs:
 
       - name: Baixar linuxdeploy
         run: |
-          curl -L \
+          curl --fail --location --retry 3 \
             -o linuxdeploy.AppImage \
             https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
 
@@ -90,7 +103,7 @@ jobs:
 
       - name: Baixar appimagetool
         run: |
-          curl -L \
+          curl --fail --location --retry 3 \
             -o appimagetool.AppImage \
             https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
 
@@ -126,7 +139,7 @@ jobs:
           update: true
           install: >-
             make
-            zip
+            mingw-w64-x86_64-nsis
             git
             mingw-w64-x86_64-gcc
             mingw-w64-x86_64-cmake
@@ -177,6 +190,8 @@ jobs:
           cp -r Design \
             dist/Zombies++/Design
 
+          rm -rf dist/Zombies++/Design/imagens/legacy
+
           # DLLs da SFML 2.6.2 compilada pelo workflow.
           cp -n SFML-local/bin/*.dll \
             dist/Zombies++/
@@ -204,22 +219,37 @@ jobs:
 
               done
 
-          cd dist
-
-          zip -r \
-            ../Zombies++-Windows-x86_64.zip \
-            Zombies++
+          # Um unico download; recursos e DLLs sao instalados junto ao jogo.
+          cat > installer.nsi <<'EOF'
+          Unicode true
+          Name "Zombies++"
+          OutFile "Zombies++-Windows-x86_64-Setup.exe"
+          InstallDir "$LOCALAPPDATA\Programs\Zombies++"
+          RequestExecutionLevel user
+          SetCompressor /SOLID lzma
+          Page directory
+          Page instfiles
+          Section "Jogo"
+            SetOutPath "$INSTDIR"
+            File /r "dist\Zombies++\*.*"
+            CreateDirectory "$SMPROGRAMS\Zombies++"
+            CreateShortcut "$SMPROGRAMS\Zombies++\Zombies++.lnk" "$INSTDIR\Zombies++.exe"
+          SectionEnd
+          EOF
+          makensis installer.nsi
 
       - name: Salvar build Windows
         uses: actions/upload-artifact@v4
         with:
           name: windows
-          path: Zombies++-Windows-x86_64.zip
+          path: Zombies++-Windows-x86_64-Setup.exe
           if-no-files-found: error
 
 
   release:
     name: Criar nova versão
+    permissions:
+      contents: write
 
     needs:
       - linux
@@ -248,7 +278,8 @@ jobs:
         run: |
           git fetch --tags origin
 
-          while true; do
+          publicou=false
+          for tentativa in 1 2 3; do
 
             LATEST="$(
               git tag \
@@ -284,6 +315,7 @@ jobs:
             git tag "$TAG" "$GITHUB_SHA"
 
             if git push origin "$TAG"; then
+              publicou=true
               break
             fi
 
@@ -296,6 +328,10 @@ jobs:
 
           done
 
+          if [ "$publicou" != true ]; then
+            echo "Falha ao publicar a tag apos tres tentativas." >&2
+            exit 1
+          fi
           echo "Nova versão: $TAG"
 
           mv \
@@ -303,12 +339,13 @@ jobs:
             "dist/Zombies++-${TAG}-Linux-x86_64.AppImage"
 
           mv \
-            dist/Zombies++-Windows-x86_64.zip \
-            "dist/Zombies++-${TAG}-Windows-x86_64.zip"
+            dist/Zombies++-Windows-x86_64-Setup.exe \
+            "dist/Zombies++-${TAG}-Windows-x86_64-Setup.exe"
 
           gh release create "$TAG" \
             "dist/Zombies++-${TAG}-Linux-x86_64.AppImage" \
-            "dist/Zombies++-${TAG}-Windows-x86_64.zip" \
+            "dist/Zombies++-${TAG}-Windows-x86_64-Setup.exe" \
             --title "Zombies++ $TAG" \
             --generate-notes \
+            --notes "Linux: baixe o AppImage, permita sua execucao e abra. Windows: execute o Setup.exe para instalar o jogo com seus recursos e bibliotecas. Os arquivos Source code sao adicionados automaticamente pelo GitHub." \
             --latest

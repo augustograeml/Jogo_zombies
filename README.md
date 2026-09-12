@@ -146,3 +146,9 @@ Os gerenciadores continuam Singleton, com vida controlada e encerramento idempot
 A refatoração P01 foi comparada isoladamente com a versão anterior: estados idênticos após 80 passos. Os testes novos cobrem destinos, perseguição/golpe, retomada de 100 passos dos inimigos, preferências, inicialização sem DISPLAY, câmera e desenho em 1024×1024, 1280×720 e 640×800 sem mutar o mundo.
 
 Os menus usam DejaVu Sans, painéis carvão e texto marfim. A seleção tem faixa oliva, texto escuro e marcador lateral; alto contraste usa branco e preto. Os oito novos fundos seguem ambientes de evacuação abandonados. Veja [direção, assets e validação da remasterização](Recursos/RELATORIO_VISUAL.md).
+
+## Downloads de release
+
+O workflow em `master` publica um AppImage Linux e um instalador `Setup.exe` Windows, incluindo os recursos e bibliotecas necessários. No Linux, permita a execução do AppImage antes de abri-lo. No Windows, o instalador usa a pasta do usuário e cria um atalho no menu Iniciar; mantenha os arquivos instalados juntos. Um `prog.exe` isolado não contém imagens, fontes ou DLLs.
+
+As artes de `Design/imagens/legacy/` permanecem no Git, mas não entram nos pacotes. O GitHub também exibe automaticamente os arquivos de código-fonte da tag. O workflow executa os testes no Linux antes de publicar e permite execução manual pela aba Actions.
