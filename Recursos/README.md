@@ -24,7 +24,7 @@ A busca sobe no máximo oito níveis. Assim, o executável em `build` ou na raiz
 | Artes alternativas | `imagens/andando.png`, `imagens/parado.png` | Pertencem a outro personagem e não entram na sequência. |
 | Caminhada dos inimigos | `imagens/zumbi_corrida_atlas.png`, `imagens/arqueiro_corrida_atlas.png`, `imagens/gigante_corrida_atlas.png` | Oito poses por personagem, carregadas e isoladas uma vez. |
 | Inimigos originais | `imagens/zumbi_bateu_morreu.png`, `imagens/zumbi_atirador.png`, `imagens/zumbi_gigante.png` | Zumbi, arqueiro e gigante. |
-| Obstáculos e cura | `imagens/plataforma.png`, `imagens/bloco_musgo.jpeg`, `imagens/espinho.png`, `imagens/caixa.png`, `imagens/saude.png` | Texturas reutilizadas pelas entidades do mapa. |
+| Obstáculos e cura | `imagens/plataforma.png`, `imagens/bloco_musgo.png`, `imagens/espinho.png`, `imagens/caixa.png`, `imagens/saude.png` | Plataformas com faixas de três trechos; demais texturas preservadas. |
 
 O catálogo calcula o retângulo dos pixels visíveis de cada quadro uma única vez. O desenho normaliza a altura, centraliza os pés na base da caixa física e espelha o sprite para a esquerda. A caixa de colisão continua independente: não muda ao trocar quadro, parar ou virar.
 
@@ -75,7 +75,7 @@ A geração de uma folha nova do Luigi foi solicitada à ferramenta integrada de
 
 `Recursos::area_cenario` recorta centralmente os fundos na proporção 5:3 durante a carga. O desenho usa essa região sem deformar os PNGs. Os menus também usam escala uniforme e recorte central.
 
-A fonte `Design/fonte/DejaVuSans.ttf` acompanha a licença em `Design/fonte/DejaVu-LICENCA.md` e agora é o padrão da UI. As preferências da pausa continuam oferecendo escala, contraste e volumes por categoria.
+A UI usa Teko Bold nos títulos e Barlow Condensed Medium nos textos funcionais, ambas sob SIL OFL 1.1. DejaVu Sans continua como alternativa de acessibilidade. Veja [fontes e licenças](../Design/fonte/CREDITOS.md) e [plataformas e tipografia](PLATAFORMAS_TIPOGRAFIA.md). As preferências da pausa continuam oferecendo escala, contraste e volumes por categoria.
 
 ## Folha de caminhada do Luigi
 

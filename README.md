@@ -145,7 +145,9 @@ Os gerenciadores continuam Singleton, com vida controlada e encerramento idempot
 
 A refatoração P01 foi comparada isoladamente com a versão anterior: estados idênticos após 80 passos. Os testes novos cobrem destinos, perseguição/golpe, retomada de 100 passos dos inimigos, preferências, inicialização sem DISPLAY, câmera e desenho em 1024×1024, 1280×720 e 640×800 sem mutar o mundo.
 
-Os menus usam DejaVu Sans, painéis carvão e texto marfim. A seleção tem faixa oliva, texto escuro e marcador lateral; alto contraste usa branco e preto. Os oito novos fundos seguem ambientes de evacuação abandonados. Veja [direção, assets e validação da remasterização](Recursos/RELATORIO_VISUAL.md).
+Os menus usam Teko Bold nos títulos e Barlow Condensed Medium nos textos funcionais, painéis carvão e texto marfim. A seleção tem texto oliva claro e marcador lateral; alto contraste usa branco e preto. DejaVu permanece como alternativa de acessibilidade. Os oito novos fundos seguem ambientes de evacuação abandonados. Veja [direção, assets e validação da remasterização](Recursos/RELATORIO_VISUAL.md).
+
+A [segunda etapa visual](Recursos/PLATAFORMAS_TIPOGRAFIA.md) integra plataformas de concreto frio com neve e pedra úmida com musgo discreto. As faixas de textura variam por posição sem alterar colisões, mapas ou saves. Artes anteriores estão em `Design/imagens/legacy/`.
 
 ## Downloads de release
 
