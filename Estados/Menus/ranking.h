@@ -5,9 +5,10 @@
 #include <vector>
 namespace Estados::Menus {
 class Ranking : public Estado {
-    sf::Font fonte;
     sf::Texture imagem;
-    std::vector<sf::Text> textos;
+    struct Linha { std::string nomes,tempo,pontos; bool vitoria; };
+    std::vector<Linha> linhas;
+    bool erro=false;
     int fase = 1, jogadores = 1;
     bool por_pontos = false;
     void atualizar();
