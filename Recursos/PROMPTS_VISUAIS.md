@@ -4,7 +4,7 @@ Modo: ferramenta integrada image_gen. Os prompts abaixo foram usados sem imagens
 
 ## Direção compartilhada
 
-Art direction for Zombies++ indie 2D survival horror remaster: deliberate hand-painted 2D environment, restrained hard-edged shapes, lightly grainy gouache texture, grounded believable abandoned infrastructure, cold diffuse overcast lighting, charcoal shadows, desaturated olive and concrete grey, tiny rust-red accents. Moderate sparse purposeful detail, no glossy 3D, no photography, no blur, no fantasy, no gore, no characters, NO TEXT NO LETTERING NO UI NO PANELS drawn in image. Consistent material language: weathered concrete, oxidized steel, sparse invasive vegetation. 
+Art direction for Zombies++ indie 2D survival horror remaster: deliberate hand-painted 2D environment, restrained hard-edged shapes, lightly grainy gouache texture, grounded believable abandoned infrastructure, cold diffuse overcast lighting, charcoal shadows, desaturated olive and concrete grey, tiny rust-red accents. Moderate sparse purposeful detail, no glossy 3D, no photography, no blur, no fantasy, no gore, no characters, NO TEXT NO LETTERING NO UI NO PANELS drawn in image. Consistent material language: weathered concrete, oxidized steel, sparse invasive vegetation.
 
 ## neve
 
@@ -53,4 +53,3 @@ Generated images are saved to /home/antonio/.codex/generated_images/01a0732a-618
 Square 1024x1024. Abandoned evacuation communications shelter, simple old radio and coiled cable only in bottom right corner, thin window far left edge with cold grey light, worn olive concrete wall and quiet charcoal center. Ambiguous reflective atmosphere suitable for both survival and defeat. Central 80 percent empty low-detail wall for code-rendered result and name entry. No lettering no drawn panels.
 
 Generated images are saved to /home/antonio/.codex/generated_images/01a0732a-6184-72a1-8285-da006b244562 as /home/antonio/.codex/generated_images/01a0732a-6184-72a1-8285-da006b244562/exec-72bda1a3-5f44-4bed-a566-1db3fe99b404.png by default.
-

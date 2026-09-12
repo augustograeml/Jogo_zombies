@@ -137,12 +137,12 @@ Os testes imprimem tempos de colisão/simulação/desenho e candidatos consultad
 
 A câmera fica compartilhada quando a dupla está próxima. Ao se afastar, divide a tela em duas áreas identificadas J1/J2; separação vertical usa áreas empilhadas. Os limites de entrada e saída são diferentes para evitar alternância contínua. Um único jogador vivo volta à visão única. A câmera só afeta o desenho, e a janela mantém proporções com faixas laterais/superiores conforme a resolução.
 
-Subida, queda, dano, preparação, golpe e recuperação têm apresentações próprias a partir dos recursos existentes. A reação ao dano dura 12 passos visuais, é salva e não muda a invulnerabilidade. O desenho não avança animações. Fundos usam apenas a região ilustrada, excluindo suas margens brancas de exportação.
+Subida, queda, dano, preparação, golpe e recuperação têm apresentações próprias a partir dos recursos existentes. A reação ao dano dura 12 passos visuais, é salva e não muda a invulnerabilidade. O desenho não avança animações. Fundos usam recorte central proporcional, sem deformação.
 
-**Atualização do Luigi:** a caminhada usa poses de *Super Mario All-Stars + Super Mario World*, em pixel art, com transparência e direção preparadas em C++. A imagem antiga continua como ilustração de menu. A tentativa anterior de geração de arte foi substituída pelo uso desta folha existente.
+**Atualização do Luigi:** a caminhada usa poses de *Super Mario All-Stars + Super Mario World*, em pixel art, com transparência e direção preparadas em C++. A imagem antiga de menu está preservada em `Design/imagens/legacy`. A tentativa anterior de geração de arte foi substituída pelo uso desta folha existente.
 
 Os gerenciadores continuam Singleton, com vida controlada e encerramento idempotente. Consultá-los não abre uma janela; o jogo a inicializa explicitamente ao iniciar. Telas e observadores são encerrados antes da janela; `Audio::desligar` para as vozes sem criar dispositivo.
 
 A refatoração P01 foi comparada isoladamente com a versão anterior: estados idênticos após 80 passos. Os testes novos cobrem destinos, perseguição/golpe, retomada de 100 passos dos inimigos, preferências, inicialização sem DISPLAY, câmera e desenho em 1024×1024, 1280×720 e 640×800 sem mutar o mundo.
 
-Os botões dos menus principal, jogadores e fases usam DejaVu Sans em negrito. A seleção tem fundo amarelo, texto escuro, borda clara e marcador `>`; as demais opções têm fundo escuro.
+Os menus usam DejaVu Sans, painéis carvão e texto marfim. A seleção tem faixa oliva, texto escuro e marcador lateral; alto contraste usa branco e preto. Os oito novos fundos seguem ambientes de evacuação abandonados. Veja [direção, assets e validação da remasterização](Recursos/RELATORIO_VISUAL.md).

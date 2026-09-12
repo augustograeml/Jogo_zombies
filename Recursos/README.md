@@ -1,6 +1,6 @@
 # Recursos do jogo
 
-O código continua exclusivamente em arquivos `.cpp` e `.h`. Imagens, fontes e mapas permanecem como dados em `Design`; nenhuma arte foi removida ou substituída.
+O código continua exclusivamente em arquivos `.cpp` e `.h`. Imagens, fontes e mapas permanecem como dados em `Design`. Os oito fundos da remasterização substituem as artes ativas; os originais estão preservados em `Design/imagens/legacy/`. Veja [o relatório visual](RELATORIO_VISUAL.md).
 
 ## Localização
 
@@ -20,7 +20,7 @@ A busca sobe no máximo oito níveis. Assim, o executável em `build` ou na raiz
 | --- | --- | --- |
 | Corrida do jogador 1 | `imagens/op1.png` até `imagens/op27.png` | Ordem numérica explícita; os 27 quadros foram conferidos em conjunto. |
 | Repouso do jogador 1 | `imagens/op10.png` | Pose fixa da mesma sequência; mantém a última direção. |
-| Jogador 2 | `imagens/luigi_smas_folha.png` | Poses de caminhada em pixel art; a arte antiga permanece no menu. |
+| Jogador 2 | `imagens/luigi_smas_folha.png` | Poses de caminhada em pixel art; a arte antiga do menu está preservada em `legacy`. |
 | Artes alternativas | `imagens/andando.png`, `imagens/parado.png` | Pertencem a outro personagem e não entram na sequência. |
 | Caminhada dos inimigos | `imagens/zumbi_corrida_atlas.png`, `imagens/arqueiro_corrida_atlas.png`, `imagens/gigante_corrida_atlas.png` | Oito poses por personagem, carregadas e isoladas uma vez. |
 | Inimigos originais | `imagens/zumbi_bateu_morreu.png`, `imagens/zumbi_atirador.png`, `imagens/zumbi_gigante.png` | Zumbi, arqueiro e gigante. |
@@ -73,9 +73,9 @@ Luigi usa poses reais da folha documentada abaixo. A implementação antiga de m
 
 A geração de uma folha nova do Luigi foi solicitada à ferramenta integrada de imagens em 07/09/2026: doze poses em grade 4×3 (oito de caminhada, repouso, salto, dano e pisão), preservando a aparência da referência e fundo transparente. A ferramenta rejeitou a saída (`moderation_blocked`, categoria `other`). Nenhum arquivo dessa tentativa foi incorporado. Posteriormente, a caminhada foi corrigida com a folha existente documentada abaixo.
 
-`Recursos::area_cenario` identifica a região ilustrada dos fundos durante a carga, e `setTextureRect` exclui as margens brancas do desenho sem modificar os PNGs.
+`Recursos::area_cenario` recorta centralmente os fundos na proporção 5:3 durante a carga. O desenho usa essa região sem deformar os PNGs. Os menus também usam escala uniforme e recorte central.
 
-A fonte alternativa `Design/fonte/DejaVuSans.ttf` acompanha a licença em `Design/fonte/DejaVu-LICENCA.md`. Pode ser ativada nas preferências da pausa, junto com escala, contraste e volumes por categoria.
+A fonte `Design/fonte/DejaVuSans.ttf` acompanha a licença em `Design/fonte/DejaVu-LICENCA.md` e agora é o padrão da UI. As preferências da pausa continuam oferecendo escala, contraste e volumes por categoria.
 
 ## Folha de caminhada do Luigi
 
