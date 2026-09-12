@@ -1,4 +1,5 @@
 #include "../Entidades/Obstaculos/neve.h"
+#include "../Recursos/plataforma.h"
 
 namespace Entidades
 {
@@ -7,6 +8,7 @@ namespace Entidades
         Neve::Neve(Vector2f pos): Obstaculo(pos, false,false,false,true,false), escorrega(true)
         {
             this->setSkin("Design/imagens/plataforma.png");
+            corpo.setTextureRect(Recursos::trecho_plataforma(pos));
             this->set_vida(1);
         }
 
