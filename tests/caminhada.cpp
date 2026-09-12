@@ -14,6 +14,10 @@ int main() {
     auto* gg=Gerenciadores::Gerenciador_Grafico::get_instancia();
     auto* janela=gg->get_Janela(); gg->resetarCamera(); janela->clear(sf::Color(26,35,49));
     sf::Font fonte; fonte.loadFromFile(Recursos::caminho("Design/fonte/fonte_simas.ttf").string());
+    for(const auto& q:Recursos::caminhada_luigi()) {
+        const auto pixels=q.textura->copyToImage();
+        assert(pixels.getPixel(q.regiao.left,q.regiao.top).a==0);
+    }
     const char* nomes[]={"Luigi", "Zumbi", "Arqueiro", "Gigante"};
     for(int linha=0;linha<4;++linha) {
         sf::Text titulo(nomes[linha],fonte,24); titulo.setPosition(20,linha*240+10); janela->draw(titulo);

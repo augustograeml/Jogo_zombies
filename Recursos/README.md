@@ -20,7 +20,7 @@ A busca sobe no máximo oito níveis. Assim, o executável em `build` ou na raiz
 | --- | --- | --- |
 | Corrida do jogador 1 | `imagens/op1.png` até `imagens/op27.png` | Ordem numérica explícita; os 27 quadros foram conferidos em conjunto. |
 | Repouso do jogador 1 | `imagens/op10.png` | Pose fixa da mesma sequência; mantém a última direção. |
-| Jogador 2 | `imagens/luigiDireita.png` | Anima pernas e braço com malha articulada em C++; preserva a imagem original e espelha a direção. |
+| Jogador 2 | `imagens/luigi_smas_folha.png` | Poses de caminhada em pixel art; a arte antiga permanece no menu. |
 | Artes alternativas | `imagens/andando.png`, `imagens/parado.png` | Pertencem a outro personagem e não entram na sequência. |
 | Caminhada dos inimigos | `imagens/zumbi_corrida_atlas.png`, `imagens/arqueiro_corrida_atlas.png`, `imagens/gigante_corrida_atlas.png` | Oito poses por personagem, carregadas e isoladas uma vez. |
 | Inimigos originais | `imagens/zumbi_bateu_morreu.png`, `imagens/zumbi_atirador.png`, `imagens/zumbi_gigante.png` | Zumbi, arqueiro e gigante. |
@@ -65,14 +65,22 @@ Os três arquivos `*_corrida_atlas.png` foram gerados com a ferramenta de imagen
 
 `src/atlas.cpp` isola as oito maiores silhuetas e mantém as texturas em cache. Para exportações RGB com fundo neutro quadriculado, remove somente o fundo conectado às bordas durante a carga. O arquivo de imagem permanece intacto.
 
-Luigi não recebeu imagem gerada: `src/animacao_articulada.cpp` transforma uma malha sobre `luigiDireita.png`. A pose parada permanece original; braços e pernas alternam durante a caminhada, sem mudar a colisão.
+Luigi usa poses reais da folha documentada abaixo. A implementação antiga de malha articulada foi removida.
 
 ## Ciclos e apresentação da atualização P08/P09
 
 `Animacao/pose.h` escolhe poses de subida, queda e reação a dano; preparação/golpe/recuperação derivam dos contadores de comportamento persistidos dos inimigos. As transformações são somente visuais. `reacao_visual` é um campo opcional, limitado a 12 passos, com valor zero para saves antigos.
 
-A geração de uma folha nova do Luigi foi solicitada à ferramenta integrada de imagens em 07/09/2026: doze poses em grade 4×3 (oito de caminhada, repouso, salto, dano e pisão), preservando a aparência da referência e fundo transparente. A ferramenta rejeitou a saída (`moderation_blocked`, categoria `other`). Nenhum arquivo dessa tentativa foi incorporado. Continuam pendentes a nova folha e a padronização dos atlas; os recursos existentes permanecem em uso.
+A geração de uma folha nova do Luigi foi solicitada à ferramenta integrada de imagens em 07/09/2026: doze poses em grade 4×3 (oito de caminhada, repouso, salto, dano e pisão), preservando a aparência da referência e fundo transparente. A ferramenta rejeitou a saída (`moderation_blocked`, categoria `other`). Nenhum arquivo dessa tentativa foi incorporado. Posteriormente, a caminhada foi corrigida com a folha existente documentada abaixo.
 
 `Recursos::area_cenario` identifica a região ilustrada dos fundos durante a carga, e `setTextureRect` exclui as margens brancas do desenho sem modificar os PNGs.
 
 A fonte alternativa `Design/fonte/DejaVuSans.ttf` acompanha a licença em `Design/fonte/DejaVu-LICENCA.md`. Pode ser ativada nas preferências da pausa, junto com escala, contraste e volumes por categoria.
+
+## Folha de caminhada do Luigi
+
+- Arquivo: `Design/imagens/luigi_smas_folha.png`.
+- Origem: [The Spriters Resource — Luigi, Super Mario All-Stars / + Super Mario World](https://www.spriters-resource.com/snes/smassmw/asset/53666/).
+- Arte original: Nintendo. A folha e seus créditos foram mantidos intactos; não é uma arte gerada nem um recurso de domínio público.
+- `src/luigi.cpp` seleciona repouso e contatos alternados da seção Super Luigi. Remove as cores de fundo durante a carga e mantém os quadros em cache.
+- A sequência usa o contador de animação já persistido, preserva a orientação e mantém a caixa física independente dos pixels.

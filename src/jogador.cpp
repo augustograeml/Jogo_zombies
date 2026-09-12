@@ -1,5 +1,5 @@
 #include "../Logica/entrada.h"
-#include "../Animacao/articulada.h"
+#include "../Animacao/pose.h"
 #include "../Logica/movimento.h"
 #include <algorithm>
 #include <cmath>
@@ -53,11 +53,6 @@ namespace Entidades
             const auto& estado = animacao.obter();
             const auto pose=Animacao::pose_jogador(estado.correndo?1.f:0.f,velocidade.y,get_reacao());
             const auto deformacao=Animacao::deformacao(pose,get_reacao()/12.f);
-            if (jogador2) {
-                Animacao::desenhar_articulada(*pGG->get_Janela(),*Textura,corpo.getGlobalBounds(),estado,
-                    get_protecao() && (get_protecao()/5)%2 ? sf::Color(255,100,100,130) : sf::Color::White,pose,get_reacao()/12.f);
-                return;
-            }
             sf::Sprite visual;
             if (!jogador2) {
                 const unsigned indice=pose==Animacao::Pose::Subida?4:pose==Animacao::Pose::Queda?17:
@@ -65,12 +60,17 @@ namespace Entidades
                 const auto& quadro = Recursos::corrida().at(indice);
                 visual.setTexture(*quadro.textura);
                 visual.setTextureRect(quadro.regiao);
-            } else visual.setTexture(*Textura);
+            } else {
+                const auto& quadros=Recursos::caminhada_luigi();
+                const auto& quadro=quadros.at(estado.correndo?estado.quadro*quadros.size()/27:0);
+                visual.setTexture(*quadro.textura); visual.setTextureRect(quadro.regiao);
+            }
             const auto area = visual.getLocalBounds();
             const auto caixa = corpo.getGlobalBounds();
             const float escala = caixa.height / area.height;
             visual.setOrigin(area.width / 2.f, area.height);
-            visual.setScale((estado.direita ? escala : -escala)*deformacao.x, escala*deformacao.y);
+            const bool espelhar=estado.direita==jogador2; // Folha de Luigi olha originalmente para a esquerda.
+            visual.setScale((espelhar?-escala:escala)*deformacao.x, escala*deformacao.y);
             visual.setRotation((estado.direita?1:-1)*deformacao.angulo);
             visual.setPosition(caixa.left + caixa.width / 2.f, caixa.top + caixa.height);
             // Preserva a sinalizacao existente de saude; a geometria continua independente.

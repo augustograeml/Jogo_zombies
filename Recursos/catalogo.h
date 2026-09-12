@@ -16,6 +16,7 @@ struct Quadro {
 };
 sf::IntRect area_cenario(const sf::Texture& textura);
 const std::vector<Quadro>& corrida();
+const std::vector<Quadro>& caminhada_luigi();
 enum class Animado { Zumbi, Arqueiro, Gigante };
 const std::vector<Quadro>& caminhada(Animado tipo);
 // Legenda: espaco=vazio; 0=neve; 1/2=marcadores; 3=zumbi; 4=arqueiro;

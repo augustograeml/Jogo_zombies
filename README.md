@@ -62,12 +62,12 @@ O VS Code foi ajustado para compilar o projeto inteiro, em vez de apenas o arqui
 - Durante o jogo: `Esc` pausa e salva. Perder o foco também pausa.
 - Na pausa: `Esc` continua; `S` repete o salvamento, útil após um erro de escrita.
 - Fechar normalmente a janela salva a partida. Ao abrir novamente, escolha **Continuar**.
-- Os saves aparecem somente em **Continuar**. Nessa tela, setas ou `1`, `2`, `3` selecionam; `Enter` carrega; `R` recupera a cópia anterior; `Esc` volta. Novo Jogo abre sua própria seleção de destino, sugere um slot vazio e pede confirmação adicional para substituir uma partida.
+- Os saves aparecem somente em **Continuar**. Nessa tela, setas ou `1`, `2`, `3` selecionam; `Enter` carrega; `R` recupera a cópia anterior; `Esc` volta. Novo Jogo abre sua própria seleção de destino, sugere um slot vazio e aceita a escolha com um clique ou Enter, sem confirmação adicional.
 - Ranking: setas mudam a fase, `Tab` muda solo/dupla, `P` alterna tempo/pontos, `Enter` ou `Esc` volta ao menu.
 - Pausa: `M` silencia; `+`/`-` ajustam o volume geral. `F` abre preferências; setas selecionam/ajustam e `Enter` altera. Há escala de 100%, 115% ou 130%, fonte legível, alto contraste e volumes de movimento/coleta, combate e resultado. `Esc` ou `F` fecha as preferências.
 - Áudio persiste em `preferencias.json`; apresentação em `interface.json`, ambos ignorados pelo Git.
 
-Há três slots completos: `partida.json`, `partida-slot2.json` e `partida-slot3.json`. Novo Jogo substitui o destino confirmado e guarda a versão anterior válida em `.bak`. A recuperação por `R` preserva o arquivo substituído em `.corrompido-N`. Arquivos corrompidos nunca são sobrescritos silenciosamente. Saves completos de versão 1 migram para a versão 2; os antigos arquivos separados por entidade continuam sem informação suficiente para uma retomada completa.
+Há três slots completos: `partida.json`, `partida-slot2.json` e `partida-slot3.json`. Novo Jogo substitui o destino escolhido e guarda a versão anterior válida em `.bak`. A recuperação por `R` preserva o arquivo substituído em `.corrompido-N`. Arquivos corrompidos nunca são sobrescritos silenciosamente. Saves completos de versão 1 migram para a versão 2; os antigos arquivos separados por entidade continuam sem informação suficiente para uma retomada completa.
 
 O painel superior mostra tempo, recorde de conclusão com nome, vida de cada jogador, pontos da equipe e recorde de pontos da fase/modalidade. O cronômetro começa em zero em **Novo Jogo**, para durante a pausa e é preservado ao continuar. No avanço automático para a fase 2, mantém o tempo total da partida; o ranking continua medindo cada fase separadamente.
 
@@ -98,7 +98,7 @@ No Windows, o executável de testes é `build/testes.exe`; substitua a pasta tem
 
 ## Melhorias implementadas
 
-- Corrida de 27 quadros para o jogador 1, pose parada e direção independente da colisão. Luigi caminha com articulação da arte original em C++; os três tipos de zumbi usam sequências de oito poses. A animação acompanha a simulação e é salva.
+- Corrida de 27 quadros para o jogador 1, pose parada e direção independente da colisão. Luigi caminha com poses de uma folha de sprites em pixel art; os três tipos de zumbi usam sequências de oito poses. A animação acompanha a simulação e é salva.
 - Colisões por canto superior esquerdo, chão sem rebote e efeito de superfície aplicado uma vez por passo. O gelo freia menos, mas permite parar.
 - Pisões após uma queda maior que 300 unidades (seis blocos de 50) causam dano dobrado; acima de 500, triplo. O bônus é consumido no impacto, e a altura acumulada também é salva.
 - Proteção de 45 passos (0,75 s) após dano, reação visual e cura limitada a 20 vidas.
@@ -131,7 +131,7 @@ O save guarda o total e os estados dos objetos consumidos/derrotados. Recarregar
 
 A validação executada nesta entrega é Linux com GCC 14 e SFML 2.6.2. O caminho de compilação Windows foi mantido, mas esta revisão não foi executada no Windows. O binário Windows antigo do repositório precisa ser recompilado.
 
-Os testes imprimem tempos de colisão/simulação/desenho e candidatos consultados; são medições locais, não promessa de FPS em outro computador. O teste compara snapshots com grade ligada/desligada. Música de fundo e autosave periódico continuam como possibilidades futuras. Luigi usa a imagem existente articulada, sem uma nova folha de sprites. O plano local atualizado está em `PLANO_MELHORIAS_JOGO.md`, ignorado pelo Git.
+Os testes imprimem tempos de colisão/simulação/desenho e candidatos consultados; são medições locais, não promessa de FPS em outro computador. O teste compara snapshots com grade ligada/desligada. Música de fundo e autosave periódico continuam como possibilidades futuras. Luigi usa uma folha de sprites existente, com origem documentada em `Recursos/README.md`. O plano local atualizado está em `PLANO_MELHORIAS_JOGO.md`, ignorado pelo Git.
 
 ## Atualização P01, P03, P05, P07, P08, P09 e P11
 
@@ -139,8 +139,10 @@ A câmera fica compartilhada quando a dupla está próxima. Ao se afastar, divid
 
 Subida, queda, dano, preparação, golpe e recuperação têm apresentações próprias a partir dos recursos existentes. A reação ao dano dura 12 passos visuais, é salva e não muda a invulnerabilidade. O desenho não avança animações. Fundos usam apenas a região ilustrada, excluindo suas margens brancas de exportação.
 
-**Limite da P08:** a ferramenta de imagens rejeitou a geração da nova folha do Luigi, na categoria genérica `other`, sem detalhar o motivo. A folha de poses desenhadas e a padronização dos arquivos de atlas continuam pendentes. Luigi mantém a arte original articulada; não foi incluída uma nova imagem nem substituído o personagem. Os ciclos de ação e reação foram implementados.
+**Atualização do Luigi:** a caminhada usa poses de *Super Mario All-Stars + Super Mario World*, em pixel art, com transparência e direção preparadas em C++. A imagem antiga continua como ilustração de menu. A tentativa anterior de geração de arte foi substituída pelo uso desta folha existente.
 
 Os gerenciadores continuam Singleton, com vida controlada e encerramento idempotente. Consultá-los não abre uma janela; o jogo a inicializa explicitamente ao iniciar. Telas e observadores são encerrados antes da janela; `Audio::desligar` para as vozes sem criar dispositivo.
 
 A refatoração P01 foi comparada isoladamente com a versão anterior: estados idênticos após 80 passos. Os testes novos cobrem destinos, perseguição/golpe, retomada de 100 passos dos inimigos, preferências, inicialização sem DISPLAY, câmera e desenho em 1024×1024, 1280×720 e 640×800 sem mutar o mundo.
+
+Os botões dos menus principal, jogadores e fases usam DejaVu Sans em negrito. A seleção tem fundo amarelo, texto escuro, borda clara e marcador `>`; as demais opções têm fundo escuro.
