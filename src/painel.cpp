@@ -20,7 +20,7 @@ std::string formatar_tempo(double segundos) {
     return texto.str();
 }
 PainelPartida::PainelPartida() {
-    if (!fonte.loadFromFile(Recursos::caminho("Design/fonte/fonte_simas.ttf").string()))
+    if (!fonte.loadFromFile(Recursos::caminho("Design/fonte/DejaVuSans.ttf").string()))
         throw std::runtime_error("Fonte do painel nao encontrada.");
 }
 void PainelPartida::atualizar_recorde(int numero_fase, int quantidade) {
@@ -49,9 +49,9 @@ void PainelPartida::desenhar(sf::RenderWindow& janela, double segundos, int pont
     const float largura = janela.getView().getSize().x;
     const float divisao1 = largura * 0.22f, divisao2 = largura * 0.55f;
     sf::RectangleShape fundo({largura, 100});
-    fundo.setFillColor(preferencias.contraste?sf::Color::Black:sf::Color(8, 15, 23, 232)); janela.draw(fundo);
+    fundo.setFillColor(preferencias.contraste?sf::Color::Black:sf::Color(16,23,21,240)); janela.draw(fundo);
     sf::RectangleShape detalhe({largura, 3}); detalhe.setPosition(0, 98);
-    detalhe.setFillColor(sf::Color(66, 218, 181)); janela.draw(detalhe);
+    detalhe.setFillColor(sf::Color(145,167,122)); janela.draw(detalhe);
     auto texto = [&](const std::string& valor, float x, float y, unsigned tamanho,
                      sf::Color cor, float limite) {
         sf::Text t(sf::String::fromUtf8(valor.begin(), valor.end()), preferencias.legivel?fonte_legivel():fonte, tamanho);
@@ -60,7 +60,7 @@ void PainelPartida::desenhar(sf::RenderWindow& janela, double segundos, int pont
         if (w > limite) t.setScale(limite / w, limite / w);
         janela.draw(t);
     };
-    const sf::Color legenda(173, 190, 203), verde(107, 243, 211), ouro(255, 215, 122);
+    const sf::Color legenda(173, 190, 203), verde(177,198,154), ouro(198,188,149);
     texto("FASE " + std::to_string(fase), 20, 14, 20, sf::Color::White, divisao1 - 35);
     texto(jogadores == 1 ? "SOLO" : "DUPLA", 20, 57, 16, legenda, divisao1 - 35);
     texto("TEMPO DA PARTIDA", divisao1, 13, 14, legenda, divisao2 - divisao1 - 20);
@@ -69,7 +69,7 @@ void PainelPartida::desenhar(sf::RenderWindow& janela, double segundos, int pont
     texto(recorde ? formatar_tempo(*recorde) : (erro_recorde ? "Indisponivel" : "Sem recorde"),
           divisao2, 37, 23, ouro, largura - divisao2 - 20);
     if (recorde) texto(titulares, divisao2, 73, 12, legenda, largura - divisao2 - 20);
-    sf::RectangleShape segunda({largura,90}); segunda.setPosition(0,100); segunda.setFillColor(preferencias.contraste?sf::Color::Black:sf::Color(8,15,23,245)); janela.draw(segunda);
+    sf::RectangleShape segunda({largura,90}); segunda.setPosition(0,100); segunda.setFillColor(preferencias.contraste?sf::Color::Black:sf::Color(16,23,21,245)); janela.draw(segunda);
     for(std::size_t i=0;i<vidas.size();++i) {
         const float x=20+190*i;
         texto("J"+std::to_string(i+1)+"  "+std::to_string(std::max(0,vidas[i]))+"/20",x,103,14,legenda,170);

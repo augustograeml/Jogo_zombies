@@ -41,7 +41,7 @@ Jogo::~Jogo() {
 }
 void Jogo::Executar() {
     sf::Font fonte;
-    fonte.loadFromFile(Recursos::caminho("Design/fonte/fonte_simas.ttf").string());
+    fonte.loadFromFile(Recursos::caminho("Design/fonte/DejaVuSans.ttf").string());
     while (pG->get_JanelaAberta()) {
         pEv->executar();
         if (!pG->get_JanelaAberta()) break;
