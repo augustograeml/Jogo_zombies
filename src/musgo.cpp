@@ -1,4 +1,5 @@
 #include "../Entidades/Obstaculos/musgo.h"
+#include "../Recursos/plataforma.h"
 
 namespace Entidades
 {
@@ -6,7 +7,8 @@ namespace Entidades
     {
         Musgo::Musgo(sf::Vector2f pos) : Obstaculo(pos, false,false,false,false,true), gosmento(true)
         {
-            this->setSkin("Design/imagens/bloco_musgo.jpeg");
+            this->setSkin("Design/imagens/bloco_musgo.png");
+            corpo.setTextureRect(Recursos::trecho_plataforma(pos));
             this->set_vida(1);
         }
 
