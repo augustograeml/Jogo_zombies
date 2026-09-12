@@ -1,5 +1,6 @@
 #include "../Persistencia/pontos.h"
 #include "../Interface/preferencias.h"
+#include "../Interface/tema.h"
 #include "../Recursos/catalogo.h"
 #include "../Estados/Menus/ranking.h"
 #include "../Persistencia/ranking.h"
@@ -13,7 +14,7 @@ Ranking::Ranking(int id) : Estado(id) {
 void Ranking::atualizar() {
     textos.clear();
     auto texto = [this](const std::string& valor, float y, unsigned tamanho = 25) {
-        sf::Text t(sf::String::fromUtf8(valor.begin(), valor.end()), fonte, tamanho);
+        sf::Text t(sf::String::fromUtf8(valor.begin(), valor.end()), Interface::fonte_legivel(), tamanho);
         t.setPosition(90, y); t.setOutlineColor(sf::Color::Black); t.setOutlineThickness(2);
         const float largura = t.getLocalBounds().width;
         if (largura > 840) t.setScale(840 / largura, 840 / largura);
@@ -58,9 +59,7 @@ void Ranking::executar() {
     if(Interface::Preferencias::instancia().contraste) {
         sf::RectangleShape fundo({1024,1024}); fundo.setFillColor(sf::Color::Black); grafico->get_Janela()->draw(fundo);
     }
-    sf::RectangleShape painel({870, 500});
-    painel.setPosition(75, 260); painel.setFillColor(sf::Color(12, 8, 22, 210));
-    grafico->get_Janela()->draw(painel);
+    Interface::Tema::painel(*grafico->get_Janela(),{55,85,914,805});
     for (auto texto : textos) { Interface::aplicar_texto(texto,840); grafico->get_Janela()->draw(texto); }
 }
 }
