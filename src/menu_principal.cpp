@@ -1,6 +1,7 @@
 #include "../Persistencia/slots.h"
 #include "../Interface/painel.h"
 #include "../Interface/preferencias.h"
+#include "../Interface/tema.h"
 #include "../Recursos/catalogo.h"
 #include "../Estados/Menus/menu_principal.h"
 #include "../Estados/Fases/fase1.h"
@@ -11,8 +12,8 @@ namespace Estados::Menus {
 Menu_Principal::Menu_Principal(int id) : Menu(id), jacriado(false), pObserver(nullptr) { inicializa_valores(); }
 Menu_Principal::~Menu_Principal() = default;
 void Menu_Principal::inicializa_valores() {
-    fonte_slots.loadFromFile(Recursos::caminho("Design/fonte/fonte_simas.ttf").string());
-    imagem->loadFromFile(Recursos::caminho("Design/imagens/menu_zombies++.jpg").string());
+    fonte_slots.loadFromFile(Recursos::caminho("Design/fonte/DejaVuSans.ttf").string());
+    imagem->loadFromFile(Recursos::caminho("Design/imagens/menu_zombies++.png").string());
     fonte->loadFromFile(Recursos::caminho("Design/fonte/sangue_escorrendo.ttf").string());
     opcoes = {"Zombies++", "Novo Jogo", "Continuar", "Ranking", "Sair"};
     coordenadas = {{130, 40}, {445, 700}, {445, 762}, {460, 823}, {480, 886}};
@@ -42,15 +43,16 @@ void Menu_Principal::executar() {
     if (!escolhendo_partida && !escolhendo_destino) { mostrar_menu(); return; }
     pGG->resetarCamera(); pGG->desenharTextura(imagem);
     auto* janela=pGG->get_Janela();
-    sf::RectangleShape fundo({920,580}); fundo.setPosition(52,225); fundo.setFillColor(Interface::Preferencias::instancia().contraste?sf::Color::Black:sf::Color(8,15,23,245)); janela->draw(fundo);
+    sf::RectangleShape fundo({920,580}); fundo.setPosition(52,225); fundo.setFillColor(Interface::Preferencias::instancia().contraste?sf::Color::Black:Interface::Tema::fundo()); janela->draw(fundo);
     sf::Text titulo(escolhendo_destino?"Novo jogo: escolher destino":"Continuar jogo",fonte_slots,34); titulo.setPosition(95,260); Interface::aplicar_texto(titulo,820); janela->draw(titulo);
     for (std::size_t i=0;i<resumos.size();++i) {
         const bool atual=static_cast<int>(i+1)==(escolhendo_destino?destino_novo:Persistencia::Slots::instancia().selecionado());
         sf::RectangleShape cartao({840,82}); cartao.setPosition(92,350+100*i);
-        cartao.setFillColor(atual?sf::Color(29,75,71):sf::Color(27,35,45)); janela->draw(cartao);
+        cartao.setFillColor(atual?Interface::Tema::acento():Interface::Tema::fundo()); janela->draw(cartao);
         sf::Text t((atual?"> ":"  ")+resumos[i],fonte_slots,18); t.setPosition(110,376+100*i);
-        t.setFillColor(atual?sf::Color(107,243,211):sf::Color::White);
+        t.setFillColor(atual?sf::Color(16,23,21):Interface::Tema::tinta());
         Interface::aplicar_texto(t,800);
+        if(atual) t.setFillColor(sf::Color(16,23,21));
         janela->draw(t);
     }
     const std::string instrucoes = escolhendo_destino
