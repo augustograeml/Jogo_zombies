@@ -20,7 +20,7 @@ std::string formatar_tempo(double segundos) {
     return texto.str();
 }
 PainelPartida::PainelPartida() {
-    if (!fonte.loadFromFile(Recursos::caminho("Design/fonte/BarlowCondensed-Medium.ttf").string()))
+    if (!fonte.loadFromFile(Recursos::caminho("Design/fonte/BarlowSemiCondensed-Medium.ttf").string()))
         throw std::runtime_error("Fonte do painel nao encontrada.");
 }
 void PainelPartida::atualizar_recorde(int numero_fase, int quantidade) {

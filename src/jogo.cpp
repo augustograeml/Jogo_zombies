@@ -42,7 +42,7 @@ Jogo::~Jogo() {
 }
 void Jogo::Executar() {
     sf::Font fonte;
-    fonte.loadFromFile(Recursos::caminho("Design/fonte/BarlowCondensed-Medium.ttf").string());
+    fonte.loadFromFile(Recursos::caminho("Design/fonte/BarlowSemiCondensed-Medium.ttf").string());
     while (pG->get_JanelaAberta()) {
         pEv->executar();
         if (!pG->get_JanelaAberta()) break;

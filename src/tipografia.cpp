@@ -12,11 +12,13 @@ sf::Font carregar(const char* arquivo) {
 }
 }
 const sf::Font& fonte_interface() {
-    static const sf::Font fonte=carregar("Design/fonte/BarlowCondensed-Medium.ttf");
+    static const sf::Font fonte=carregar("Design/fonte/BarlowSemiCondensed-Medium.ttf");
     return Preferencias::instancia().legivel?fonte_legivel():fonte;
 }
 const sf::Font& fonte_titulo() {
-    static const sf::Font fonte=carregar("Design/fonte/Teko-Bold.otf");
-    return Preferencias::instancia().legivel?fonte_legivel():fonte;
+    static const sf::Font fonte=carregar("Design/fonte/BlackOpsOne-Regular.ttf");
+    static const sf::Font acessivel=carregar("Design/fonte/Teko-Bold.otf");
+    // O modo legivel elimina os recortes stencil, preservando a identidade dos titulos.
+    return Preferencias::instancia().legivel?acessivel:fonte;
 }
 }

@@ -10,8 +10,8 @@ inline void painel(sf::RenderTarget& alvo,sf::FloatRect area) {
     p.setFillColor(fundo()); p.setOutlineColor({80,96,82}); p.setOutlineThickness(-1); alvo.draw(p);
 }
 inline void estilo_titulo(sf::Text& t) {
-    t.setFont(fonte_titulo()); t.setFillColor(tinta()); t.setLetterSpacing(1.12f);
-    t.setOutlineColor({10,16,14,210}); t.setOutlineThickness(1.f);
+    t.setFont(fonte_titulo()); t.setFillColor(tinta()); t.setLetterSpacing(1.04f);
+    t.setOutlineColor({10,16,14,160}); t.setOutlineThickness(.5f);
 }
 inline void titulo(sf::RenderTarget& alvo,const std::string& valor,float y,unsigned tamanho=72) {
     sf::Text t(valor,fonte_titulo(),tamanho); estilo_titulo(t);
@@ -25,7 +25,7 @@ inline void botao(sf::RenderTarget& alvo,sf::FloatRect area,const std::string& v
     const bool contraste=Preferencias::instancia().contraste;
     b.setFillColor(ativo?(contraste?sf::Color::White:sf::Color(39,52,35,250)):fundo()); b.setOutlineColor(ativo?acento():sf::Color(80,96,82)); b.setOutlineThickness(-1); alvo.draw(b);
     if(ativo) { sf::RectangleShape marca({4,area.height-14}); marca.setPosition(area.left+7,area.top+7); marca.setFillColor(contraste?sf::Color::Black:acento()); alvo.draw(marca); }
-    sf::Text t(valor,fonte_interface(),tamanho+2); t.setLetterSpacing(1.08f); t.setFillColor(ativo?(contraste?sf::Color::Black:sf::Color(199,218,174)):tinta());
+    sf::Text t(valor,fonte_interface(),tamanho+4); t.setLetterSpacing(1.08f); t.setFillColor(ativo?(contraste?sf::Color::Black:sf::Color(199,218,174)):tinta());
     const auto r=t.getLocalBounds(); const float s=std::min(Preferencias::instancia().escala,(area.width-28)/std::max(1.f,r.width));
     t.setOrigin(r.left+r.width/2,r.top+r.height/2); t.setScale(s,s); t.setPosition(area.left+area.width/2,area.top+area.height/2); alvo.draw(t);
 }

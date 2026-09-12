@@ -8,7 +8,7 @@ namespace Estados::Menus {
 Nome::Nome(int id) : Menu(id) { inicializa_valores(); }
 void Nome::inicializa_valores() {
     imagem->loadFromFile(Recursos::caminho("Design/imagens/pegar_nome.png").string());
-    fonte->loadFromFile(Recursos::caminho("Design/fonte/BarlowCondensed-Medium.ttf").string());
+    fonte->loadFromFile(Recursos::caminho("Design/fonte/BarlowSemiCondensed-Medium.ttf").string());
 }
 void Nome::ao_entrar() {
     entrada.clear(); nomes.clear();

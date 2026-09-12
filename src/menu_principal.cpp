@@ -12,7 +12,7 @@ namespace Estados::Menus {
 Menu_Principal::Menu_Principal(int id) : Menu(id), jacriado(false), pObserver(nullptr) { inicializa_valores(); }
 Menu_Principal::~Menu_Principal() = default;
 void Menu_Principal::inicializa_valores() {
-    fonte_slots.loadFromFile(Recursos::caminho("Design/fonte/BarlowCondensed-Medium.ttf").string());
+    fonte_slots.loadFromFile(Recursos::caminho("Design/fonte/BarlowSemiCondensed-Medium.ttf").string());
     imagem->loadFromFile(Recursos::caminho("Design/imagens/menu_zombies++.png").string());
     fonte->loadFromFile(Recursos::caminho("Design/fonte/Teko-Bold.otf").string());
     opcoes = {"Zombies++", "Novo Jogo", "Continuar", "Ranking", "Sair"};
