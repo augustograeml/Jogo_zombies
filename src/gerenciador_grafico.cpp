@@ -24,6 +24,11 @@ namespace Gerenciadores
         {
             sf::Sprite sprite;
             sprite.setTexture(*pT);
+            const auto tamanho=pT->getSize();
+            if(!tamanho.x || !tamanho.y) return;
+            const float escala=std::max(1024.f/tamanho.x,1024.f/tamanho.y);
+            sprite.setScale(escala,escala);
+            sprite.setPosition((1024-tamanho.x*escala)/2,(1024-tamanho.y*escala)/2);
             get_Janela()->draw(sprite);
         }
     }
