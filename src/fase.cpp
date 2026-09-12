@@ -1,5 +1,6 @@
 #include "../Logica/mundo.h"
 #include "../Interface/preferencias.h"
+#include "../Recursos/plataforma.h"
 #include "../Persistencia/mundo.h"
 #include "../Estados/Fases/construtor_cenario.h"
 #include "../Persistencia/slots.h"
@@ -36,7 +37,7 @@ void Fase::criar_jogadores() {
     jogadores.incluir(primeiro);
 }
 void Fase::criar_inimigos(std::string caminho) { ConstrutorCenario::inimigos(caminho, inimigos); }
-void Fase::criar_cenario(std::string caminho) { ConstrutorCenario::obstaculos(caminho, obstaculos); gC.invalidar_grade(); }
+void Fase::criar_cenario(std::string caminho) { ConstrutorCenario::obstaculos(caminho, obstaculos); Recursos::encaixar_plataformas(obstaculos); gC.invalidar_grade(); }
 void Fase::ao_entrar() {
     painel.atualizar_recorde(get_numero_fase(), num_jogadores);
     relogio.restart(); // Descarta tempo no menu, em pausa e fora do processo.
@@ -161,6 +162,6 @@ void Fase::simular_passo() {
 }
 Json Fase::capturar() { auto contexto=mundo(); return Persistencia::capturar_mundo(contexto); }
 void Fase::restaurar(const Json& dados) {
-    auto contexto=mundo(); Persistencia::restaurar_mundo(contexto,dados); relogio.restart();
+    auto contexto=mundo(); Persistencia::restaurar_mundo(contexto,dados); Recursos::encaixar_plataformas(obstaculos); relogio.restart();
 }
 }
