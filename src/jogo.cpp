@@ -4,6 +4,7 @@
 #include "../Persistencia/slots.h"
 #include "../Persistencia/aleatorio.h"
 #include "../Recursos/catalogo.h"
+#include "../Interface/preferencias.h"
 #include "../jogo.h"
 #include <memory>
 
@@ -41,7 +42,7 @@ Jogo::~Jogo() {
 }
 void Jogo::Executar() {
     sf::Font fonte;
-    fonte.loadFromFile(Recursos::caminho("Design/fonte/DejaVuSans.ttf").string());
+    fonte.loadFromFile(Recursos::caminho("Design/fonte/BarlowCondensed-Medium.ttf").string());
     while (pG->get_JanelaAberta()) {
         pEv->executar();
         if (!pG->get_JanelaAberta()) break;
@@ -54,7 +55,7 @@ void Jogo::Executar() {
             fundo.setFillColor(sf::Color(0, 0, 0, 220));
             const float y = pE->get_estado_atual() >= 6 && pE->get_estado_atual() <= 9 ? 168.f : 10.f;
             fundo.setPosition(10, y);
-            sf::Text aviso(pE->mensagem, fonte, 18);
+            sf::Text aviso(pE->mensagem, Interface::fonte_interface(), 20);
             aviso.setPosition(20, y + 10);
             const float largura = aviso.getLocalBounds().width;
             if (largura > 980) aviso.setScale(980 / largura, 980 / largura);

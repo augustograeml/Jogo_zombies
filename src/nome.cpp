@@ -8,7 +8,7 @@ namespace Estados::Menus {
 Nome::Nome(int id) : Menu(id) { inicializa_valores(); }
 void Nome::inicializa_valores() {
     imagem->loadFromFile(Recursos::caminho("Design/imagens/pegar_nome.png").string());
-    fonte->loadFromFile(Recursos::caminho("Design/fonte/fonte_simas.ttf").string());
+    fonte->loadFromFile(Recursos::caminho("Design/fonte/BarlowCondensed-Medium.ttf").string());
 }
 void Nome::ao_entrar() {
     entrada.clear(); nomes.clear();
@@ -60,22 +60,24 @@ void Nome::executar() {
     auto* fase = dynamic_cast<Fases::Fase*>(pGE->get_estado(pGE->get_fase()));
     const bool venceu = fase && fase->get_vitoria();
     Interface::Tema::painel(*pGG->get_Janela(),{80,110,864,650});
-    sf::Text titulo(venceu ? "Fase concluida!" : "Fim de jogo", Interface::fonte_legivel(), 45);
+    sf::Text titulo(venceu ? "FASE CONCLUIDA" : "FIM DE JOGO", Interface::fonte_titulo(), 64);
+    Interface::Tema::estilo_titulo(titulo);
     titulo.setPosition(130, 160);
     sf::Text instrucao("Nome do jogador " + std::to_string(std::min(static_cast<int>(nomes.size()) + 1, quantidade)) +
-                       " (Enter confirma)", Interface::fonte_legivel(), 26);
+                       " (Enter confirma)", Interface::fonte_interface(), 26);
     instrucao.setPosition(130, 320);
     Interface::Tema::painel(*pGG->get_Janela(),{130,460,760,75});
-    sf::Text campo(entrada + "_", Interface::fonte_legivel(), 32); campo.setPosition(150, 480);
+    sf::Text campo(entrada + "_", Interface::fonte_interface(), 32); campo.setPosition(150, 480);
     sf::Text resultado("Pontuacao da equipe: " + std::to_string(fase ? fase->get_pontos() : 0) +
-        (venceu ? " | Tempo de conclusao registrado." : " | Pontos positivos entram no ranking."), Interface::fonte_legivel(), 20);
+        (venceu ? " | Tempo de conclusao registrado." : " | Pontos positivos entram no ranking."), Interface::fonte_interface(), 20);
     resultado.setPosition(130, 250);
-    sf::Text ajuda("Esc: menu | Continuar recupera o resultado pendente", Interface::fonte_legivel(), 20);
+    sf::Text ajuda("Esc: menu | Continuar recupera o resultado pendente", Interface::fonte_interface(), 20);
     ajuda.setPosition(130, 650);
     for (auto* texto : {&titulo, &instrucao, &campo, &ajuda, &resultado}) {
         Interface::aplicar_texto(*texto,770);
-        texto->setOutlineColor(sf::Color::Black); texto->setOutlineThickness(2);
+        texto->setFillColor(Interface::Tema::tinta());
     }
+    ajuda.setFillColor(Interface::Preferencias::instancia().contraste?sf::Color::White:Interface::Tema::secundaria());
     pGG->get_Janela()->draw(titulo); pGG->get_Janela()->draw(instrucao);
     pGG->get_Janela()->draw(resultado);
     pGG->get_Janela()->draw(campo); pGG->get_Janela()->draw(ajuda);

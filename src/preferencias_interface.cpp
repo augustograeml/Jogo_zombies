@@ -27,6 +27,7 @@ const sf::Font& fonte_legivel() {
 void aplicar_texto(sf::Text& t,float largura) {
     const auto& p=Preferencias::instancia();
     if(p.legivel) t.setFont(fonte_legivel());
+    if(!p.contraste && t.getFillColor()==sf::Color::White) t.setFillColor({229,233,223});
     float s=p.escala;
     const auto w=t.getLocalBounds().width;
     if(w*s>largura && w>0) s=largura/w;

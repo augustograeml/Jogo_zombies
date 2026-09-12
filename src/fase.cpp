@@ -88,7 +88,7 @@ void Fase::desenhar_partida() {
             borda.setOutlineThickness(-2); borda.setOutlineColor(sf::Color::White); janela->draw(borda);
             sf::RectangleShape etiqueta({44,30}); etiqueta.setPosition(x+4,y+4);
             etiqueta.setFillColor(sf::Color::Black); janela->draw(etiqueta);
-            sf::Text nome("J"+std::to_string(i+1),Interface::fonte_legivel(),20);
+            sf::Text nome("J"+std::to_string(i+1),Interface::fonte_interface(),20);
             nome.setPosition(x+10,y+5); janela->draw(nome);
         }
         janela->setView(anterior);

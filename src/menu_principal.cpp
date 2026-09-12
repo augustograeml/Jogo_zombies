@@ -12,9 +12,9 @@ namespace Estados::Menus {
 Menu_Principal::Menu_Principal(int id) : Menu(id), jacriado(false), pObserver(nullptr) { inicializa_valores(); }
 Menu_Principal::~Menu_Principal() = default;
 void Menu_Principal::inicializa_valores() {
-    fonte_slots.loadFromFile(Recursos::caminho("Design/fonte/DejaVuSans.ttf").string());
+    fonte_slots.loadFromFile(Recursos::caminho("Design/fonte/BarlowCondensed-Medium.ttf").string());
     imagem->loadFromFile(Recursos::caminho("Design/imagens/menu_zombies++.png").string());
-    fonte->loadFromFile(Recursos::caminho("Design/fonte/sangue_escorrendo.ttf").string());
+    fonte->loadFromFile(Recursos::caminho("Design/fonte/Teko-Bold.otf").string());
     opcoes = {"Zombies++", "Novo Jogo", "Continuar", "Ranking", "Sair"};
     coordenadas = {{130, 40}, {445, 700}, {445, 762}, {460, 823}, {480, 886}};
     tamanhos = {200, 22, 22, 22, 22};
@@ -44,7 +44,7 @@ void Menu_Principal::executar() {
     pGG->resetarCamera(); pGG->desenharTextura(imagem);
     auto* janela=pGG->get_Janela();
     sf::RectangleShape fundo({920,580}); fundo.setPosition(52,225); fundo.setFillColor(Interface::Preferencias::instancia().contraste?sf::Color::Black:Interface::Tema::fundo()); janela->draw(fundo);
-    sf::Text titulo(escolhendo_destino?"Novo jogo: escolher destino":"Continuar jogo",fonte_slots,34); titulo.setPosition(95,260); Interface::aplicar_texto(titulo,820); janela->draw(titulo);
+    sf::Text titulo(escolhendo_destino?"NOVO JOGO / DESTINO":"CONTINUAR JOGO",Interface::fonte_titulo(),52); titulo.setPosition(95,250); Interface::Tema::estilo_titulo(titulo); Interface::aplicar_texto(titulo,820); janela->draw(titulo);
     for (std::size_t i=0;i<resumos.size();++i) {
         const bool atual=static_cast<int>(i+1)==(escolhendo_destino?destino_novo:Persistencia::Slots::instancia().selecionado());
         sf::RectangleShape cartao({840,82}); cartao.setPosition(92,350+100*i);

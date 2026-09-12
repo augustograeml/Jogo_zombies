@@ -11,7 +11,7 @@ void Menu::mostrar_menu() {
     pGG->desenharTextura(imagem);
     if(Interface::Preferencias::instancia().contraste) { sf::RectangleShape fundo({1024,1024}); fundo.setFillColor(sf::Color::Black); pGG->get_Janela()->draw(fundo); }
     auto& janela=*pGG->get_Janela();
-    Interface::Tema::titulo(janela,id==0?"Zombies++":id==1?"Jogadores":"Escolha a fase",110,id==0?86:58);
+    Interface::Tema::titulo(janela,id==0?"ZOMBIES++":id==1?"JOGADORES":"ESCOLHA A FASE",110,id==0?132:76);
     for(std::size_t i=1;i<textos.size();++i)
         Interface::Tema::botao(janela,area_opcao(i),opcoes[i],i==static_cast<std::size_t>(pos));
 }

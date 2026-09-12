@@ -8,19 +8,21 @@
 #include <sstream>
 namespace Estados::Menus {
 Ranking::Ranking(int id) : Estado(id) {
-    fonte.loadFromFile(Recursos::caminho("Design/fonte/fonte_simas.ttf").string());
+    fonte.loadFromFile(Recursos::caminho("Design/fonte/BarlowCondensed-Medium.ttf").string());
     imagem.loadFromFile(Recursos::caminho("Design/imagens/rankingzombies++.png").string());
 }
 void Ranking::atualizar() {
     textos.clear();
     auto texto = [this](const std::string& valor, float y, unsigned tamanho = 25) {
-        sf::Text t(sf::String::fromUtf8(valor.begin(), valor.end()), Interface::fonte_legivel(), tamanho);
-        t.setPosition(90, y); t.setOutlineColor(sf::Color::Black); t.setOutlineThickness(2);
+        sf::Text t(sf::String::fromUtf8(valor.begin(), valor.end()), Interface::fonte_interface(), tamanho);
+        t.setPosition(90, y); t.setFillColor(Interface::Tema::tinta());
+        if(y==120) Interface::Tema::estilo_titulo(t);
+        else if(y==180 || y==215 || y==820) t.setFillColor(Interface::Tema::secundaria());
         const float largura = t.getLocalBounds().width;
         if (largura > 840) t.setScale(840 / largura, 840 / largura);
         textos.push_back(t);
     };
-    texto("Ranking - Fase " + std::to_string(fase) + (jogadores == 1 ? " - Solo" : " - Dupla"), 120, 32);
+    texto("RANKING / FASE " + std::to_string(fase) + (jogadores == 1 ? " / SOLO" : " / DUPLA"), 120, 48);
     texto(por_pontos ? "Maior pontuacao vence; empate pelo tempo" : "Menor tempo vence", 180, 20);
     texto("Setas: fase | Tab: solo/dupla | P: tempo/pontos", 215, 20);
     try {

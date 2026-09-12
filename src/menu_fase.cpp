@@ -8,7 +8,7 @@ Menu_Fase::Menu_Fase(int id, bool dois) : Menu(id), pObserver(nullptr) { set_jog
 Menu_Fase::~Menu_Fase() = default;
 void Menu_Fase::inicializa_valores() {
     imagem->loadFromFile(Recursos::caminho("Design/imagens/menu2fases.png").string());
-    fonte->loadFromFile(Recursos::caminho("Design/fonte/sangue_escorrendo.ttf").string());
+    fonte->loadFromFile(Recursos::caminho("Design/fonte/Teko-Bold.otf").string());
     opcoes = {"Fases", "Fase 1", "Fase 2", "Sair"};
     coordenadas = {{270, 40}, {360, 604}, {600, 604}, {493, 650}};
     tamanhos = {200, 20, 20, 20};

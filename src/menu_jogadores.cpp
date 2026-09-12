@@ -27,7 +27,7 @@ namespace Estados
         {
             selecionado = deselecionado = jogador2 = false;
             imagem->loadFromFile(Recursos::caminho("Design/imagens/menu2jogadores.png").string());
-            fonte->loadFromFile(Recursos::caminho("Design/fonte/sangue_escorrendo.ttf").string());
+            fonte->loadFromFile(Recursos::caminho("Design/fonte/Teko-Bold.otf").string());
 
             opcoes = {"Players", "Um jogador", "Dois Jogadores", "Sair"};
             textos.resize(4);

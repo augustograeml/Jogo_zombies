@@ -7,7 +7,7 @@ namespace Estados
     {
         Botao::Botao()
         {
-            fonte->loadFromFile(Recursos::caminho("Design/fonte/sangue_escorrendo.ttf").string());
+            fonte->loadFromFile(Recursos::caminho("Design/fonte/Teko-Bold.otf").string());
             texto.setFont(*fonte);
             texto.setFillColor(sf::Color::White);
             //talvez essa linha de baixo possa cagar o codigo, ficar experto

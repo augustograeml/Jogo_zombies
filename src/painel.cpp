@@ -20,7 +20,7 @@ std::string formatar_tempo(double segundos) {
     return texto.str();
 }
 PainelPartida::PainelPartida() {
-    if (!fonte.loadFromFile(Recursos::caminho("Design/fonte/DejaVuSans.ttf").string()))
+    if (!fonte.loadFromFile(Recursos::caminho("Design/fonte/BarlowCondensed-Medium.ttf").string()))
         throw std::runtime_error("Fonte do painel nao encontrada.");
 }
 void PainelPartida::atualizar_recorde(int numero_fase, int quantidade) {
@@ -54,7 +54,7 @@ void PainelPartida::desenhar(sf::RenderWindow& janela, double segundos, int pont
     detalhe.setFillColor(sf::Color(145,167,122)); janela.draw(detalhe);
     auto texto = [&](const std::string& valor, float x, float y, unsigned tamanho,
                      sf::Color cor, float limite) {
-        sf::Text t(sf::String::fromUtf8(valor.begin(), valor.end()), preferencias.legivel?fonte_legivel():fonte, tamanho);
+        sf::Text t(sf::String::fromUtf8(valor.begin(), valor.end()), fonte_interface(), tamanho);
         t.setPosition(x, y); t.setFillColor(preferencias.contraste?sf::Color::White:cor);
         const float w = t.getLocalBounds().width;
         if (w > limite) t.setScale(limite / w, limite / w);
@@ -63,16 +63,16 @@ void PainelPartida::desenhar(sf::RenderWindow& janela, double segundos, int pont
     const sf::Color legenda(173, 190, 203), verde(177,198,154), ouro(198,188,149);
     texto("FASE " + std::to_string(fase), 20, 14, 20, sf::Color::White, divisao1 - 35);
     texto(jogadores == 1 ? "SOLO" : "DUPLA", 20, 57, 16, legenda, divisao1 - 35);
-    texto("TEMPO DA PARTIDA", divisao1, 13, 14, legenda, divisao2 - divisao1 - 20);
+    texto("TEMPO DA PARTIDA", divisao1, 13, 17, legenda, divisao2 - divisao1 - 20);
     texto(formatar_tempo(segundos), divisao1, 43, 28, verde, divisao2 - divisao1 - 20);
-    texto("RECORDE DA FASE", divisao2, 13, 14, legenda, largura - divisao2 - 20);
+    texto("RECORDE DA FASE", divisao2, 13, 17, legenda, largura - divisao2 - 20);
     texto(recorde ? formatar_tempo(*recorde) : (erro_recorde ? "Indisponivel" : "Sem recorde"),
           divisao2, 37, 23, ouro, largura - divisao2 - 20);
-    if (recorde) texto(titulares, divisao2, 73, 12, legenda, largura - divisao2 - 20);
+    if (recorde) texto(titulares, divisao2, 73, 15, legenda, largura - divisao2 - 20);
     sf::RectangleShape segunda({largura,90}); segunda.setPosition(0,100); segunda.setFillColor(preferencias.contraste?sf::Color::Black:sf::Color(16,23,21,245)); janela.draw(segunda);
     for(std::size_t i=0;i<vidas.size();++i) {
         const float x=20+190*i;
-        texto("J"+std::to_string(i+1)+"  "+std::to_string(std::max(0,vidas[i]))+"/20",x,103,14,legenda,170);
+        texto("J"+std::to_string(i+1)+"  "+std::to_string(std::max(0,vidas[i]))+"/20",x,103,17,legenda,170);
         sf::RectangleShape base({160,12}); base.setPosition(x,132); base.setFillColor({55,65,75}); janela.draw(base);
         base.setSize({160*std::clamp(vidas[i]/20.f,0.f,1.f),12}); base.setFillColor(vidas[i]<10?sf::Color(255,120,110):verde); janela.draw(base);
     }

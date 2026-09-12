@@ -9,7 +9,7 @@ Pause::Pause(int id) : Estado(id), fonte(new sf::Font), imagem(new sf::Texture) 
 Pause::~Pause() { delete fonte; delete imagem; }
 void Pause::inicializa_valores() {
     imagem->loadFromFile(Recursos::caminho("Design/imagens/pause.png").string());
-    fonte->loadFromFile(Recursos::caminho("Design/fonte/sangue_escorrendo.ttf").string());
+    fonte->loadFromFile(Recursos::caminho("Design/fonte/Teko-Bold.otf").string());
     opcoes = {"Pausa", "Continuar", "Menu"};
     coordenadas = {{340, 185}, {390, 462}, {470, 605}};
     tamanhos = {150, 50, 50};
@@ -63,19 +63,19 @@ void Pause::mostrar_menu() {
             "Movimento e coleta: "+std::to_string(static_cast<int>(a.volumes[0]))+"%",
             "Combate: "+std::to_string(static_cast<int>(a.volumes[1]))+"%",
             "Vitoria e derrota: "+std::to_string(static_cast<int>(a.volumes[2]))+"%"};
-        auto escrever=[&](std::string valor,float y,unsigned tamanho) { sf::Text t(valor,Interface::fonte_legivel(),tamanho); t.setPosition(90,y); Interface::aplicar_texto(t,840); janela.draw(t); };
-        escrever("Preferencias",90,42);
+        auto escrever=[&](std::string valor,float y,unsigned tamanho) { sf::Text t(valor,Interface::fonte_interface(),tamanho); t.setPosition(90,y); Interface::aplicar_texto(t,840); janela.draw(t); };
+        Interface::Tema::titulo(janela,"PREFERENCIAS",95,72);
         for(std::size_t i=0;i<linhas.size();++i) Interface::Tema::botao(janela,{80,225+80.f*i,864,60},linhas[i],preferencia==static_cast<int>(i),24);
         escrever("Setas: selecionar/ajustar | Enter: alterar",810,22);
         escrever("Esc ou F: voltar | Preferencias salvas automaticamente",860,20);
         return;
     }
-    Interface::Tema::titulo(janela,"Pausa",125);
+    Interface::Tema::titulo(janela,"PAUSA",125,86);
     Interface::Tema::botao(janela,{320,440,384,60},"Continuar",pos==1,26);
     Interface::Tema::botao(janela,{320,535,384,60},"Menu",pos==2,26);
     const auto& p=Audio::Preferencias::instancia();
     sf::Text ajuda("F: preferencias | S: salvar | M: mudo | +/-: volume " + std::to_string(static_cast<int>(p.volume)) +
-        (p.mudo?" (mudo)":""), Interface::fonte_legivel(), 20);
+        (p.mudo?" (mudo)":""), Interface::fonte_interface(), 20);
     ajuda.setPosition(80,800); pGG->get_Janela()->draw(ajuda);
 }
 void Pause::executar() { mostrar_menu(); }
