@@ -1,0 +1,314 @@
+name: Build and Release
+
+on:
+  push:
+    branches:
+      - master
+
+permissions:
+  contents: write
+
+jobs:
+  linux:
+    name: Linux x86-64
+    runs-on: ubuntu-24.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Instalar dependências
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            g++ \
+            make \
+            libsfml-dev \
+            curl \
+            file \
+            patchelf \
+            imagemagick
+
+      - name: Compilar
+        run: |
+          make clean
+          make -j"$(nproc)"
+
+      - name: Montar AppDir
+        run: |
+          mkdir -p AppDir/usr/bin
+          mkdir -p AppDir/usr/share/zombies
+
+          cp prog AppDir/usr/bin/zombies
+          cp -r Design AppDir/usr/share/zombies/Design
+
+          cat > AppDir/AppRun <<'EOF'
+          #!/bin/sh
+
+          APPDIR="$(dirname "$(readlink -f "$0")")"
+
+          export ZOMBIES_RECURSOS="$APPDIR/usr/share/zombies"
+
+          exec "$APPDIR/usr/bin/zombies" "$@"
+          EOF
+
+          chmod +x AppDir/AppRun
+
+          cat > AppDir/zombies.desktop <<'EOF'
+          [Desktop Entry]
+          Type=Application
+          Name=Zombies++
+          Exec=zombies
+          Icon=zombies
+          Categories=Game;
+          Terminal=false
+          EOF
+
+          # O linuxdeploy exige um ícone quadrado em resolução válida.
+          convert Design/imagens/zumbi_bateu_morreu.png \
+            -thumbnail 224x224 \
+            -background none \
+            -gravity center \
+            -extent 256x256 \
+            AppDir/zombies.png
+
+      - name: Baixar linuxdeploy
+        run: |
+          curl -L \
+            -o linuxdeploy.AppImage \
+            https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
+
+          chmod +x linuxdeploy.AppImage
+
+      - name: Incluir bibliotecas
+        run: |
+          APPIMAGE_EXTRACT_AND_RUN=1 ./linuxdeploy.AppImage \
+            --appdir AppDir \
+            --executable AppDir/usr/bin/zombies \
+            --desktop-file AppDir/zombies.desktop \
+            --icon-file AppDir/zombies.png
+
+      - name: Baixar appimagetool
+        run: |
+          curl -L \
+            -o appimagetool.AppImage \
+            https://github.com/AppImage/AppImageKit/releases/download/continuous/appimagetool-x86_64.AppImage
+
+          chmod +x appimagetool.AppImage
+
+      - name: Gerar AppImage
+        run: |
+          ARCH=x86_64 APPIMAGE_EXTRACT_AND_RUN=1 \
+            ./appimagetool.AppImage \
+            AppDir \
+            Zombies++-Linux-x86_64.AppImage
+
+      - name: Salvar build Linux
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux
+          path: Zombies++-Linux-x86_64.AppImage
+          if-no-files-found: error
+
+
+  windows:
+    name: Windows x86-64
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configurar MSYS2
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: true
+          install: >-
+            make
+            zip
+            git
+            mingw-w64-x86_64-gcc
+            mingw-w64-x86_64-cmake
+            mingw-w64-x86_64-ninja
+
+      - name: Compilar SFML 2.6.2
+        shell: msys2 {0}
+        run: |
+          git clone \
+            --depth 1 \
+            --branch 2.6.2 \
+            https://github.com/SFML/SFML.git \
+            SFML-src
+
+          cmake \
+            -S SFML-src \
+            -B SFML-build \
+            -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DBUILD_SHARED_LIBS=ON \
+            -DSFML_BUILD_EXAMPLES=OFF \
+            -DSFML_BUILD_DOC=OFF \
+            -DCMAKE_INSTALL_PREFIX="$PWD/SFML-local"
+
+          cmake --build SFML-build --parallel 4
+          cmake --install SFML-build
+
+      - name: Compilar Zombies++
+        shell: msys2 {0}
+        run: |
+          export PATH="$PWD/SFML-local/bin:$PATH"
+
+          make clean
+
+          make -j4 \
+            SFML_ROOT="$PWD/SFML-local"
+
+      - name: Montar pacote Windows
+        shell: msys2 {0}
+        run: |
+          export PATH="$PWD/SFML-local/bin:$PATH"
+
+          mkdir -p dist/Zombies++
+
+          cp prog.exe \
+            dist/Zombies++/Zombies++.exe
+
+          cp -r Design \
+            dist/Zombies++/Design
+
+          # DLLs da SFML 2.6.2 compilada pelo workflow.
+          cp -n SFML-local/bin/*.dll \
+            dist/Zombies++/
+
+          # Dependências extras distribuídas pela própria SFML,
+          # como OpenAL, caso estejam presentes.
+          if [ -d SFML-src/extlibs/bin/x64 ]; then
+            cp -n \
+              SFML-src/extlibs/bin/x64/*.dll \
+              dist/Zombies++/ \
+              2>/dev/null || true
+          fi
+
+          # Runtime do MinGW necessário para rodar o .exe
+          # em uma máquina Windows sem MSYS2 instalado.
+          ldd prog.exe \
+            | awk '/=> \/mingw64\// {print $3}' \
+            | sort -u \
+            | while read -r dll; do
+
+                if [ -f "$dll" ]; then
+                  cp -n "$dll" \
+                    dist/Zombies++/ || true
+                fi
+
+              done
+
+          cd dist
+
+          zip -r \
+            ../Zombies++-Windows-x86_64.zip \
+            Zombies++
+
+      - name: Salvar build Windows
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows
+          path: Zombies++-Windows-x86_64.zip
+          if-no-files-found: error
+
+
+  release:
+    name: Criar nova versão
+
+    needs:
+      - linux
+      - windows
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout com histórico e tags
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Baixar builds
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Calcular versão, criar tag e publicar
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+        shell: bash
+
+        run: |
+          git fetch --tags origin
+
+          while true; do
+
+            LATEST="$(
+              git tag \
+                -l 'v[0-9]*.[0-9]*.[0-9]*' \
+                --sort=-v:refname \
+              | head -n 1
+            )"
+
+            if [ -z "$LATEST" ]; then
+
+              MAJOR=1
+              MINOR=0
+              PATCH=0
+
+            else
+
+              VERSION="${LATEST#v}"
+
+              IFS='.' read -r \
+                MAJOR \
+                MINOR \
+                PATCH \
+                <<< "$VERSION"
+
+              PATCH=$((PATCH + 1))
+
+            fi
+
+            TAG="v${MAJOR}.${MINOR}.${PATCH}"
+
+            echo "Tentando criar ${TAG}..."
+
+            git tag "$TAG" "$GITHUB_SHA"
+
+            if git push origin "$TAG"; then
+              break
+            fi
+
+            echo "A tag ${TAG} já existe. Recalculando..."
+
+            git tag -d "$TAG" || true
+            git fetch --tags origin
+
+            sleep 2
+
+          done
+
+          echo "Nova versão: $TAG"
+
+          mv \
+            dist/Zombies++-Linux-x86_64.AppImage \
+            "dist/Zombies++-${TAG}-Linux-x86_64.AppImage"
+
+          mv \
+            dist/Zombies++-Windows-x86_64.zip \
+            "dist/Zombies++-${TAG}-Windows-x86_64.zip"
+
+          gh release create "$TAG" \
+            "dist/Zombies++-${TAG}-Linux-x86_64.AppImage" \
+            "dist/Zombies++-${TAG}-Windows-x86_64.zip" \
+            --title "Zombies++ $TAG" \
+            --generate-notes \
+            --latest
