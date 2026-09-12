@@ -8,7 +8,7 @@ Paleta compartilhada: carvão #101715, concreto #87948A, oliva #91A77A, marfim #
 
 Composição: fundos de gameplay com região central pouco contrastada e detalhes nas camadas distantes. Menus quadrados com espaço negativo central. Telas de leitura têm ambientes mais escuros e painéis desenhados em C++.
 
-Tipografia (segunda etapa): Teko Bold para títulos industriais e Barlow Condensed Medium para leitura funcional, ambas SIL OFL. DejaVu permanece como alternativa de acessibilidade. Seleção com marcador lateral e texto oliva claro; opções inativas carvão/marfim. Alto contraste e escala continuam disponíveis.
+Tipografia (segunda etapa): Black Ops One para títulos stencil e Barlow Semi Condensed Medium para leitura funcional, ambas SIL OFL. DejaVu permanece como alternativa de acessibilidade. Seleção com marcador lateral e texto oliva claro; opções inativas carvão/marfim. Alto contraste e escala continuam disponíveis.
 
 ## Produção
 

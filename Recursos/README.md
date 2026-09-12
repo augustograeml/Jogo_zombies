@@ -75,7 +75,7 @@ A geração de uma folha nova do Luigi foi solicitada à ferramenta integrada de
 
 `Recursos::area_cenario` recorta centralmente os fundos na proporção 5:3 durante a carga. O desenho usa essa região sem deformar os PNGs. Os menus também usam escala uniforme e recorte central.
 
-A UI usa Teko Bold nos títulos e Barlow Condensed Medium nos textos funcionais, ambas sob SIL OFL 1.1. DejaVu Sans continua como alternativa de acessibilidade. Veja [fontes e licenças](../Design/fonte/CREDITOS.md) e [plataformas e tipografia](PLATAFORMAS_TIPOGRAFIA.md). As preferências da pausa continuam oferecendo escala, contraste e volumes por categoria.
+A UI usa Black Ops One nos títulos e Barlow Semi Condensed Medium nos textos funcionais, ambas sob SIL OFL 1.1. DejaVu Sans continua como alternativa de acessibilidade. Veja [fontes e licenças](../Design/fonte/CREDITOS.md) e [plataformas e tipografia](PLATAFORMAS_TIPOGRAFIA.md). As preferências da pausa continuam oferecendo escala, contraste e volumes por categoria.
 
 ## Folha de caminhada do Luigi
 

@@ -145,7 +145,7 @@ Os gerenciadores continuam Singleton, com vida controlada e encerramento idempot
 
 A refatoração P01 foi comparada isoladamente com a versão anterior: estados idênticos após 80 passos. Os testes novos cobrem destinos, perseguição/golpe, retomada de 100 passos dos inimigos, preferências, inicialização sem DISPLAY, câmera e desenho em 1024×1024, 1280×720 e 640×800 sem mutar o mundo.
 
-Os menus usam Teko Bold nos títulos e Barlow Condensed Medium nos textos funcionais, painéis carvão e texto marfim. A seleção tem texto oliva claro e marcador lateral; alto contraste usa branco e preto. DejaVu permanece como alternativa de acessibilidade. Os oito novos fundos seguem ambientes de evacuação abandonados. Veja [direção, assets e validação da remasterização](Recursos/RELATORIO_VISUAL.md).
+Os menus usam Black Ops One nos títulos e Barlow Semi Condensed Medium nos textos funcionais, painéis carvão e texto marfim. A seleção tem texto oliva claro e marcador lateral; alto contraste usa branco e preto. DejaVu permanece como alternativa de acessibilidade. Os oito novos fundos seguem ambientes de evacuação abandonados. Veja [direção, assets e validação da remasterização](Recursos/RELATORIO_VISUAL.md).
 
 A [segunda etapa visual](Recursos/PLATAFORMAS_TIPOGRAFIA.md) integra plataformas de concreto frio com neve e pedra úmida com musgo discreto. As faixas de textura variam por posição sem alterar colisões, mapas ou saves. Artes anteriores estão em `Design/imagens/legacy/`.
 
@@ -154,3 +154,5 @@ A [segunda etapa visual](Recursos/PLATAFORMAS_TIPOGRAFIA.md) integra plataformas
 O workflow em `master` publica um AppImage Linux e um instalador `Setup.exe` Windows, incluindo os recursos e bibliotecas necessários. No Linux, permita a execução do AppImage antes de abri-lo. No Windows, o instalador usa a pasta do usuário e cria um atalho no menu Iniciar; mantenha os arquivos instalados juntos. Um `prog.exe` isolado não contém imagens, fontes ou DLLs.
 
 As artes de `Design/imagens/legacy/` permanecem no Git, mas não entram nos pacotes. O GitHub também exibe automaticamente os arquivos de código-fonte da tag. O workflow executa os testes no Linux antes de publicar e permite execução manual pela aba Actions.
+
+O [acabamento visual](Recursos/ACABAMENTO_VISUAL.md) conecta blocos verticais, reorganiza o ranking em colunas e mantém títulos Teko no modo de acessibilidade.
