@@ -34,8 +34,11 @@ public:
             const sf::Vector2f tamanho(area.width*1024,area.height*1024);
             // Fora dos limites (por exemplo queda fatal), ainda acompanha o jogador.
             const auto limitar=[](float c,float inicio,float fim,float metade) {
-                if(c<inicio || c>fim) return c;
-                return fim-inicio<2*metade?(inicio+fim)/2:std::clamp(c,inicio+metade,fim-metade);
+                const float preferido=fim-inicio<2*metade?(inicio+fim)/2:
+                    std::clamp(c,inicio+metade,fim-metade);
+                // Prioriza enquadrar o corpo inteiro, sem salto brusco ao cruzar o limite.
+                const float margem=std::min(80.f,metade*.5f);
+                return std::clamp(preferido,c-metade+margem,c+metade-margem);
             };
             centro.x=limitar(centro.x,mapa.left,mapa.left+mapa.width,tamanho.x/2);
             centro.y=limitar(centro.y,mapa.top,mapa.top+mapa.height,tamanho.y/2);

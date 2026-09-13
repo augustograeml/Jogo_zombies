@@ -18,6 +18,13 @@ int main() {
     assert(v.size()==2 && contem(v[0],{100,50}) && contem(v[1],{100,3900}));
     assert(v[0].getViewport().top+v[0].getViewport().height<=v[1].getViewport().top+.001f);
     v=c.atualizar({{3900,3900}},mapa,247,{900,1600}); assert(v.size()==1 && contem(v[0],{3900,3900}));
+    for(float y:{80.f,40.f,0.f,-1.f,-80.f,-1000.f,4000.f,4100.f}) {
+        const auto cena=c.atualizar({{500,y}},mapa,190,{1024,1024});
+        assert(contem(cena[0],{480,y-40}) && contem(cena[0],{520,y+40}));
+    }
+    auto antes=c.atualizar({{500,0}},mapa,190,{1024,1024});
+    auto depois=c.atualizar({{500,-1}},mapa,190,{1024,1024});
+    assert(std::abs(antes[0].getCenter().y-depois[0].getCenter().y)<=1.01f);
     for(auto pixels:{sf::Vector2u(1600,900),sf::Vector2u(900,1600),sf::Vector2u(640,480)}) {
         auto ui=Interface::vista_interface(pixels); auto r=ui.getViewport();
         assert(std::abs(r.width*pixels.x-r.height*pixels.y)<.01f);
