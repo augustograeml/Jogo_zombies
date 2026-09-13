@@ -12,8 +12,6 @@ void Projetil::atualizar() { corpo.move(velocidade); }
 void Projetil::mover() {
     if (nochao) { morrer(); return; }
     corpo.move(sf::Vector2f(0.f, 0.1f) + velocidade);
-    const auto pos = corpo.getPosition();
-    if (pos.x < -200 || pos.x > 4000 || pos.y < -2000 || pos.y > 2500) morrer();
 }
 void Projetil::atirar() {}
 void Projetil::salvar(std::ostringstream* saida) { *saida << Persistencia::Serializador::salvar(*this).dump(); }

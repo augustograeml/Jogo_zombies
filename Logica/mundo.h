@@ -18,6 +18,7 @@ struct Mundo {
     std::mt19937& motor_fase;
     std::string& partida_id;
     int estado, num_jogadores;
+    sf::FloatRect limites{0,0,2000,2000};
     int numero_fase() const { return estado<8?1:2; }
 };
 enum class FimPasso { Nenhum, Vitoria, Derrota };

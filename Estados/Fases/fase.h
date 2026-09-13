@@ -27,7 +27,7 @@ protected:
     bool ja_criado;
     bool jogador2;
     sf::Texture Textura;
-    sf::RectangleShape shape;
+    sf::FloatRect limites{0,0,2000,1200};
     Listas::ListaEntidade jogadores, obstaculos, inimigos;
     Gerenciadores::Gerenciador_Colisoes gC;
     int num_jogadores;

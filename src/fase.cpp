@@ -1,3 +1,4 @@
+#include "../Recursos/limites.h"
 #include "../Recursos/catalogo.h"
 #include "../Logica/mundo.h"
 #include "../Interface/preferencias.h"
@@ -38,7 +39,22 @@ void Fase::criar_jogadores() {
     jogadores.incluir(primeiro);
 }
 void Fase::criar_inimigos(std::string caminho) { ConstrutorCenario::inimigos(caminho, inimigos); }
-void Fase::criar_cenario(std::string caminho) { ConstrutorCenario::obstaculos(caminho, obstaculos); Recursos::encaixar_plataformas(obstaculos); gC.invalidar_grade(); }
+void Fase::criar_cenario(std::string caminho) {
+    ConstrutorCenario::obstaculos(caminho, obstaculos);
+    Recursos::encaixar_plataformas(obstaculos);
+    limites=Recursos::limites_mundo(obstaculos);
+    const auto linhas=Recursos::validar_mapa(caminho);
+    for(std::size_t y=0;y<linhas.size();++y) for(std::size_t x=0;x<linhas[y].size();++x) {
+        if(linhas[y][x]!='1' && linhas[y][x]!='2') continue;
+        for(auto it=jogadores.get_primeiro();it!=nullptr;++it) {
+            auto* j=static_cast<Entidades::Personagens::Jogador*>(*it);
+            if(j->eh_jogador2()!=(linhas[y][x]=='2')) continue;
+            const auto t=j->get_corpo()->getSize();
+            j->setPosicao({x*TAM+(TAM-t.x)/2,(y+1)*TAM-t.y});
+        }
+    }
+    gC.invalidar_grade();
+}
 void Fase::ao_entrar() {
     painel.atualizar_recorde(get_numero_fase(), num_jogadores);
     relogio.restart(); // Descarta tempo no menu, em pausa e fora do processo.
@@ -102,7 +118,7 @@ void Fase::atualizar() {
     for(auto it=jogadores.get_primeiro();it!=nullptr;++it)
         if((*it)->get_vivo()) { const auto r=(*it)->get_corpo()->getGlobalBounds(); vivos.push_back({r.left+r.width/2,r.top+r.height/2}); }
     auto* janela=pGG->get_Janela();
-    vistas=camera_dupla.atualizar(vivos,shape.getGlobalBounds(),Interface::altura_painel(),janela->getSize());
+    vistas=camera_dupla.atualizar(vivos,limites,Interface::altura_painel(),janela->getSize());
     janela->setView(vistas.front());
 }
 void Fase::set_tempo_jogadores() {
@@ -151,7 +167,7 @@ bool Fase::registrar_resultado(const std::vector<std::string>& nomes) {
 
 namespace Estados::Fases {
 Logica::Mundo Fase::mundo() {
-    return {jogadores,inimigos,obstaculos,gC,sessao,resultado,pontuacao,eventos,motor_fase,partida_id,Estado::id,num_jogadores};
+    return {jogadores,inimigos,obstaculos,gC,sessao,resultado,pontuacao,eventos,motor_fase,partida_id,Estado::id,num_jogadores,limites};
 }
 void Fase::simular_passo() {
     if(resultado.finalizada) return;
@@ -163,6 +179,6 @@ void Fase::simular_passo() {
 }
 Json Fase::capturar() { auto contexto=mundo(); return Persistencia::capturar_mundo(contexto); }
 void Fase::restaurar(const Json& dados) {
-    auto contexto=mundo(); Persistencia::restaurar_mundo(contexto,dados); Recursos::encaixar_plataformas(obstaculos); relogio.restart();
+    auto contexto=mundo(); Persistencia::restaurar_mundo(contexto,dados); Recursos::encaixar_plataformas(obstaculos); limites=Recursos::limites_mundo(obstaculos); relogio.restart();
 }
 }

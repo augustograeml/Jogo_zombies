@@ -34,12 +34,26 @@ FimPasso simular(Mundo& m) {
     jogadores.executar();
     inimigos.executar();
     motor_fase = Persistencia::motor();
+    // Limites horizontais compartilhados por personagens e camera. O teto permanece livre.
+    for(auto* lista:{&jogadores,&inimigos}) for(auto it=lista->get_primeiro();it!=nullptr;++it) {
+        const auto r=(*it)->get_corpo()->getGlobalBounds();
+        const float x=std::clamp(r.left,m.limites.left,
+            std::max(m.limites.left,m.limites.left+m.limites.width-r.width));
+        if(x!=r.left) { auto p=(*it)->getPosicao();p.x+=x-r.left;(*it)->setPosicao(p); }
+    }
+    const sf::FloatRect area_flechas(m.limites.left-500,m.limites.top-1000,
+        m.limites.width+1000,m.limites.height+2000);
+    for(auto it=inimigos.get_primeiro();it!=nullptr;++it) {
+        auto* flechas=static_cast<Entidades::Personagens::Inimigo*>(*it)->get_projeteis();
+        if(flechas) for(auto& f:*flechas)
+            if(!area_flechas.intersects(f.get_corpo()->getGlobalBounds())) f.morrer();
+    }
     gC.gerenciar_colisoes();
     for(auto it=inimigos.get_primeiro();it!=nullptr;++it)
         static_cast<Entidades::Personagens::Inimigo*>(*it)->avancar_animacao();
     // Morte por queda evita uma partida sem possibilidade de terminar.
     for (auto it = jogadores.get_primeiro(); it != nullptr; ++it)
-        if ((*it)->get_vida() <= 0 || (*it)->getPosicao().y > 2000) (*it)->morrer();
+        if ((*it)->get_vida() <= 0 || (*it)->getPosicao().y > m.limites.top+m.limites.height+600) (*it)->morrer();
     for (const auto& a : antes) {
         auto* e = a.entidade;
         if (auto* j = dynamic_cast<Entidades::Personagens::Jogador*>(e)) {
