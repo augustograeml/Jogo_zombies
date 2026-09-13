@@ -2,6 +2,7 @@
 #include "../Estados/Fases/fase2.h"
 #include "../Persistencia/entidades.h"
 #include "../Recursos/catalogo.h"
+#include "level.h"
 #include <cassert>
 #include <filesystem>
 #include <iostream>
@@ -50,11 +51,12 @@ template<class Base> void testar(int fase) {
         const auto inicio=cena.capturar();
         const std::string prefixo="fase"+std::to_string(fase)+(dupla?"-dupla-":"-solo-");
         cena.foto(pasta/(prefixo+"inicio.png"));
-        const float meio=fase==1?620.f:670.f;
-        cena.camera({1450,meio},{1570,meio});cena.foto(pasta/(prefixo+"meio.png"));
-        const float arena=fase==1?720.f:670.f;
-        cena.camera({3550,arena},{3300,arena});cena.foto(pasta/(prefixo+"arena.png"));
-        cena.camera({100,-450},{3500,-450});cena.foto(pasta/(prefixo+"alto-horizontal.png"));
+        const auto trechos=Testes::principais(Recursos::validar_mapa("Design/cenario/cenario_fase"+std::to_string(fase)+".txt"));
+        const auto meio=trechos[trechos.size()/2];
+        cena.camera({meio.x+60,meio.y-80},{meio.x+180,meio.y-80});cena.foto(pasta/(prefixo+"meio.png"));
+        const auto arena=trechos.back();
+        cena.camera({arena.x+300,arena.y-80},{arena.x+180,arena.y-80});cena.foto(pasta/(prefixo+"arena.png"));
+        cena.camera({100,-450},{39500,-450});cena.foto(pasta/(prefixo+"alto-horizontal.png"));
         cena.camera({1800,-500},{1800,920});cena.foto(pasta/(prefixo+"alto-vertical.png"));
         for(auto tamanho:{sf::Vector2u(1280,720),sf::Vector2u(720,1280)}) {
             auto* janela=Gerenciadores::Gerenciador_Grafico::get_instancia()->get_Janela();

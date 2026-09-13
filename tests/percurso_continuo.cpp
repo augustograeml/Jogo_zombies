@@ -1,6 +1,7 @@
 #include "../Estados/Fases/fase1.h"
 #include "../Estados/Fases/fase2.h"
 #include "../Logica/mundo.h"
+#include "level.h"
 #include <cassert>
 #include <cmath>
 #include <cstdlib>
@@ -58,16 +59,18 @@ public:
     }
 
     void verificar() {
-        const std::vector<sf::Vector2f> caminho = this->get_numero_fase() == 1 ?
-            std::vector<sf::Vector2f>{{520,900},{760,800},{960,700},{1130,800},{1400,700},
-                {1710,700},{1960,800},{2160,700},{2400,800},{2660,700},{2890,700},
-                {3000,700},{3260,800},{3600,800},{3900,800}} :
-            std::vector<sf::Vector2f>{{520,900},{760,800},{1050,800},{1370,850},{1540,750},
-                {1790,850},{2050,750},{2250,650},{2400,750},{2660,650},{2890,650},
-                {3030,650},{3260,750},{3570,750},{3900,750}};
+        std::vector<sf::Vector2f> caminho;
+        const auto mapa=Recursos::validar_mapa("Design/cenario/cenario_fase"+std::to_string(this->get_numero_fase())+".txt");
+        for(const auto& p:Testes::principais(mapa)) {
+            caminho.push_back({p.x+40,p.y});
+            for(const auto& desvio:Testes::patamares(mapa))
+                if(desvio.x>=p.x && desvio.fim<=p.fim && desvio.y<p.y)
+                    caminho.push_back({desvio.x+50,desvio.y});
+            caminho.push_back({p.fim-80,p.y});
+        }
         std::vector<std::size_t> etapas(this->num_jogadores, 0);
         fotografar("inicio");
-        for (unsigned passo = 0; passo < 5000; ++passo) {
+        for (unsigned passo = 0; passo < 60000; ++passo) {
             unsigned indice = 0;
             bool terminou = true;
             for (auto it = this->jogadores.get_primeiro(); it != nullptr; ++it, ++indice) {
@@ -94,10 +97,13 @@ public:
             const auto fim = Logica::simular(contexto);
             if (fim == Logica::FimPasso::Derrota) throw std::runtime_error("Derrota durante a navegacao.");
             for (auto it = this->jogadores.get_primeiro(); it != nullptr; ++it) {
-                assert((*it)->get_vivo() && (*it)->get_vida() == 20);
+                if(!(*it)->get_vivo() || (*it)->get_vida()!=20) {
+                    std::cerr<<"Dano no percurso fase "<<this->get_numero_fase()<<" dupla "<<this->num_jogadores<<" passo "<<passo<<" x "<<(*it)->getPosicao().x<<" y "<<(*it)->getPosicao().y<<"\n";
+                    assert(false);
+                }
                 assert((*it)->getPosicao().y < this->limites.top + this->limites.height);
             }
-            if (passo == 1000) fotografar("meio");
+            if (passo == 10000) fotografar("meio");
         }
         throw std::runtime_error("Percurso continuo nao alcancou a arena no prazo.");
     }

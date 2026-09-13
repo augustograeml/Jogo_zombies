@@ -5,23 +5,24 @@
 #include "../Recursos/catalogo.h"
 #include "../Recursos/limites.h"
 #include "../Persistencia/entidades.h"
+#include "level.h"
 #include <cassert>
 #include <iostream>
 #include <queue>
 #include <filesystem>
 using namespace Entidades::Personagens;
-struct Patamar { float x,fim,y; };
+using Testes::Patamar;
 // Usa as mesmas entidades, movimento por passo e resolvedor de colisoes do jogo.
 // Isola inimigos do percurso, mas exige saltos sem dano dos espinhos reais.
 bool salto(Patamar a,Patamar b,Listas::ListaEntidade& terreno,bool dupla) {
-    if(b.y<a.y-100 || b.x>a.fim+250 || a.x>b.fim+250) return false;
+    if(b.y<a.y-150 || b.x>a.fim+250 || a.x>b.fim+250) return false;
     Listas::ListaEntidade jogadores,inimigos;
     auto* j=new Jogador({0,0},{0,0},false); jogadores.incluir(j);
     Jogador* luigi=nullptr;
     if(dupla) { luigi=new Jogador({0,0},{0,0},true);jogadores.incluir(luigi); }
     Gerenciadores::Gerenciador_Colisoes g;
     g.set_jogadores(&jogadores);g.set_inimigos(&inimigos);g.set_obstaculos(&terreno);
-    for(float inicio=a.x+25;inicio<=a.fim-45-(dupla?40:0);inicio+=25) {
+    for(float inicio=a.x+10;inicio<=a.fim-50-(dupla?40:0);inicio+=25) {
         const float destino=std::clamp(inicio,b.x+10,b.fim-50-(dupla?40:0));
         if(std::abs(destino-inicio)>250) continue;
         for(auto* jogador:{j,luigi}) if(jogador) {
@@ -61,42 +62,63 @@ void mapa(int fase,bool dupla) {
     for(auto it=terreno.get_primeiro();it!=nullptr;++it)
         if(dynamic_cast<Entidades::Obstaculos::Coracao*>(*it)) (*it)->morrer();
     const auto bounds=Recursos::limites_mundo(terreno);
-    assert(bounds.width==4000 && bounds.height==1100);
+    assert(bounds.width==40000);
+    Testes::validar_passagens(linhas);
+    // Uma regressao de clearance deve ser detectada mesmo em mapas pequenos.
+    bool rejeitou=false;try { Testes::validar_passagens({"0"," ","0"}); } catch(...) { rejeitou=true; }
+    assert(rejeitou);Testes::validar_passagens({"0"," "," ","0"});
     Listas::ListaEntidade inimigos;
     Estados::Fases::ConstrutorCenario::inimigos(caminho,inimigos);
     unsigned gigantes=0;
     for(auto it=inimigos.get_primeiro();it!=nullptr;++it) {
         const auto r=(*it)->get_corpo()->getGlobalBounds();
-        assert(r.left>350); // Nenhum inimigo nasce sobre os dois pontos iniciais.
-        if(dynamic_cast<Gigante*>(*it)) { ++gigantes;assert(r.left>3200 && r.width==Recursos::Escala::gigante.x); }
+        assert(r.left>350 && r.left+r.width<=bounds.width);
+        if(dynamic_cast<Gigante*>(*it)) { ++gigantes;assert(r.width==Recursos::Escala::gigante.x); }
         for(auto o=terreno.get_primeiro();o!=nullptr;++o)
             if((*o)->get_vivo()) assert(!r.intersects((*o)->get_corpo()->getGlobalBounds()));
     }
-    assert(gigantes==1);
-    const char material=fase==1?'0':'7';std::vector<Patamar> plataformas;
-    for(std::size_t y=0;y<linhas.size();++y) {
-        int inicio=-1;
-        for(std::size_t x=0;x<=linhas[y].size();++x) {
-            const bool superficie=x<linhas[y].size() && linhas[y][x]==material &&
-                (y==0 || x>=linhas[y-1].size() || linhas[y-1][x]!=material) &&
-                (y<2 || x>=linhas[y-2].size() || linhas[y-2][x]!=material);
-            if(superficie && inicio<0) inicio=x;
-            if(!superficie && inicio>=0) { plataformas.push_back({inicio*50.f,x*50.f,y*50.f});inicio=-1; }
+    assert(inimigos.get_tamanho()>=36 && gigantes==3 && terreno.get_tamanho()>=2440);
+    const auto plataformas=Testes::principais(linhas);
+    assert(plataformas.size()>=60 && plataformas.front().x==0 && plataformas.back().fim==40000);
+    for(std::size_t i=1;i<plataformas.size();++i) {
+        assert(std::abs(plataformas[i].y-plataformas[i-1].y)<=100);
+        assert(plataformas[i].x-plataformas[i-1].fim<=100);
+        if(!salto(plataformas[i-1],plataformas[i],terreno,dupla)) {
+            std::cerr<<"Salto bloqueado fase "<<fase<<" dupla "<<dupla<<" x="<<plataformas[i].x<<"\n";assert(false);
         }
     }
-    std::vector<bool> visitado(plataformas.size());std::queue<std::size_t> fila;
-    for(std::size_t i=0;i<plataformas.size();++i)
-        if(plataformas[i].x==0 && plataformas[i].y==900) {visitado[i]=true;fila.push(i);}
-    while(!fila.empty()) {
-        const auto atual=fila.front();fila.pop();
-        for(std::size_t i=0;i<plataformas.size();++i) if(!visitado[i] && salto(plataformas[atual],plataformas[i],terreno,dupla)) {
-            visitado[i]=true;fila.push(i);
+    for(const auto& p:Testes::patamares(linhas)) if(p.fim-p.x<350) {
+        // Sacadas opcionais e pequenos fundos dos vaos devem ter entrada/saida.
+        bool acessivel=false;
+        for(const auto& a:plataformas) {
+            if(p.fim<a.x-250 || p.x>a.fim+250) continue;
+            if(p.fim-p.x<=100) acessivel=salto(p,a,terreno,dupla);
+            else acessivel=salto(a,p,terreno,dupla);
+            if(acessivel)break;
         }
+        if(!acessivel) { std::cerr<<"Desvio sem acesso/retorno x="<<p.x<<" y="<<p.y<<"\n";assert(false); }
     }
-    for(std::size_t i=0;i<plataformas.size();++i) if(!visitado[i] && plataformas[i].y<1000) {
-        std::cerr<<"Inalcancavel fase "<<fase<<": "<<plataformas[i].x<<","<<plataformas[i].y<<"\n";assert(false);
+
+    // Atravessa de fato o primeiro corredor de 100 unidades, sem pular.
+    const auto sacadas=Testes::patamares(linhas);
+    const auto it_sacada=std::find_if(sacadas.begin(),sacadas.end(),[](auto p){return p.fim-p.x==150;});
+    assert(it_sacada!=sacadas.end());const auto sacada=*it_sacada;
+    const auto it_apoio=std::find_if(plataformas.begin(),plataformas.end(),[&](auto p){return p.x<=sacada.x && p.fim>=sacada.fim;});
+    assert(it_apoio!=plataformas.end());const auto apoio=*it_apoio;
+    Listas::ListaEntidade passantes,vazio;std::vector<Jogador*> andando;
+    for(int n=0;n<(dupla?2:1);++n) {
+        auto* j=new Jogador({sacada.x-60+n*40,apoio.y-Recursos::Escala::humano},{0,0},n!=0);
+        passantes.incluir(j);andando.push_back(j);
     }
-    std::cout<<"Fase "<<fase<<" "<<(dupla?"dupla":"solo")<<": "<<std::count(visitado.begin(),visitado.end(),true)<<" patamares alcancaveis com subida <=100 e deslocamento <=250.\n";
+    Gerenciadores::Gerenciador_Colisoes corredor;
+    corredor.set_jogadores(&passantes);corredor.set_obstaculos(&terreno);corredor.set_inimigos(&vazio);
+    for(int t=0;t<2500 && andando[0]->getPosicao().x<sacada.fim+10;++t) {
+        for(auto* j:andando) j->mover_com_controles(false,true,false,false);
+        corredor.gerenciar_colisoes();
+        for(auto* j:andando) assert(std::abs(j->getPosicao().y+j->getTamanho().y-apoio.y)<.05f && j->get_vida()==20);
+    }
+    assert(andando[0]->getPosicao().x>=sacada.fim+10);
+    std::cout<<"Fase "<<fase<<" "<<(dupla?"dupla":"solo")<<": "<<plataformas.size()<<" patamares principais alcancaveis: subida <=100, deslocamento <=250; desvios <=150.\n";
 }
 int main() {
     using namespace Recursos::Escala;
@@ -110,6 +132,7 @@ int main() {
         std::cout<<"Salto: altura "<<-apice<<", alcance para subir 100: "<<x<<"\n";
     }
     Jogador j({0,0},{0,0},false),l({0,0},{0,0},true);Zumbi z;Arqueiro a;Gigante g;
+    assert(passagem_minima>=std::max(j.getTamanho().y,l.getTamanho().y)*1.15f);
     assert(j.get_corpo()->getSize()==jogador && l.get_corpo()->getSize()==jogador);
     assert(z.getTamanho()==zumbi && a.getTamanho()==arqueiro && g.getTamanho()==gigante);
     Entidades::Obstaculos::Caixa c;Entidades::Obstaculos::Espinho e;Entidades::Obstaculos::Coracao h;
