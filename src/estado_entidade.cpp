@@ -37,7 +37,7 @@ Json Serializador::salvar(const Entidades::Entidade& e) {
         const auto& m = p->get_movimento();
         extra = {{"jogador2", p->jogador2}, {"nome", p->nome}, {"tempo", p->tempo},
                  {"poder", p->poder}, {"leu_fase", p->leu_fase},
-                 {"movimento",{{"origem_queda",m.origem_queda},{"queda_ativa",m.queda_ativa},{"gelo",m.gelo}}},
+                 {"movimento",{{"origem_queda",m.origem_queda},{"queda_ativa",m.queda_ativa},{"gelo",m.gelo},{"tolerancia_salto",m.tolerancia_salto},{"comando_salto",m.comando_salto},{"pulo_pressionado",m.pulo_pressionado}}},
                  {"animacao", {{"correndo",a.correndo},{"quadro",a.quadro},{"passos",a.passos},{"direita",a.direita}}}};
     } else if (auto p = dynamic_cast<const Arqueiro*>(&e)) {
         tipo = "arqueiro";
@@ -98,7 +98,9 @@ std::unique_ptr<Entidades::Entidade> Serializador::carregar(const Json& j) {
         if (x.contains("movimento")) {
             const auto& m=x.at("movimento");
             p->restaurar_movimento({static_cast<float>(numero(m.at("origem_queda"),-1000000,1000000)),
-                m.at("queda_ativa").get<bool>(),m.at("gelo").get<bool>()});
+                m.at("queda_ativa").get<bool>(),m.at("gelo").get<bool>(),
+                static_cast<unsigned>(inteiro(m.value("tolerancia_salto",Json(0)),0,6)),
+                static_cast<unsigned>(inteiro(m.value("comando_salto",Json(0)),0,6)),m.value("pulo_pressionado",false)});
         } else p->restaurar_movimento({pos.y,false,false});
         if (x.contains("animacao")) {
             const auto& a = x.at("animacao");

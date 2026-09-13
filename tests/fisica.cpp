@@ -3,6 +3,21 @@
 #include <cassert>
 #include <iostream>
 int main() {
+    {
+        Logica::EstadoMovimento e;
+        assert(!Logica::solicitar_salto(e,true,false));
+        assert(!Logica::solicitar_salto(e,false,false));
+        assert(Logica::solicitar_salto(e,false,true));
+        assert(!Logica::solicitar_salto(e,false,true));
+        Logica::EstadoMovimento buffer;
+        assert(!Logica::solicitar_salto(buffer,false,true));
+        assert(Logica::solicitar_salto(buffer,true,false));
+        Logica::EstadoMovimento expirado;
+        Logica::solicitar_salto(expirado,true,false);
+        for(int n=0;n<7;++n) Logica::solicitar_salto(expirado,false,false);
+        assert(!Logica::solicitar_salto(expirado,false,true));
+    }
+
     using Fisica::resolver;
     assert(resolver({10,0,50,50},{0,50,100,20},0).lado==4);
     auto c=resolver({10,10,50,50},{0,50,100,20},1);

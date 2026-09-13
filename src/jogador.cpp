@@ -133,7 +133,9 @@ namespace Entidades
         void Jogador::mover_com_controles(bool esquerda, bool direita, bool pular, bool descer)
         {
             Logica::acompanhar_queda(movimento, getPosicao().y, nochao);
-            const auto nova=Logica::mover({velocidade.x,velocidade.y},nochao,esquerda,direita,pular,descer,movimento.gelo);
+            const bool salto=Logica::solicitar_salto(movimento,nochao,pular);
+            auto nova=Logica::mover({velocidade.x,velocidade.y},nochao,esquerda,direita,false,descer,movimento.gelo);
+            if(salto) nova.y=-Recursos::Configuracao::impulso_salto;
             if(nova.y != 0.f) movimento.queda_ativa = true;
             velocidade={nova.x,nova.y};
             nochao = false;
