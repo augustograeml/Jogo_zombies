@@ -37,6 +37,7 @@ namespace Gerenciadores
             struct Estatisticas { std::uint64_t pares_teoricos=0, testes_obstaculos=0; double microssegundos=0; };
             Estatisticas medidas;
             const Estatisticas& estatisticas() const { return medidas; }
+            bool existe_solido(const sf::FloatRect& area);
             void ativar_grade(bool ativa) { usar_grade = ativa; }
             void invalidar_grade() { grade_suja = true; }
             Gerenciador_Colisoes();

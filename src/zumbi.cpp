@@ -23,7 +23,7 @@ namespace Entidades
 
         void Zumbi::atualizar()
         {
-            corpo.setPosition(corpo.getPosition() + velocidade);
+            deslocar_com_apoio();
         }
 
         void Zumbi::mover()

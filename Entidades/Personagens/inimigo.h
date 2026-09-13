@@ -3,6 +3,7 @@ namespace Persistencia { class Serializador; }
 #include "../entidade.h"
 #include "../projetil.h"
 #include "../../Logica/comportamento.h"
+#include "../../Gerenciadores/gerenciador_colisoes.h"
 #include "jogador.h"  
 
 namespace Entidades
@@ -13,6 +14,7 @@ namespace Entidades
         {
         friend class Persistencia::Serializador;
             protected:
+                Gerenciadores::Gerenciador_Colisoes* terreno_percebido=nullptr; // Consulta derivada por passo, nao persistida.
                 Jogador* pjogador;
                 bool maldade;
                 bool direcao;
@@ -30,6 +32,8 @@ namespace Entidades
                 void update(sf::Vector2f& posicao_jogador);
                 void mudar_direcao();
 
+                void perceber_terreno(Gerenciadores::Gerenciador_Colisoes* terreno) { terreno_percebido=terreno; }
+                void deslocar_com_apoio();
                 virtual void perceber(const std::vector<Logica::Alvo>&) {}
                 virtual void atualizar() = 0;
                 virtual void mover() = 0;

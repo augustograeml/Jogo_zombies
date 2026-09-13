@@ -106,3 +106,17 @@ namespace Entidades
         }
     }
 }
+
+namespace Entidades::Personagens {
+void Inimigo::deslocar_com_apoio() {
+    const auto r=corpo.getGlobalBounds();
+    if(terreno_percebido && velocidade.x!=0) {
+        const float frente=velocidade.x>0?r.left+r.width+8:r.left-10;
+        const bool apoiado=terreno_percebido->existe_solido({r.left+2,r.top+r.height,r.width-4,3});
+        const bool apoio=terreno_percebido->existe_solido({frente,r.top+r.height,2,8});
+        const bool parede=terreno_percebido->existe_solido({frente,r.top+4,2,r.height-8});
+        if(apoiado && (!apoio || parede)) {velocidade.x=0;direcao=!direcao;}
+    }
+    corpo.move(velocidade);
+}
+}

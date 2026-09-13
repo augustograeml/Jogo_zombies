@@ -26,7 +26,7 @@ namespace Entidades
 
         void Arqueiro::atualizar()
         {
-            corpo.setPosition(corpo.getPosition() + velocidade);
+            deslocar_com_apoio();
         }
 
         void Arqueiro::mover()

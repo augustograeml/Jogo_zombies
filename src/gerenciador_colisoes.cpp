@@ -41,6 +41,21 @@ namespace Gerenciadores
         projeteis = nullptr;
     }
 
+    bool Gerenciador_Colisoes::existe_solido(const sf::FloatRect& area) {
+        if(grade_suja) construir_grade();
+        auto testa=[&](std::size_t i) {
+            auto* e=ordem_obstaculos[i];
+            return e->get_vivo() && (dynamic_cast<Entidades::Obstaculos::Neve*>(e) ||
+                dynamic_cast<Entidades::Obstaculos::Musgo*>(e) || dynamic_cast<Entidades::Obstaculos::Caixa*>(e)) &&
+                area.intersects(e->get_corpo()->getGlobalBounds());
+        };
+        if(!usar_grade) {for(std::size_t i=0;i<ordem_obstaculos.size();++i)if(testa(i))return true;return false;}
+        for(int x=std::floor(area.left/100);x<=std::floor((area.left+area.width)/100);++x)
+            for(int y=std::floor(area.top/100);y<=std::floor((area.top+area.height)/100);++y) {
+                auto c=grade.find({x,y});if(c!=grade.end())for(auto i:c->second)if(testa(i))return true;
+            }
+        return false;
+    }
     void Gerenciador_Colisoes::construir_grade() {
         grade.clear(); ordem_obstaculos.clear(); indices_obstaculos.clear();
         if (obstaculos) for (auto it=obstaculos->get_primeiro(); it!=nullptr; ++it) {

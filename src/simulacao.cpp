@@ -26,7 +26,18 @@ FimPasso simular(Mundo& m, const Comandos& comandos) {
     }
     for (auto it = inimigos.get_primeiro(); it != nullptr; ++it) {
         auto* inimigo = static_cast<Entidades::Personagens::Inimigo*>(*it);
-        inimigo->perceber(alvos);
+        inimigo->perceber_terreno(&gC);
+        auto visiveis=alvos;
+        if(dynamic_cast<Entidades::Personagens::Arqueiro*>(inimigo)) {
+            const auto r=inimigo->get_corpo()->getGlobalBounds();
+            for(auto& alvo:visiveis) {
+                const float origem=alvo.x>r.left?r.left+r.width:r.left;
+                const float destino=alvo.x+20;
+                if(gC.existe_solido({std::min(origem,destino),r.top+r.height*.45f,
+                    std::abs(destino-origem),5})) alvo.vivo=false;
+            }
+        }
+        inimigo->perceber(visiveis);
         antes.push_back({*it,(*it)->get_vida(),(*it)->get_vivo(),0});
     }
     for (auto it = obstaculos.get_primeiro(); it != nullptr; ++it)

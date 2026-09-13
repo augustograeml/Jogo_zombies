@@ -30,7 +30,7 @@ namespace Entidades
 
         void Gigante::atualizar()
         {
-            corpo.setPosition(corpo.getPosition() + velocidade);
+            deslocar_com_apoio();
         }
 
         void Gigante::mover()
