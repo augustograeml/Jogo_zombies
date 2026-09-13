@@ -44,8 +44,8 @@ int main() {
         alvo.display(); const auto imagem=alvo.getTexture().copyToImage();
         for(const auto& vista:vistas) {
             const auto r=alvo.getViewport(vista);
-            for(int y=r.top+1;y<r.top+r.height-1;++y)
-                for(int x=r.left+1;x<r.left+r.width-1;++x)
+            for(int y=r.top;y<r.top+r.height;++y)
+                for(int x=r.left;x<r.left+r.width;++x)
                     assert(imagem.getPixel(x,y)==sf::Color(71,83,92));
         }
     }

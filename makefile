@@ -59,7 +59,7 @@ test-logica: build/comportamentos$(EXE) build/teste-animacao$(EXE) build/teste-f
 	./build/teste-persistencia$(EXE)
 	./build/teste-logica$(EXE)
 	./build/comportamentos$(EXE)
-test-integracao: build/apresentacao$(EXE) build/novo-slot$(EXE) build/comportamentos-integracao$(EXE) build/acessibilidade$(EXE) build/servicos$(EXE) build/camera$(EXE) build/caminhada$(EXE) build/testes$(EXE) build/novidades$(EXE) build/superficies$(EXE) build/animacao-integracao$(EXE) build/resultado-falha$(EXE) build/menu-saves$(EXE)
+test-integracao: build/escala-mundo$(EXE) build/apresentacao$(EXE) build/novo-slot$(EXE) build/comportamentos-integracao$(EXE) build/acessibilidade$(EXE) build/servicos$(EXE) build/camera$(EXE) build/caminhada$(EXE) build/testes$(EXE) build/novidades$(EXE) build/superficies$(EXE) build/animacao-integracao$(EXE) build/resultado-falha$(EXE) build/menu-saves$(EXE)
 	./build/testes$(EXE)
 	./build/novidades$(EXE)
 	./build/superficies$(EXE)
@@ -73,6 +73,7 @@ test-integracao: build/apresentacao$(EXE) build/novo-slot$(EXE) build/comportame
 	./build/servicos$(EXE) janela
 	./build/camera$(EXE)
 	./build/apresentacao$(EXE)
+	./build/escala-mundo$(EXE)
 
 build/superficies$(EXE): tests/superficies.cpp $(TEST_OBJECTS) $(HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS) tests/superficies.cpp $(TEST_OBJECTS) $(LDLIBS) -o $@
@@ -110,4 +111,10 @@ build/design-menus$(EXE): tests/design_menus.cpp $(TEST_OBJECTS) $(HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS) $< $(TEST_OBJECTS) $(LDLIBS) -o $@
 
 build/remaster-visual$(EXE): tests/remaster_visual.cpp $(TEST_OBJECTS) $(HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS) $< $(TEST_OBJECTS) $(LDLIBS) -o $@
+
+build/escala-mundo$(EXE): tests/escala_mundo.cpp $(TEST_OBJECTS) $(HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS) $< $(TEST_OBJECTS) $(LDLIBS) -o $@
+
+build/mundo-visual$(EXE): tests/mundo_visual.cpp $(TEST_OBJECTS) $(HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS) $< $(TEST_OBJECTS) $(LDLIBS) -o $@
