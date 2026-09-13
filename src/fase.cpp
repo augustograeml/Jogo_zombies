@@ -1,3 +1,4 @@
+#include "../Recursos/catalogo.h"
 #include "../Logica/mundo.h"
 #include "../Interface/preferencias.h"
 #include "../Recursos/plataforma.h"
@@ -60,7 +61,7 @@ void Fase::desenhar_partida() {
     atualizar();
     for(const auto& vista:vistas) {
     pGG->get_Janela()->setView(vista);
-    pGG->desenharFundo(&shape);
+    Recursos::desenhar_cenario(*pGG->get_Janela(),Textura);
     const auto& camera=pGG->get_Janela()->getView();
     const auto canto=camera.getCenter()-camera.getSize()/2.f;
     // Margem conserva sprites que ultrapassam a caixa fisica; so o desenho e filtrado.
@@ -99,7 +100,7 @@ void Fase::desenhar_partida() {
 void Fase::atualizar() {
     std::vector<sf::Vector2f> vivos;
     for(auto it=jogadores.get_primeiro();it!=nullptr;++it)
-        if((*it)->get_vivo()) vivos.push_back((*it)->getPosicao()+sf::Vector2f(25,25));
+        if((*it)->get_vivo()) { const auto r=(*it)->get_corpo()->getGlobalBounds(); vivos.push_back({r.left+r.width/2,r.top+r.height/2}); }
     auto* janela=pGG->get_Janela();
     vistas=camera_dupla.atualizar(vivos,shape.getGlobalBounds(),Interface::altura_painel(),janela->getSize());
     janela->setView(vistas.front());

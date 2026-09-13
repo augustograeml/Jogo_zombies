@@ -15,6 +15,8 @@ struct Quadro {
     sf::IntRect regiao; // Limites dos pixels visiveis: alinhamento pelos pes.
 };
 sf::IntRect area_cenario(const sf::Texture& textura);
+// Camada independente do mundo: cover isotropico para cada viewport.
+void desenhar_cenario(sf::RenderTarget& alvo, const sf::Texture& textura);
 const std::vector<Quadro>& corrida();
 const std::vector<Quadro>& caminhada_luigi();
 enum class Animado { Zumbi, Arqueiro, Gigante };

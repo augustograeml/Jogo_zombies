@@ -2,6 +2,7 @@
 #include "../Interface/preferencias.h"
 #include "../Animacao/pose.h"
 #include "../Persistencia/entidades.h"
+#include "../Recursos/catalogo.h"
 #include <cassert>
 #include <iostream>
 class Cena: public Estados::Fases::Fase1 {
@@ -28,6 +29,25 @@ int main() {
         assert(cena.capturar()==antes);
         sf::Texture t; assert(t.create(tamanho.x,tamanho.y)); t.update(*janela);
         assert(t.copyToImage().saveToFile("/tmp/zombies-camera-"+std::to_string(tamanho.x)+".png"));
+    }
+    // Fundo deve cobrir cada viewport mesmo fora de qualquer limite do mapa.
+    sf::Image original; original.create(320,180,sf::Color(71,83,92));
+    sf::Texture textura; assert(textura.loadFromImage(original));
+    sf::RenderTexture alvo; assert(alvo.create(640,480));
+    Interface::CameraDupla camera;
+    for(const auto& pontos:std::vector<std::vector<sf::Vector2f>>{
+        {{-2000,-3000}},{{9000,7000}},{{-2000,-3000},{9000,-3000}},
+        {{100,-3000},{100,7000}},{{100,100},{200,100}}}) {
+        const auto vistas=camera.atualizar(pontos,{0,0,2000,1200},190,{640,480});
+        alvo.clear(sf::Color::Magenta);
+        for(const auto& vista:vistas) { alvo.setView(vista); Recursos::desenhar_cenario(alvo,textura); }
+        alvo.display(); const auto imagem=alvo.getTexture().copyToImage();
+        for(const auto& vista:vistas) {
+            const auto r=alvo.getViewport(vista);
+            for(int y=r.top+1;y<r.top+r.height-1;++y)
+                for(int x=r.left+1;x<r.left+r.width-1;++x)
+                    assert(imagem.getPixel(x,y)==sf::Color(71,83,92));
+        }
     }
     Entidades::Personagens::Gigante gigante;
     gigante.receber_dano(10); assert(gigante.get_reacao()==12);
