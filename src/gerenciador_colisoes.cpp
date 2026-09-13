@@ -88,6 +88,12 @@ namespace Gerenciadores
             for(std::size_t i=0;i<pendentes.size();) {
                 auto* obst=pendentes[i++];
                 const auto antes=(*jog)->getPosicao();
+                if(auto* cura=dynamic_cast<Entidades::Obstaculos::Coracao*>(obst)) {
+                    if(cura->get_vivo() && jogador->get_vivo() &&
+                       jogador->get_corpo()->getGlobalBounds().intersects(cura->get_corpo()->getGlobalBounds()))
+                        cura->colidir(jogador,1);
+                    continue; // Pickup nao e uma parede ou plataforma.
+                }
                 const int lado=colidiu(*jog,obst);
                 if(!lado) continue;
                 if(lado==4 && !apoio_definido) {
@@ -113,6 +119,7 @@ namespace Gerenciadores
             for(std::size_t i=0;i<pendentes.size();) {
                 auto* obst=pendentes[i++];
                 const auto antes=(*inim)->getPosicao();
+                if(dynamic_cast<Entidades::Obstaculos::Coracao*>(obst)) continue;
                 const int lado=colidiu(*inim,obst);
                 if(lado==1 || lado==3) static_cast<Entidades::Personagens::Inimigo*>(*inim)->mudar_direcao();
                 if(usar_grade && antes!=(*inim)->getPosicao()) { pendentes=candidatos_apos(*inim,obst); i=0; }
@@ -172,7 +179,7 @@ namespace Gerenciadores
             for (auto& flecha : *flechas) {
                 if (!flecha.get_vivo()) continue;
                 for (auto* obst : candidatos(&flecha)) {
-                    if (obst->get_vivo() && obst->get_corpo()->getGlobalBounds().intersects(
+                    if (!dynamic_cast<Entidades::Obstaculos::Coracao*>(obst) && obst->get_vivo() && obst->get_corpo()->getGlobalBounds().intersects(
                             flecha.get_corpo()->getGlobalBounds())) {
                         flecha.morrer();
                         break;

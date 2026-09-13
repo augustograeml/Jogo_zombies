@@ -13,19 +13,19 @@ int main() {
     Listas::ListaEntidade jogadores,obstaculos,inimigos;
     Gerenciadores::Gerenciador_Colisoes g;
     g.set_jogadores(&jogadores); g.set_obstaculos(&obstaculos); g.set_inimigos(&inimigos);
-    auto* j=new Jogador({25,0},{1,0},false); jogadores.incluir(j);
+    auto* j=new Jogador({25,-30},{1,0},false); jogadores.incluir(j);
     obstaculos.incluir(new Neve({0,50})); obstaculos.incluir(new Neve({50,50}));
     g.gerenciar_colisoes();
     assert(std::abs(j->getVelocidade().x-1.f)<.0001f); // Dois blocos: aplica uma vez.
-    assert(j->getVelocidade().y==0 && j->getPosicao().y==0);
+    assert(j->getVelocidade().y==0 && j->getPosicao().y==-30);
     for(int i=0;i<100;++i) { j->mover_com_controles(false,false,false,false); g.gerenciar_colisoes(); }
-    assert(j->getVelocidade().x==0 && j->getPosicao().y==0);
+    assert(j->getVelocidade().x==0 && j->getPosicao().y==-30);
     obstaculos.limpar(); g.invalidar_grade();
     obstaculos.incluir(new Musgo({0,50})); obstaculos.incluir(new Musgo({50,50}));
-    j->setPosicao({25,0}); j->setVelocidade({3,0}); g.gerenciar_colisoes();
+    j->setPosicao({25,-30}); j->setVelocidade({3,0}); g.gerenciar_colisoes();
     assert(std::abs(j->getVelocidade().x-2.f)<.0001f);
     // Contato lateral nao aplica o modificador de superficie.
-    j->setPosicao({-40,55}); j->setVelocidade({2,0}); g.gerenciar_colisoes();
+    j->setPosicao({-30,55}); j->setVelocidade({2,0}); g.gerenciar_colisoes();
     assert(j->getVelocidade().x==0);
     // Mesma ordem sequencial depois de deslocamento entre celulas.
     obstaculos.limpar(); g.invalidar_grade();
@@ -39,14 +39,14 @@ int main() {
     }
     obstaculos.limpar(); g.invalidar_grade();
     auto* gigante=new Entidades::Personagens::Gigante({0,100},{0,0}); inimigos.incluir(gigante);
-    j->setPosicao({10,55}); j->setVelocidade({0,2});
+    j->setPosicao({10,25}); j->setVelocidade({0,2});
     j->restaurar_movimento({-300,true,false});
     g.gerenciar_colisoes();
     assert(gigante->get_vida()==80 && j->getVelocidade().y==-3);
-    j->setPosicao({10,55}); j->setVelocidade({0,2});
+    j->setPosicao({10,25}); j->setVelocidade({0,2});
     g.gerenciar_colisoes();
     assert(gigante->get_vida()==70); // Queda anterior nao fortalece proximo golpe.
-    j->setPosicao({10,55}); j->setVelocidade({0,-2});
+    j->setPosicao({10,25}); j->setVelocidade({0,-2});
     j->restaurar_movimento({-600,true,false});
     g.gerenciar_colisoes();
     assert(gigante->get_vida()==70); // Subindo nao causa golpe de queda.

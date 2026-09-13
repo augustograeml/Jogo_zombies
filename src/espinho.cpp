@@ -1,3 +1,5 @@
+#include "../Recursos/escala.h"
+#include "../Recursos/catalogo.h"
 #include "../Entidades/Obstaculos/espinho.h"
 
 namespace Entidades
@@ -7,6 +9,7 @@ namespace Entidades
         Espinho::Espinho(sf::Vector2f pos) : Obstaculo(pos, true, false ,false,false,false), dano(5)
         {
             this->setSkin("Design/imagens/espinho.png");
+            Recursos::dimensionar_objeto(corpo,*Textura,Recursos::Escala::espinho);
             this->set_vida(55);
         }
 

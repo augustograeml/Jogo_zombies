@@ -1,3 +1,4 @@
+#include "../Recursos/escala.h"
 #include "../Persistencia/entidades.h"
 #include <algorithm>
 #include "../Entidades/Personagens/arqueiro.h"
@@ -9,6 +10,7 @@ namespace Entidades
         Arqueiro::Arqueiro(sf::Vector2f pos, sf::Vector2f vel) : Inimigo(pos, vel), vetor_projeteis(), numero_salvo_arqueiros(0)
         {
             this->setSkin("Design/imagens/zumbi_atirador.png");
+            corpo.setSize(Recursos::Escala::arqueiro);
             atirando = false;
             direcao = 0;
             recarregar = 0;
@@ -92,7 +94,9 @@ namespace Entidades
             if (recarregar == 0)
             {
                 Projetil novo_projetil({10, 5}, direcao);
-                novo_projetil.setPosicao(sf::Vector2f(this->getPosicao().x + 20.f, this->getPosicao().y + 15.f));
+                const auto r=corpo.getGlobalBounds();
+                novo_projetil.setPosicao({direcao?r.left+r.width:r.left-Recursos::Escala::projetil.x,
+                    r.top+r.height*.45f});
                 atirando = false;
                 vetor_projeteis.push_back(novo_projetil);
                 disparou = true;

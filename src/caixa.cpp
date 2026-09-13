@@ -1,3 +1,5 @@
+#include "../Recursos/escala.h"
+#include "../Recursos/catalogo.h"
 #include "../Persistencia/aleatorio.h"
 #include "../Entidades/Obstaculos/caixa.h"
 
@@ -14,6 +16,7 @@ namespace Entidades
             //se o jogador pular em cima da caixa e ela for fragil ela quebra
 
             this->setSkin("Design/imagens/caixa.png");
+            Recursos::dimensionar_objeto(corpo,*Textura,Recursos::Escala::caixa);
             this->set_vida(20);
         }
 

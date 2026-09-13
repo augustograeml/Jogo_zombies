@@ -1,8 +1,9 @@
+#include "../Recursos/escala.h"
 #include "../Entidades/projetil.h"
 #include "../Persistencia/entidades.h"
 namespace Entidades {
 Projetil::Projetil(sf::Vector2f pos, bool dir) : Entidade(pos), dano(2), direcao(dir) {
-    corpo.setSize({20, 5}); corpo.setFillColor(sf::Color::Red);
+    corpo.setSize(Recursos::Escala::projetil); corpo.setFillColor(sf::Color::Red);
     velocidade = {dir ? 12.f : -12.f, 0.f};
 }
 Projetil::~Projetil() = default;

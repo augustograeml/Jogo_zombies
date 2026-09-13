@@ -106,3 +106,20 @@ std::vector<std::string> validar_mapa(const std::string& relativo) {
     return linhas;
 }
 }
+
+namespace Recursos {
+void dimensionar_objeto(sf::RectangleShape& corpo,const sf::Texture& textura,float altura) {
+    static std::map<const sf::Texture*,sf::IntRect> regioes;
+    auto it=regioes.find(&textura);
+    if(it==regioes.end()) {
+        const auto imagem=textura.copyToImage(); const auto t=imagem.getSize();
+        unsigned l=t.x,c=t.y,r=0,b=0;
+        for(unsigned y=0;y<t.y;++y) for(unsigned x=0;x<t.x;++x)
+            if(imagem.getPixel(x,y).a>8) { l=std::min(l,x);c=std::min(c,y);r=std::max(r,x);b=std::max(b,y); }
+        if(l==t.x) throw std::runtime_error("Objeto inteiramente transparente.");
+        it=regioes.emplace(&textura,sf::IntRect(l,c,r-l+1,b-c+1)).first;
+    }
+    corpo.setTextureRect(it->second);
+    corpo.setSize({altura*it->second.width/it->second.height,altura});
+}
+}

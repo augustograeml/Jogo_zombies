@@ -1,3 +1,4 @@
+#include "../Recursos/escala.h"
 #include "../Persistencia/entidades.h"
 #include "../Persistencia/aleatorio.h"
 #include "../Entidades/Personagens/gigante.h"
@@ -19,6 +20,7 @@ namespace Entidades
                 set_forca(4);
 
             this->setSkin("Design/imagens/zumbi_gigante.png");
+            corpo.setSize(Recursos::Escala::gigante);
             this->set_vida(100);
         }
 

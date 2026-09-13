@@ -10,7 +10,6 @@ inline constexpr float gravidade = 0.1f;
 inline constexpr float impulso_salto = 6.f;
 inline constexpr unsigned passos_quadro_corrida = 2;
 inline constexpr unsigned quadros_corrida = 27;
-inline constexpr float altura_personagem = 50.f;
 inline constexpr unsigned protecao_dano = 45;
 inline constexpr int recarga_arqueiro = 100;
 inline constexpr unsigned preparacao_arqueiro = 30;

@@ -17,6 +17,8 @@ struct Quadro {
 sf::IntRect area_cenario(const sf::Texture& textura);
 // Camada independente do mundo: cover isotropico para cada viewport.
 void desenhar_cenario(sf::RenderTarget& alvo, const sf::Texture& textura);
+// Recorte alpha e escala uniforme para objetos estaticos.
+void dimensionar_objeto(sf::RectangleShape& corpo, const sf::Texture& textura, float altura);
 const std::vector<Quadro>& corrida();
 const std::vector<Quadro>& caminhada_luigi();
 enum class Animado { Zumbi, Arqueiro, Gigante };

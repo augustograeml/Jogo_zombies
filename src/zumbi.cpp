@@ -1,3 +1,4 @@
+#include "../Recursos/escala.h"
 #include "../Persistencia/entidades.h"
 #include "../Persistencia/aleatorio.h"
 #include "../Entidades/Personagens/zumbi.h"
@@ -10,6 +11,7 @@ namespace Entidades
         Zumbi::Zumbi(Vector2f pos, Vector2f vel) : Inimigo(pos, vel), numero_zumbi_salvos(0)
         {
             this->setSkin("Design/imagens/zumbi_bateu_morreu.png");
+            corpo.setSize(Recursos::Escala::zumbi);
             direcao = 1;
             pulo = Persistencia::sortear(10);
         }

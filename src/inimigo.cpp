@@ -74,7 +74,7 @@ namespace Entidades
             const float escala=caixa.height/quadro.regiao.height;
             visual.setOrigin(quadro.regiao.width/2.f,quadro.regiao.height);
             const bool arte_direita=tipo==Recursos::Animado::Zumbi;
-            visual.setScale((estado.direita==arte_direita?escala:-escala)*deformacao.x,escala*deformacao.y);
+            visual.setScale((estado.direita==arte_direita?escala:-escala),escala);
             visual.setRotation((estado.direita?1:-1)*deformacao.angulo);
             visual.setPosition(caixa.left+caixa.width/2.f,caixa.top+caixa.height);
             visual.setColor(corpo.getFillColor());

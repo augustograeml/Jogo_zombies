@@ -1,3 +1,4 @@
+#include "../Recursos/escala.h"
 #include "../Logica/entrada.h"
 #include "../Animacao/pose.h"
 #include "../Logica/movimento.h"
@@ -21,6 +22,7 @@ namespace Entidades
         Jogador::Jogador(sf::Vector2f pos, sf::Vector2f vel, bool jog2) : Personagem(pos, vel),
          jogador2(jog2), leu_fase(false), poder(1), tempo(0.0)
         {
+            corpo.setSize(Recursos::Escala::jogador);
             this->set_vida(20);
             if (!jog2)
             {
@@ -70,7 +72,7 @@ namespace Entidades
             const float escala = caixa.height / area.height;
             visual.setOrigin(area.width / 2.f, area.height);
             const bool espelhar=estado.direita==jogador2; // Folha de Luigi olha originalmente para a esquerda.
-            visual.setScale((espelhar?-escala:escala)*deformacao.x, escala*deformacao.y);
+            visual.setScale((espelhar?-escala:escala), escala);
             visual.setRotation((estado.direita?1:-1)*deformacao.angulo);
             visual.setPosition(caixa.left + caixa.width / 2.f, caixa.top + caixa.height);
             // Preserva a sinalizacao existente de saude; a geometria continua independente.
