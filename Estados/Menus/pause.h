@@ -1,5 +1,6 @@
 #pragma once 
 #include "../estado.h"
+#include "../../Interface/controles.h"
 #include "../../Gerenciadores/gerenciador_grafico.h"
 #include "../Fases/fase.h"
 #include <SFML/Graphics.hpp>
@@ -15,6 +16,8 @@ namespace Estados
                 int pos;
                 bool preferencias_abertas=false;
                 int preferencia=0;
+                bool controles_abertos=false;
+                Interface::MenuControles controles;
                 //o deselecionar é necessario porque como o loop pra rodar o jogo eh rapido pode acontecer de uma opcao ser selecionada duplicada no menu
                 bool selecionado, deselecionado, inicio;
 

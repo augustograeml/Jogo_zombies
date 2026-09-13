@@ -21,3 +21,5 @@ sfml-*.dll
 /PLANO_MELHORIAS_JOGO.md
 
 /interface.json*
+
+/controles.json*

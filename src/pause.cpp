@@ -22,8 +22,10 @@ void Pause::inicializa_valores() {
     textos[0].setOutlineThickness(20); textos[1].setOutlineThickness(4);
 }
 void Pause::tratar_evento(const sf::Event& evento) {
+    if(controles_abertos) {controles_abertos=controles.tratar(evento);return;}
     if (evento.type != sf::Event::KeyPressed) return;
     const auto tecla=evento.key.code;
+    if(tecla==sf::Keyboard::C) {controles_abertos=true;return;}
     if(tecla==sf::Keyboard::F) { preferencias_abertas=!preferencias_abertas; return; }
     if(preferencias_abertas) {
         if(tecla==sf::Keyboard::Escape) { preferencias_abertas=false; return; }
@@ -54,6 +56,7 @@ void Pause::mostrar_menu() {
     auto& janela=*pGG->get_Janela();
     if(Interface::Preferencias::instancia().contraste || preferencias_abertas) { sf::RectangleShape fundo({1024,1024}); fundo.setFillColor(sf::Color::Black); janela.draw(fundo); }
     Interface::Tema::painel(janela,{55,55,914,880});
+    if(controles_abertos) {controles.desenhar(janela);return;}
     if(preferencias_abertas) {
         const auto& p=Interface::Preferencias::instancia(); const auto& a=Audio::Preferencias::instancia();
         const std::vector<std::string> linhas={
@@ -74,7 +77,7 @@ void Pause::mostrar_menu() {
     Interface::Tema::botao(janela,{320,440,384,60},"Continuar",pos==1,26);
     Interface::Tema::botao(janela,{320,535,384,60},"Menu",pos==2,26);
     const auto& p=Audio::Preferencias::instancia();
-    sf::Text ajuda("F: preferencias | S: salvar | M: mudo | +/-: volume " + std::to_string(static_cast<int>(p.volume)) +
+    sf::Text ajuda("C: controles | F: preferencias | S: salvar | M: mudo | +/-: volume " + std::to_string(static_cast<int>(p.volume)) +
         (p.mudo?" (mudo)":""), Interface::fonte_interface(), 20);
     ajuda.setPosition(80,800); pGG->get_Janela()->draw(ajuda);
 }
