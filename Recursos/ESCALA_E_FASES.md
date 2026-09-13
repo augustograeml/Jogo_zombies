@@ -114,6 +114,14 @@ meio, arena, separacoes horizontal/vertical, altura extrema e resolucoes
 1024×1024, 1280×720 e 720×1280. Tambem gera duas comparacoes de escala.
 As capturas ficam em `/tmp/zombies-mundo-visual` e o desenho nao pode alterar o save.
 
+`percurso-continuo`, tambem incluido na integracao, percorre cada fase inteira
+em uma unica execucao, em solo e dupla, sem reposicionar os jogadores entre
+patamares. Injeta somente controles e exige passar por 15 pontos ate o fim da
+arena, sem dano. Mantem caixas e espinhos; isola a IA e desativa curas para nao
+mascarar dano. Complementa a prova de saltos isolados com a sequencia completa.
+Use `ZOMBIES_CAPTURAR_PERCURSO=1` ao executar `build/percurso-continuo` para gerar
+capturas de inicio, meio e fim na pasta temporaria `zombies-percurso-continuo`.
+
 A validacao jogavel e automatizada por trajetorias e encontros; nao representa
 uma partida manual continua de ponta a ponta. As capturas foram inspecionadas
 visualmente. Os testes nao avaliam subjetivamente o ritmo/dificuldade como um
