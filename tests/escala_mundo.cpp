@@ -113,7 +113,7 @@ int main() {
     assert(j.get_corpo()->getSize()==jogador && l.get_corpo()->getSize()==jogador);
     assert(z.getTamanho()==zumbi && a.getTamanho()==arqueiro && g.getTamanho()==gigante);
     Entidades::Obstaculos::Caixa c;Entidades::Obstaculos::Espinho e;Entidades::Obstaculos::Coracao h;
-    assert(c.getTamanho().y<humano/2 && e.getTamanho().y<humano/2 && h.getTamanho().y<humano/3);
+    assert(c.getTamanho().y<humano/2 && e.getTamanho().y<humano/2 && h.getTamanho().y==coracao && h.getTamanho().y<=humano/2);
     for(auto* entidade:std::vector<Entidades::Entidade*>{&j,&l,&z,&a,&g,&c,&e,&h}) {
         auto salvo=Persistencia::Serializador::salvar(*entidade);
         auto copia=Persistencia::Serializador::carregar(salvo);
