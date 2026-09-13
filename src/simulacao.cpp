@@ -7,7 +7,7 @@
 #include "../Persistencia/aleatorio.h"
 #include "../Persistencia/pontos.h"
 namespace Logica {
-FimPasso simular(Mundo& m) {
+FimPasso simular(Mundo& m, const Comandos& comandos) {
     auto& jogadores=m.jogadores; auto& inimigos=m.inimigos; auto& obstaculos=m.obstaculos;
     auto& gC=m.gC; auto& sessao=m.sessao; auto& resultado=m.resultado;
     auto& motor_fase=m.motor_fase;
@@ -19,6 +19,7 @@ FimPasso simular(Mundo& m) {
     std::vector<Antes> antes;
     for (auto it = jogadores.get_primeiro(); it != nullptr; ++it) {
         auto* j = static_cast<Entidades::Personagens::Jogador*>(*it);
+        j->receber_comando(comandos[j->eh_jogador2()?1:0]);
         j->atualizar_protecao();
         alvos.push_back({j->eh_jogador2() ? 2 : 1, j->getPosicao().x, j->getPosicao().y, j->get_vivo()});
         antes.push_back({j,j->get_vida(),j->get_vivo(),j->getVelocidade().y});

@@ -81,6 +81,6 @@ public:
     void tratar_evento(const sf::Event& evento) override;
     virtual void atualizar();
     virtual void fim_de_jogo();
-    void simular_passo();
+    void simular_passo(const Logica::Comandos& comandos = {});
 };
 }

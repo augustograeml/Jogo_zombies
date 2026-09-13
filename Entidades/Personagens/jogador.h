@@ -2,6 +2,7 @@
 namespace Persistencia { class Serializador; }
 #include <SFML/Graphics.hpp>
 #include "personagem.h"
+#include "../../Logica/entrada.h"
 #include "../../Animacao/corrida.h"
 #include "../../Logica/movimento.h"
 #include "../../Gerenciadores/gerenciador_estados.h"
@@ -21,12 +22,14 @@ namespace Entidades
             double tempo;
             Animacao::Corrida animacao;
             Logica::EstadoMovimento movimento;
+            Logica::Controle comando;
             bool controles_solo = false; // Derivado do modo da fase, inclusive ao carregar.
 
 
         public:
             Jogador(sf::Vector2f pos, sf::Vector2f vel, bool jog2);
             ~Jogador();
+            void receber_comando(Logica::Controle c) { comando=c; }
             void set_controles_solo(bool solo) { controles_solo=solo; }
             bool get_controles_solo() const { return controles_solo; }
 

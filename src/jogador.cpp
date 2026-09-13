@@ -126,23 +126,9 @@ namespace Entidades
 
         void Jogador::mover()
         {
-            const Logica::Teclas teclas{
-                sf::Keyboard::isKeyPressed(sf::Keyboard::A),sf::Keyboard::isKeyPressed(sf::Keyboard::D),
-                sf::Keyboard::isKeyPressed(sf::Keyboard::W),sf::Keyboard::isKeyPressed(sf::Keyboard::S),
-                sf::Keyboard::isKeyPressed(sf::Keyboard::Left),sf::Keyboard::isKeyPressed(sf::Keyboard::Right),
-                sf::Keyboard::isKeyPressed(sf::Keyboard::Up),sf::Keyboard::isKeyPressed(sf::Keyboard::Down),
-                sf::Keyboard::isKeyPressed(sf::Keyboard::Space)};
-            const auto c=Logica::controles(teclas,false,controles_solo);
-            mover_com_controles(c.esquerda,c.direita,c.pular,c.descer);
+            mover_com_controles(comando.esquerda,comando.direita,comando.pular,comando.descer);
         }
-
-        void Jogador::mover_jog2()
-        {
-            mover_com_controles(sf::Keyboard::isKeyPressed(sf::Keyboard::Left),
-                               sf::Keyboard::isKeyPressed(sf::Keyboard::Right),
-                               sf::Keyboard::isKeyPressed(sf::Keyboard::Up),
-                               sf::Keyboard::isKeyPressed(sf::Keyboard::Down));
-        }
+        void Jogador::mover_jog2() { mover(); }
 
         void Jogador::mover_com_controles(bool esquerda, bool direita, bool pular, bool descer)
         {

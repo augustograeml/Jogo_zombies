@@ -1,4 +1,5 @@
 #include "../Recursos/limites.h"
+#include "../Interface/controles.h"
 #include "../Recursos/catalogo.h"
 #include "../Logica/mundo.h"
 #include "../Interface/preferencias.h"
@@ -67,7 +68,7 @@ void Fase::tratar_evento(const sf::Event& evento) {
 void Fase::executar_comum() {
     sessao.acumular(relogio.restart().asSeconds());
     while (!resultado.finalizada && sessao.proximo()) {
-        simular_passo();
+        simular_passo(Interface::ler_controles(num_jogadores==1));
     }
     if (pGE->get_estado_atual() != Estado::id) return;
     desenhar_partida();
@@ -169,11 +170,11 @@ namespace Estados::Fases {
 Logica::Mundo Fase::mundo() {
     return {jogadores,inimigos,obstaculos,gC,sessao,resultado,pontuacao,eventos,motor_fase,partida_id,Estado::id,num_jogadores,limites};
 }
-void Fase::simular_passo() {
+void Fase::simular_passo(const Logica::Comandos& comandos) {
     if(resultado.finalizada) return;
     const auto inicio=std::chrono::steady_clock::now();
     auto contexto=mundo();
-    const auto fim=Logica::simular(contexto);
+    const auto fim=Logica::simular(contexto,comandos);
     if(fim!=Logica::FimPasso::Nenhum) concluir(fim==Logica::FimPasso::Vitoria);
     micros_simulacao=std::chrono::duration<double,std::micro>(std::chrono::steady_clock::now()-inicio).count();
 }

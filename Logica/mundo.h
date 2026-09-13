@@ -1,5 +1,6 @@
 #pragma once
 #include "sessao.h"
+#include "entrada.h"
 #include "eventos.h"
 #include "../Listas/listaEntidades.h"
 #include "../Gerenciadores/gerenciador_colisoes.h"
@@ -22,5 +23,5 @@ struct Mundo {
     int numero_fase() const { return estado<8?1:2; }
 };
 enum class FimPasso { Nenhum, Vitoria, Derrota };
-FimPasso simular(Mundo& mundo);
+FimPasso simular(Mundo& mundo, const Comandos& comandos = {});
 }
