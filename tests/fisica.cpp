@@ -31,7 +31,17 @@ int main() {
         normal=Logica::mover(normal,true,false,false,false,false,false);
     }
     assert(gelo.x>3 && normal.x<.01f);
-    for(int i=0;i<120;++i) gelo=Logica::mover(gelo,true,false,false,false,false,true);
+    for(int i=0;i<200;++i) gelo=Logica::mover(gelo,true,false,false,false,false,true);
     assert(gelo.x==0); // Desliza mais, mas ainda permite parar completamente.
+    Logica::Velocidade inversao{4,0}, comum{4,0};
+    float distancia=0;Logica::Velocidade solto{4,0};
+    for(int i=0;i<40;++i) {
+        inversao=Logica::mover(inversao,true,true,false,false,false,true);
+        comum=Logica::mover(comum,true,true,false,false,false,false);
+    }
+    assert(inversao.x>1 && std::abs(comum.x)<.01f);
+    for(int i=0;i<210;++i) { solto=Logica::mover(solto,true,false,false,false,false,true);distancia+=solto.x; }
+    assert(solto.x==0 && distancia>380 && distancia<410);
+    assert(Logica::mover({4,0},true,false,false,true,false,true).y==-6);
     std::cout << "AABB, apoio, dano de queda e freio no gelo passaram sem janela.\n";
 }

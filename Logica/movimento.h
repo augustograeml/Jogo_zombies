@@ -24,9 +24,9 @@ inline int dano_queda(EstadoMovimento& estado, float y, int base) {
 inline Velocidade mover(Velocidade v, bool chao, bool esquerda, bool direita, bool pular, bool descer, bool gelo = false) {
     using namespace Recursos::Configuracao;
     const int sentido=static_cast<int>(direita)-static_cast<int>(esquerda);
-    v.x=std::clamp(v.x+sentido*aceleracao_jogador,-velocidade_maxima_jogador,velocidade_maxima_jogador);
+    v.x=std::clamp(v.x+sentido*(gelo && chao ? aceleracao_gelo : aceleracao_jogador),-velocidade_maxima_jogador,velocidade_maxima_jogador);
     if (!sentido) {
-        const float freio = gelo && chao ? .035f : freio_jogador;
+        const float freio = gelo && chao ? freio_gelo : freio_jogador;
         if(std::abs(v.x)<=freio) v.x=0;
         else v.x+=v.x>0?-freio:freio;
     }

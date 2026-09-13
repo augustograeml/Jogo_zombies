@@ -5,6 +5,8 @@ namespace Recursos::Configuracao {
 inline constexpr unsigned passos_por_segundo = 60;
 inline constexpr float aceleracao_jogador = 0.1f;
 inline constexpr float freio_jogador = 0.2f;
+inline constexpr float freio_gelo = 0.02f;
+inline constexpr float aceleracao_gelo = 0.07f;
 inline constexpr float velocidade_maxima_jogador = 4.f;
 inline constexpr float gravidade = 0.1f;
 inline constexpr float impulso_salto = 6.f;
