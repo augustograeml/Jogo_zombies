@@ -18,6 +18,6 @@ class PainelPartida {
 public:
     PainelPartida();
     void atualizar_recorde(int numero_fase, int quantidade);
-    void desenhar(sf::RenderWindow& janela, double segundos, int pontos=0, const std::vector<int>& vidas={}) const;
+    void desenhar(sf::RenderWindow& janela, double segundos, int pontos=0, const std::vector<int>& vidas={}, int restantes=-1, const std::vector<std::string>& direcoes={}) const;
 };
 }

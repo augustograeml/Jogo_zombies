@@ -1,6 +1,11 @@
 #include "../Estados/Fases/fase1.h"
 #include <cassert>
+#include "../Logica/objetivo.h"
 int main() {
+    assert(Logica::orientar({0,0},{{200,0}})=="Direita");
+    assert(Logica::orientar({400,0},{{200,0}})=="Esquerda");
+    assert(Logica::orientar({0,0},{} )=="Area limpa");
+    assert(Logica::orientar({0,0},{{0,-200}})=="Perto / acima");
     Estados::Fases::Fase1 a(7,false),b(7,true);
     b.restaurar(a.capturar());
     Logica::Comandos c{};c[0].direita=true;c[1].esquerda=true;

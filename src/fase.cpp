@@ -2,6 +2,7 @@
 #include "../Interface/controles.h"
 #include "../Recursos/catalogo.h"
 #include "../Logica/mundo.h"
+#include "../Logica/objetivo.h"
 #include "../Interface/preferencias.h"
 #include "../Recursos/plataforma.h"
 #include "../Persistencia/mundo.h"
@@ -93,7 +94,16 @@ void Fase::desenhar_partida() {
     }
     std::vector<int> vidas;
     for(auto it=jogadores.get_primeiro();it!=nullptr;++it) vidas.push_back((*it)->get_vida());
-    painel.desenhar(*pGG->get_Janela(), get_tempo_sessao(), get_pontos(), vidas);
+    std::vector<Logica::PosicaoObjetivo> restantes;
+    for(auto it=inimigos.get_primeiro();it!=nullptr;++it) if((*it)->get_vivo()) {
+        const auto p=(*it)->getPosicao();restantes.push_back({p.x,p.y});
+    }
+    std::vector<std::string> direcoes;
+    for(auto it=jogadores.get_primeiro();it!=nullptr;++it) {
+        const auto p=(*it)->getPosicao();
+        direcoes.push_back((*it)->get_vivo()?Logica::orientar({p.x,p.y},restantes):"Derrotado");
+    }
+    painel.desenhar(*pGG->get_Janela(), get_tempo_sessao(), get_pontos(), vidas,restantes.size(),direcoes);
     if(vistas.size()==2) {
         auto* janela=pGG->get_Janela(); const auto anterior=janela->getView();
         janela->setView(Interface::vista_interface(janela->getSize()));

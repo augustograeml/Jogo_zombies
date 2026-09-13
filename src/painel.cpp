@@ -40,7 +40,7 @@ void PainelPartida::atualizar_recorde(int numero_fase, int quantidade) {
     try { auto p=Persistencia::RepositorioPontos().consultar(fase,jogadores); if(!p.empty()) recorde_pontos=p.front().pontos; }
     catch(const std::exception&) { erro_recorde=true; }
 }
-void PainelPartida::desenhar(sf::RenderWindow& janela, double segundos, int pontos, const std::vector<int>& vidas) const {
+void PainelPartida::desenhar(sf::RenderWindow& janela, double segundos, int pontos, const std::vector<int>& vidas, int restantes, const std::vector<std::string>& direcoes) const {
     const auto camera = janela.getView();
     auto vista=vista_interface(janela.getSize());
     const auto& preferencias=Preferencias::instancia();
@@ -78,6 +78,11 @@ void PainelPartida::desenhar(sf::RenderWindow& janela, double segundos, int pont
     }
     texto("PONTOS: "+std::to_string(pontos),20,158,18,verde,largura*.48f-20);
     texto("MELHOR: "+std::to_string(recorde_pontos),largura*.5f,158,18,ouro,largura*.5f-20);
+    if(restantes>=0) {
+        texto("INIMIGOS: "+std::to_string(restantes),largura*.45f,105,18,verde,largura*.53f);
+        for(std::size_t i=0;i<direcoes.size();++i)
+            texto("J"+std::to_string(i+1)+": "+direcoes[i],largura*.45f,126+i*16,14,legenda,largura*.53f);
+    }
     janela.setView(camera);
 }
 }
