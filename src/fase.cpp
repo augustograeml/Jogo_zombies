@@ -160,16 +160,16 @@ bool Fase::registrar_resultado(const std::vector<std::string>& nomes) {
     std::vector<std::string> validados;
     for (const auto& nome : nomes) validados.push_back(Persistencia::nome_valido(nome));
     // Derrotas recebem nome, mas nao competem com tempos de fases concluidas.
-    if (resultado.vitoria) {
+    if (resultado.vitoria && !resultado.assistida) {
         Persistencia::RepositorioRanking().registrar({partida_id, get_numero_fase(), num_jogadores, validados, get_tempo()});
     }
-    if (get_pontos() > 0) Persistencia::RepositorioPontos().registrar(
+    if (!resultado.assistida && get_pontos() > 0) Persistencia::RepositorioPontos().registrar(
         {partida_id, get_numero_fase(), num_jogadores, validados, get_pontos(), get_tempo(), resultado.vitoria});
     for (auto it = jogadores.get_primeiro(); it != nullptr; ++it) {
         auto* jogador = static_cast<Entidades::Personagens::Jogador*>(*it);
         jogador->set_nome(validados.at(jogador->eh_jogador2() ? 1 : 0));
     }
-    resultado.ranking_registrado = resultado.vitoria;
+    resultado.ranking_registrado = resultado.vitoria && !resultado.assistida;
     resultado.nomes_confirmados = true;
     salvar();
     return resultado.ranking_registrado;
@@ -186,10 +186,7 @@ void Fase::simular_passo(const Logica::Comandos& comandos) {
     auto contexto=mundo();
     const auto fim=Logica::simular(contexto,comandos);
     if(fim!=Logica::FimPasso::Nenhum) concluir(fim==Logica::FimPasso::Vitoria);
+    else verificar_checkpoint();
     micros_simulacao=std::chrono::duration<double,std::micro>(std::chrono::steady_clock::now()-inicio).count();
-}
-Json Fase::capturar() { auto contexto=mundo(); return Persistencia::capturar_mundo(contexto); }
-void Fase::restaurar(const Json& dados) {
-    auto contexto=mundo(); Persistencia::restaurar_mundo(contexto,dados); Recursos::encaixar_plataformas(obstaculos); limites=Recursos::limites_mundo(obstaculos); relogio.restart();
 }
 }

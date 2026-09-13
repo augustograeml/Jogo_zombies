@@ -30,6 +30,7 @@ void Nome::selecionar() {
     const auto destino=Estados::apos_resultado(fase->get_vitoria(),fase->get_numero_fase(),quantidade);
     if (destino==Estados::Tela::Fase2Dupla) {
         auto proxima = std::make_unique<Fases::Fase2>(9, false);
+        if(fase->get_assistida()) proxima->marcar_assistida();
         proxima->continuar_sessao(fase->get_passos_sessao());
         proxima->salvar();
         pGE->adicionar_estado(proxima.get()); proxima.release();
@@ -40,6 +41,13 @@ void Nome::selecionar() {
     }
 }
 void Nome::tratar_evento(const sf::Event& evento) {
+    if(evento.type==sf::Event::KeyPressed && evento.key.code==sf::Keyboard::F2) {
+        auto* fase=dynamic_cast<Fases::Fase*>(pGE->get_estado(pGE->get_fase()));
+        if(fase && fase->pode_recuperar_checkpoint()) {
+            fase->recuperar_checkpoint();pGE->set_estado_atual(pGE->get_fase());
+        }
+        return;
+    }
     if (evento.type == sf::Event::TextEntered) {
         const auto caractere = evento.text.unicode;
         if (caractere == 8 && !entrada.isEmpty()) entrada.erase(entrada.getSize() - 1);
@@ -69,9 +77,11 @@ void Nome::executar() {
     Interface::Tema::painel(*pGG->get_Janela(),{130,460,760,75});
     sf::Text campo(entrada + "_", Interface::fonte_interface(), 32); campo.setPosition(150, 480);
     sf::Text resultado("Pontuacao da equipe: " + std::to_string(fase ? fase->get_pontos() : 0) +
-        (venceu ? " | Tempo de conclusao registrado." : " | Pontos positivos entram no ranking."), Interface::fonte_interface(), 20);
+        (fase && fase->get_assistida()?" | Tentativa assistida: fora dos rankings.":venceu ? " | Tempo de conclusao registrado." : " | Pontos positivos entram no ranking."), Interface::fonte_interface(), 20);
     resultado.setPosition(130, 250);
     sf::Text ajuda("Esc: menu | Continuar recupera o resultado pendente", Interface::fonte_interface(), 20);
+    if(fase && fase->pode_recuperar_checkpoint())
+        ajuda.setString("F2: recuperar checkpoint (fora dos rankings) | Esc: menu");
     ajuda.setPosition(130, 650);
     for (auto* texto : {&titulo, &instrucao, &campo, &ajuda, &resultado}) {
         Interface::aplicar_texto(*texto,770);

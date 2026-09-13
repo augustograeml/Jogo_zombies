@@ -46,7 +46,7 @@ Json capturar_mundo(Logica::Mundo& m) {
             {"passos", sessao.passos}, {"passos_anteriores", sessao.passos_anteriores},
             {"acumulador", sessao.acumulador}, {"partida_id", partida_id},
             {"finalizada", resultado.finalizada}, {"vitoria", resultado.vitoria}, {"ranking_registrado", resultado.ranking_registrado},
-            {"nomes_confirmados", resultado.nomes_confirmados}, {"pontos", pontuacao.pontos()},
+            {"assistida",resultado.assistida}, {"nomes_confirmados", resultado.nomes_confirmados}, {"pontos", pontuacao.pontos()},
             {"aleatorio", aleatorio.str()},
             {"jogadores", salvar_lista(jogadores)}, {"inimigos", salvar_lista(inimigos)},
             {"obstaculos", salvar_lista(obstaculos)}};
@@ -76,9 +76,11 @@ void restaurar_mundo(Logica::Mundo& m, const Json& dados) {
         const bool terminou = j.at("finalizada").get<bool>();
         const bool venceu = j.at("vitoria").get<bool>();
         const bool registrado = j.at("ranking_registrado").get<bool>();
+        const bool assistida=j.value("assistida",false);
         const bool confirmados = j.value("nomes_confirmados", registrado);
         if ((venceu && !terminou) || (registrado && (!venceu || !confirmados)) || (confirmados && !terminou))
             throw std::runtime_error("Resultado inconsistente.");
+        if(assistida && registrado) throw std::runtime_error("Tentativa assistida nao disputa ranking.");
         auto novo_motor = Persistencia::ler_motor(j.at("aleatorio").get<std::string>());
         Listas::ListaEntidade novos_jogadores, novos_inimigos, novos_obstaculos;
         carregar_lista(j.at("jogadores"), novos_jogadores, 0);
@@ -106,6 +108,7 @@ void restaurar_mundo(Logica::Mundo& m, const Json& dados) {
         resultado.vitoria = venceu;
         resultado.ranking_registrado = registrado;
         resultado.nomes_confirmados = confirmados;
+        resultado.assistida = assistida;
         Persistencia::motor() = novo_motor;
         motor_fase = novo_motor;
     } catch (...) { Persistencia::motor() = motor_anterior; throw; }

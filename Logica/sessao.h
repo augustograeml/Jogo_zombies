@@ -3,7 +3,7 @@
 #include <cstdint>
 namespace Logica {
 struct ResultadoPartida {
-    bool finalizada=false, vitoria=false, ranking_registrado=false, nomes_confirmados=false;
+    bool finalizada=false, vitoria=false, ranking_registrado=false, nomes_confirmados=false, assistida=false;
 };
 struct Sessao {
     std::uint64_t passos=0, passos_anteriores=0;

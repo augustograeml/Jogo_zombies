@@ -34,6 +34,9 @@ protected:
     sf::Clock relogio;
     Logica::Sessao sessao;
     Logica::ResultadoPartida resultado;
+    Persistencia::Json checkpoint;
+    int regiao_checkpoint=-1;
+    void verificar_checkpoint();
     Logica::Eventos eventos;
     Logica::Pontuacao pontuacao;
     Audio::ObservadorSom som;
@@ -59,6 +62,10 @@ public:
     bool get_finalizada() const { return resultado.finalizada; }
     bool get_vitoria() const { return resultado.vitoria; }
     bool get_ranking_registrado() const { return resultado.ranking_registrado; }
+    bool pode_recuperar_checkpoint() const { return resultado.finalizada && !resultado.vitoria && !resultado.nomes_confirmados && !checkpoint.is_null(); }
+    bool get_assistida() const { return resultado.assistida; }
+    void marcar_assistida() { resultado.assistida=true; }
+    void recuperar_checkpoint();
     bool get_nomes_confirmados() const { return resultado.nomes_confirmados; }
     int get_num_jogadores() const { return num_jogadores; }
     int get_numero_fase() const { return Estado::id < 8 ? 1 : 2; }
