@@ -1,3 +1,4 @@
+#include "../Recursos/configuracao.h"
 #include "../Estados/Fases/fase1.h"
 #include "../Estados/Fases/fase2.h"
 #include "../Estados/Menus/menu_principal.h"
@@ -182,7 +183,8 @@ void movimento_e_tempo() {
             neve.escorregar(&jogador);
         }
         exigir(jogador.getVelocidade().x > 0, "Gelo conserva deslizamento por mais tempo que piso normal");
-        for (int i = 0; i < 120; ++i) {
+        const int prazo_parada = static_cast<int>(Recursos::Configuracao::velocidade_maxima_jogador / Recursos::Configuracao::freio_gelo) + 2;
+        for (int i = 0; i < prazo_parada; ++i) {
             jogador.set_nochao(true);
             jogador.mover_com_controles(false, false, false, false);
             neve.escorregar(&jogador);
