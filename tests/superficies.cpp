@@ -23,7 +23,12 @@ int main() {
     obstaculos.limpar(); g.invalidar_grade();
     obstaculos.incluir(new Musgo({0,50})); obstaculos.incluir(new Musgo({50,50}));
     j->setPosicao({25,-30}); j->setVelocidade({3,0}); g.gerenciar_colisoes();
-    assert(std::abs(j->getVelocidade().x-2.f)<.0001f);
+    assert(std::abs(j->getVelocidade().x-2.2f)<.0001f);
+    Musgo apoio({0,0});
+    for(int n=0;n<120;++n) {j->set_nochao(true);j->mover_com_controles(false,true,false,false);apoio.gosmar(j);}
+    assert(std::abs(j->getVelocidade().x-2.2f)<.001f);
+    for(int n=0;n<30;++n) {j->set_nochao(true);j->mover_com_controles(false,false,false,false);apoio.gosmar(j);}
+    assert(j->getVelocidade().x==0);
     // Contato lateral nao aplica o modificador de superficie.
     j->setPosicao({-30,55}); j->setVelocidade({2,0}); g.gerenciar_colisoes();
     assert(j->getVelocidade().x==0);

@@ -1,3 +1,5 @@
+#include "../Recursos/configuracao.h"
+#include <algorithm>
 #include "../Entidades/Obstaculos/musgo.h"
 #include "../Recursos/plataforma.h"
 
@@ -35,7 +37,7 @@ namespace Entidades
         {
             if(get_gosmento())
             {
-                pJ->setVelocidade(Vector2f(pJ->getVelocidade().x / 1.5f , pJ->getVelocidade().y));
+                pJ->setVelocidade(Vector2f(std::clamp(pJ->getVelocidade().x, -Recursos::Configuracao::velocidade_musgo, Recursos::Configuracao::velocidade_musgo) , pJ->getVelocidade().y));
             }
         }
         void Musgo::colidir(Entidade* pE,  int a)
