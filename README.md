@@ -156,3 +156,5 @@ O workflow em `master` publica um AppImage Linux e um instalador `Setup.exe` Win
 As artes de `Design/imagens/legacy/` permanecem no Git, mas não entram nos pacotes. O GitHub também exibe automaticamente os arquivos de código-fonte da tag. O workflow executa os testes no Linux antes de publicar e permite execução manual pela aba Actions.
 
 O [acabamento visual](Recursos/ACABAMENTO_VISUAL.md) conecta blocos verticais, reorganiza o ranking em colunas e mantém títulos Teko no modo de acessibilidade.
+
+Regras atuais, checkpoints e remapeamento: [guia de jogabilidade](Recursos/JOGABILIDADE.md).

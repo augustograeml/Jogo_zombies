@@ -37,8 +37,8 @@ Nenhuma arte foi substituida ou apagada nesta etapa.
 
 A simulacao continua a 60 passos/s, aceleracao horizontal 0,1, velocidade maxima
 4, impulso vertical 6 e gravidade 0,1 por passo. Neve usa freio 0,02 e aceleracao/reversao 0,07;
-no musgo o modificador de apoio continua dividindo a velocidade por 1,5
-(aproximadamente 0,2 de velocidade sustentada no chao).
+no musgo a velocidade apoiada e limitada a 2,2, preservando aceleracao e frenagem.
+A velocidade de 0,2 abaixo continua como caso conservador para provar alcance.
 
 Simulando a propria funcao `Logica::mover`:
 
@@ -65,7 +65,7 @@ A montanha alterna subida gradual, cristas, descidas e retomada ate a arena.
 As faixas geladas possuem espaco para reconhecer a derrapagem e frear; a
 frenagem passiva desde velocidade maxima percorre aproximadamente 398 unidades.
 O pantano alterna bacias, subidas entre ruinas e trechos elevados. O musgo
-mantem o comportamento anterior. Os perfis verticais das fases sao distintos.
+agora limita a velocidade a 2,2, mantendo a diferenca em relacao ao gelo. Os perfis verticais das fases sao distintos.
 
 As sacadas ficam 150 unidades acima do piso, deixando 100 livres sob seus
 50 de espessura: 25% de folga acima do jogador de 80. Os vaos de 100 possuem
@@ -143,3 +143,5 @@ levou 0,36–1,16 ms por passo e o desenho estabilizado ficou em 70–101 FPS.
 Essas medicoes variam com o equipamento; nao sao garantia em outros computadores.
 A grade evitou mais de 99% dos pares teoricos. Todos os inimigos continuam
 simulados; nao foi necessario introduzir congelamento de entidades distantes.
+
+As regras atuais de checkpoints, salto, controles e IA estao em [JOGABILIDADE.md](JOGABILIDADE.md).

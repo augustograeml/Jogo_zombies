@@ -142,3 +142,6 @@ build/controles$(EXE): tests/controles.cpp $(TEST_OBJECTS) $(HEADERS)
 
 build/checkpoint$(EXE): tests/checkpoint.cpp $(TEST_OBJECTS) $(HEADERS)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS) $< $(TEST_OBJECTS) $(LDLIBS) -o $@
+
+build/gameplay-visual$(EXE): tests/gameplay_visual.cpp $(TEST_OBJECTS) $(HEADERS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS) $< $(TEST_OBJECTS) $(LDLIBS) -o $@
