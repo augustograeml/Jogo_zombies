@@ -183,6 +183,10 @@ Logica::Mundo Fase::mundo() {
 void Fase::simular_passo(const Logica::Comandos& comandos) {
     if(resultado.finalizada) return;
     const auto inicio=std::chrono::steady_clock::now();
+    if(aviso_checkpoint_ate && sessao.passos>=aviso_checkpoint_ate) {
+        if(pGE->mensagem.rfind("Checkpoint ",0)==0)pGE->mensagem.clear();
+        aviso_checkpoint_ate=0;
+    }
     auto contexto=mundo();
     const auto fim=Logica::simular(contexto,comandos);
     if(fim!=Logica::FimPasso::Nenhum) concluir(fim==Logica::FimPasso::Vitoria);

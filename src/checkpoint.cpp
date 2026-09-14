@@ -34,7 +34,7 @@ void Fase::verificar_checkpoint() {
     auto contexto=mundo();auto novo=Persistencia::capturar_mundo(contexto);
     const auto anterior=checkpoint;const int antiga=regiao_checkpoint;
     checkpoint=std::move(novo);regiao_checkpoint=regiao;
-    try{salvar();pGE->mensagem="Checkpoint da regiao "+std::to_string(regiao+1)+" salvo.";}
+    try{salvar();aviso_checkpoint_ate=sessao.passos+180;pGE->mensagem="Checkpoint da regiao "+std::to_string(regiao+1)+" salvo.";}
     catch(const std::exception& e){checkpoint=anterior;regiao_checkpoint=antiga;pGE->mensagem=std::string("Falha no checkpoint: ")+e.what();}
 }
 Json Fase::capturar() {
@@ -72,6 +72,7 @@ void Fase::recuperar_checkpoint() {
     novo["assistida"]=true;novo["checkpoint"]=checkpoint;novo["regiao_checkpoint"]=regiao_checkpoint;
     try {restaurar(novo);set_tempo_jogadores();salvar();}
     catch(...) {restaurar(anterior);throw;}
+    aviso_checkpoint_ate=sessao.passos+300;
     pGE->mensagem="Checkpoint recuperado. Tentativa assistida, fora dos rankings.";
 }
 }

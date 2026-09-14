@@ -36,6 +36,7 @@ protected:
     Logica::ResultadoPartida resultado;
     Persistencia::Json checkpoint;
     int regiao_checkpoint=-1;
+    std::uint64_t aviso_checkpoint_ate=0; // Apenas apresentacao, nao afeta a partida.
     void verificar_checkpoint();
     Logica::Eventos eventos;
     Logica::Pontuacao pontuacao;
