@@ -77,7 +77,7 @@ void mapa(int fase,bool dupla) {
         for(auto o=terreno.get_primeiro();o!=nullptr;++o)
             if((*o)->get_vivo()) assert(!r.intersects((*o)->get_corpo()->getGlobalBounds()));
     }
-    assert(inimigos.get_tamanho()>=36 && gigantes==3 && terreno.get_tamanho()>=2440);
+    assert(inimigos.get_tamanho()>=36 && gigantes==3 && terreno.get_tamanho()>=900);
     const auto plataformas=Testes::principais(linhas);
     assert(plataformas.size()>=60 && plataformas.front().x==0 && plataformas.back().fim==40000);
     for(std::size_t i=1;i<plataformas.size();++i) {

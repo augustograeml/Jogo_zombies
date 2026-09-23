@@ -56,8 +56,10 @@ usando o resolvedor do jogo, caixas e espinhos ativos. Nao basta comparar centro
 ## Fases ampliadas
 
 Cada mapa passa de 4000 para 40000 unidades de largura. Sao 69 patamares
-principais, 14 sacadas opcionais e 68 fundos de recuperacao nos vaos.
-Ha 2970 tiles de terreno por fase (antes 244), 43 inimigos (antes 6),
+principais, 14 sacadas opcionais e 68 fundos de recuperacao nos vaos. As 151
+superficies agora sao componentes independentes de uma fileira; as fileiras de
+preenchimento abaixo dos topos foram removidas. Ha 842 tiles de terreno por fase,
+mantendo as posicoes dos topos, 43 inimigos (antes 6),
 30 curas (antes 4), 18 espinhos e 20 caixas. Os inimigos se dividem em
 30 comuns, 10 arqueiros e 3 gigantes, distribuídos ao longo de dez regioes.
 
@@ -93,6 +95,10 @@ continuam intencionais; nao sao falta de background dentro de uma viewport.
 
 ## Validacao reproduzivel
 
+Os resultados e capturas historicos abaixo referem-se a geometria anterior, com
+blocos preenchidos abaixo dos topos. Esta alteracao de espessura nao foi
+executada na suite nem capturada visualmente.
+
 - `make clean` e `make -j4`.
 - `make test-logica`.
 - `ALSOFT_DRIVERS=null xvfb-run -a make test-integracao`.
@@ -127,21 +133,11 @@ uma partida manual continua de ponta a ponta. As capturas foram inspecionadas
 visualmente. Os testes nao avaliam subjetivamente o ritmo/dificuldade como um
 playtest humano, mas protegem alcance, espaco, colisoes, persistencia e cobertura.
 
-## Resultados da ampliacao
+## Separacao das plataformas
 
-A travessia continua automatizada percorreu ambas as fases em solo e dupla,
-sem dano, em aproximadamente 18,6 mil passos por percurso (cerca de dez vezes
-o percurso anterior). Esse tempo isola navegacao; nao estima uma partida com combate.
-A auditoria verifica todos os intervalos verticais entre terrenos, saltos dos
-69 patamares, sacadas, retorno dos vaos e caminhada sob uma passagem de 100.
-
-`expansao`, na integracao, salva e retoma os quatro modos perto de x=39500,
-incluindo flecha em voo, inimigo morto, cura coletada, pontuacao e tempo.
-Compara a evolucao original/restaurada e a grade espacial com a busca completa.
-Saves medidos: aproximadamente 1,68 MB. Neste ambiente de teste, a simulacao
-levou 0,36–1,16 ms por passo e o desenho estabilizado ficou em 70–101 FPS.
-Essas medicoes variam com o equipamento; nao sao garantia em outros computadores.
-A grade evitou mais de 99% dos pares teoricos. Todos os inimigos continuam
-simulados; nao foi necessario introduzir congelamento de entidades distantes.
+Os topos mantem as coordenadas e a sequencia de saltos. Remover o preenchimento
+abaixo deles deixa 151 componentes fisicos independentes por fase, com no minimo
+100 unidades de espaco vertical entre superficies sobrepostas na mesma coluna.
+Os 69 patamares principais e os 43 inimigos permanecem nos mesmos lugares.
 
 As regras atuais de checkpoints, salto, controles e IA estao em [JOGABILIDADE.md](JOGABILIDADE.md).
